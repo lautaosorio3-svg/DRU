@@ -1220,23 +1220,30 @@ async function loadReflote(){
   area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando noticias reales en ${srcNames[refloteSrc]}...</div>`;
 
   const siteFilter=srcSites[refloteSrc];
+  const daysOfWeek=[];
+  for(let i=-3;i<=3;i++){const d=new Date(now);d.setDate(d.getDate()+i);daysOfWeek.push(`${d.getDate()} de ${MESF[d.getMonth()+1]}`);}
+  const weekRange=daysOfWeek.join(", ");
+
   const prompt=`Sos editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos). Hoy es ${dd} de ${MESF[mm]} de ${yy}.
 
-TAREA: Usá la herramienta web_search para buscar noticias REALES publicadas en estos medios entrerrianos. Hacé búsquedas con site:${siteFilter} combinado con palabras clave relevantes para la fecha (${dd} de ${MESF[mm]}, efemérides Concordia, Entre Ríos, etc).
+TAREA: Usá la herramienta web_search para buscar noticias REALES publicadas en medios entrerrianos. Tu objetivo es encontrar artículos reales para reflotear como "Un día como hoy" o "Esta semana en la historia".
 
-Hacé al menos 3 búsquedas distintas para encontrar artículos reales:
-- "site:${siteFilter} ${dd} de ${MESF[mm]}"
-- "site:${siteFilter} Concordia Entre Ríos efeméride"
-- "site:${siteFilter} noticias destacadas Concordia"
+ESTRATEGIA DE BÚSQUEDA (seguí este orden):
+1. Primero buscá para el día exacto: "site:${siteFilter} ${dd} de ${MESF[mm]} Concordia"
+2. Si hay pocos resultados, ampliá a la semana: "site:${siteFilter} ${MESF[mm]} Concordia Entre Ríos"
+3. Buscá también temas emblemáticos: "site:${siteFilter} Concordia historia" o "site:${siteFilter} Concordia aniversario"
+4. Si seguís sin resultados, buscá noticias destacadas recientes: "site:${siteFilter} Concordia" para traer las más relevantes
 
-Con los resultados REALES que encuentres, generá un JSON con hasta 4 noticias para reflotear. SOLO incluí noticias que hayas encontrado realmente en la búsqueda — NUNCA inventar.
+Hacé al menos 3-4 búsquedas distintas. Rango de la semana: ${weekRange}.
 
-Si una búsqueda no da resultados, probá con otros términos. Si no encontrás noticias relevantes para hoy, devolvé las noticias más destacadas de esos medios que hayas encontrado.
-
-Para cada noticia, usá la fuente real: "DRU" para diarioriouruguay.com, "ElHeraldo" para elheraldo.com.ar, "ElOnce" para elonce.com, "ElEntreRios" para elentrerios.com.
+REGLAS:
+- SOLO incluí noticias que hayas encontrado realmente en la búsqueda — NUNCA inventar artículos, URLs ni datos.
+- Fuentes: "DRU" para diarioriouruguay.com, "ElHeraldo" para elheraldo.com.ar, "ElOnce" para elonce.com, "ElEntreRios" para elentrerios.com.
+- Si el artículo es de esta semana o reciente (no histórico), poné years_ago: 0 y en why_now explicá por qué vale la pena republicarlo.
+- SIEMPRE devolvé al menos 2-4 resultados. Si no hay noticias históricas, devolvé las mejores notas recientes que hayas encontrado en esos sitios.
 
 Respondé SOLO con JSON al final (sin texto antes ni después):
-[{"source":"${srcLabels[refloteSrc]}","title":"titular real del artículo encontrado","date":"fecha de publicación","years_ago":${yy}-año,"excerpt":"resumen real del contenido del artículo","why_now":"por qué reflotear esta nota hoy","hook":"Hace X años en Concordia... — tono periodístico","url":"URL real del artículo encontrado","ig_copy":"hook máx 12 palabras\\nResumen + Link en bio + #Concordia #EntreRíos","fb_copy":"primera línea informativa\\ndato concreto del artículo\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio"}]`;
+[{"source":"${srcLabels[refloteSrc]}","title":"titular real del artículo","date":"fecha de publicación","years_ago":0,"excerpt":"resumen real del contenido","why_now":"por qué reflotear esta nota hoy","hook":"frase tipo Hace X años en Concordia... o Esta semana en...","url":"URL real del artículo","ig_copy":"hook máx 12 palabras\\nResumen + Link en bio + #Concordia #EntreRíos","fb_copy":"primera línea informativa\\ndato concreto\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio"}]`;
 
   try{
     const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:3000,tools:[{type:"web_search_20250305",name:"web_search",max_uses:5}],messages:[{role:"user",content:prompt}]})});
