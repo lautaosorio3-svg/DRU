@@ -859,12 +859,23 @@ async function loadSuggestions(){
   const area=document.getElementById("suggest-area");
   area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando efemérides para hoy...</div>`;
   const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
-  const prompt=`Generá EXACTAMENTE 3 efemérides para el día ${dd} de ${MESF[mm]} relacionadas con Entre Ríos, Argentina. Incluí históricas, famosos y curiosidades viralizables. Solo JSON sin markdown:\n[{"title":"","year":0,"desc":"","city":"","cats":["hist"],"viral":1,"hook":""}]`;
+  const prompt=`Usá la herramienta web_search para buscar efemérides REALES del ${dd} de ${MESF[mm]} relacionadas con Entre Ríos, Concordia o Argentina.
+
+Hacé estas búsquedas:
+1. "efemérides ${dd} de ${MESF[mm]} Entre Ríos"
+2. "efemérides ${dd} de ${MESF[mm]} Argentina"
+3. "${dd} de ${MESF[mm]} Concordia historia"
+
+Con los resultados VERIFICADOS, generá EXACTAMENTE 3 efemérides. NUNCA inventar fechas, datos ni hechos — solo información confirmada en los resultados de búsqueda.
+
+Respondé SOLO con JSON al final (sin texto antes ni después):
+[{"title":"titular del hecho histórico","year":0,"desc":"descripción factual verificada","city":"ciudad de Entre Ríos o Argentina","cats":["hist"],"viral":1,"hook":"gancho para redes, máx 15 palabras"}]`;
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:600,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,tools:[{type:"web_search_20250305",name:"web_search",max_uses:3}],messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
-    let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("").replace(/```json|```/g,"").trim();
-    renderSuggestions(JSON.parse(text),dd,mm);
+    let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    const parsed=extractJSON(text);
+    renderSuggestions(parsed||getFallback(dd,mm),dd,mm);
   }catch(e){renderSuggestions(getFallback(dd,mm),dd,mm);}
 }
 function getFallback(dd,mm){return[{title:`Efeméride del ${dd} de ${MESF[mm]}`,year:1900,desc:"La IA no pudo conectarse. Podés agregar efemérides manualmente.",city:"Entre Ríos",cats:["hist"],viral:0,hook:""}];}
