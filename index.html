@@ -239,11 +239,13 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
 .rc.dru{border-left:3px solid var(--or)}
 .rc.heraldo{border-left:3px solid #85B7EB}
 .rc.elonce{border-left:3px solid #97C459}
+.rc.entrerios{border-left:3px solid #D4A5E5}
 .rc-hdr{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
 .rc-src{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
 .src-dru{background:var(--orl);color:var(--or)}
 .src-her{background:rgba(133,183,235,.15);color:#85B7EB}
 .src-elo{background:rgba(151,196,89,.15);color:#97C459}
+.src-er{background:rgba(212,165,229,.15);color:#D4A5E5}
 .rc-yrs{font-size:11px;color:var(--mt)}
 .rc-t{font-family:var(--fd);font-size:14px;font-weight:600;color:var(--wh);margin-bottom:4px;line-height:1.35}
 .rc-x{font-size:12px;color:var(--mt);line-height:1.5;margin-bottom:8px}
@@ -551,6 +553,7 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
         <button class="cp cp-hist" onclick="setRefloteSrc('dru',this)">📰 DRU</button>
         <button class="cp cp-pol" onclick="setRefloteSrc('heraldo',this)">📰 El Heraldo</button>
         <button class="cp cp-cul" onclick="setRefloteSrc('elonce',this)">📺 El Once</button>
+        <button class="cp cp-dep" onclick="setRefloteSrc('entrerios',this)">📰 El Entre Ríos</button>
         <button class="rb" style="margin-left:auto;padding:8px 16px;font-size:13px;border-color:var(--orb);color:var(--or)" onclick="loadReflote()">↻ Actualizar recomendaciones</button>
       </div>
       <div id="reflote-area"><div class="lds"><div class="sp"></div>Buscando noticias para reflotear hoy...</div></div>
@@ -1211,30 +1214,37 @@ async function loadReflote(){
   const cached=getCached(cacheKey);
   if(cached){renderRefloteV2(cached);return;}
 
-  const srcNames={all:"los tres medios",dru:"Diario Río Uruguay",heraldo:"El Heraldo",elonce:"El Once"};
-  area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando en ${srcNames[refloteSrc]}...</div>`;
-  const srcLabel=refloteSrc==="dru"?"Diario Río Uruguay":refloteSrc==="heraldo"?"El Heraldo":refloteSrc==="elonce"?"El Once":"los tres medios regionales (Diario Río Uruguay, El Heraldo, El Once)";
-  const srcVal=refloteSrc==="dru"?"DRU":refloteSrc==="heraldo"?"ElHeraldo":refloteSrc==="elonce"?"ElOnce":null;
+  const srcNames={all:"todos los medios",dru:"Diario Río Uruguay",heraldo:"El Heraldo",elonce:"El Once",entrerios:"El Entre Ríos"};
+  const srcSites={all:"diarioriouruguay.com OR site:elheraldo.com.ar OR site:elonce.com OR site:elentrerios.com",dru:"diarioriouruguay.com",heraldo:"elheraldo.com.ar",elonce:"elonce.com",entrerios:"elentrerios.com"};
+  const srcLabels={all:"DRU|ElHeraldo|ElOnce|ElEntreRios",dru:"DRU",heraldo:"ElHeraldo",elonce:"ElOnce",entrerios:"ElEntreRios"};
+  area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando noticias reales en ${srcNames[refloteSrc]}...</div>`;
 
-  const prompt=`Sos editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos, Argentina). Hoy es ${dd} de ${MESF[mm]} de ${yy}.
+  const siteFilter=srcSites[refloteSrc];
+  const prompt=`Sos editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos). Hoy es ${dd} de ${MESF[mm]} de ${yy}.
 
-Tu tarea: generá 4 propuestas de "reflote" — noticias o hechos históricos de Entre Ríos/Concordia/Salto Grande que ocurrieron un ${dd} de ${MESF[mm]} en cualquier año anterior (o en esa semana si no hay exacta para el día). Priorizá hechos con impacto local real: política provincial, economía local, obras de infraestructura, eventos culturales, deportes regionales, cronología de Concordia o de la región del río Uruguay.
+TAREA: Usá la herramienta web_search para buscar noticias REALES publicadas en estos medios entrerrianos. Hacé búsquedas con site:${siteFilter} combinado con palabras clave relevantes para la fecha (${dd} de ${MESF[mm]}, efemérides Concordia, Entre Ríos, etc).
 
-Reglas:
-- Solo hechos verificables de Entre Ríos o Concordia — NUNCA inventar datos, nombres o fechas.
-- Si el medio pedido es ${srcLabel}, asignale esa fuente. Si no podés confirmar en qué medio se publicó, usá "DRU" como fuente por defecto.
-- El campo "search_url" debe ser una URL de Google Search con el título y año del hecho, para que el redactor lo verifique.
-- "years_ago" = ${yy} menos el año del hecho.
+Hacé al menos 3 búsquedas distintas para encontrar artículos reales:
+- "site:${siteFilter} ${dd} de ${MESF[mm]}"
+- "site:${siteFilter} Concordia Entre Ríos efeméride"
+- "site:${siteFilter} noticias destacadas Concordia"
 
-Respondé SOLO con JSON (sin texto antes ni después):
-[{"source":"${srcVal||"DRU|ElHeraldo|ElOnce"}","title":"titular periodístico con keyword geográfica","date":"DD/MM/AAAA","years_ago":0,"excerpt":"resumen factual de 2-3 oraciones sin sensacionalismo","why_now":"por qué es relevante reflotearlo hoy — conexión con actualidad o efeméride","hook":"frase tipo 'Hace X años en Concordia...' — tono periodístico sin exagerar","ig_copy":"texto para Instagram: hook máx 12 palabras por línea\\nCaption informativo + 'Link en bio' + #Concordia #EntreRíos","fb_copy":"primera línea autónoma informativa\\npárrafo con dato concreto\\nLeé la historia completa en diarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio","search_url":"https://www.google.com/search?q=TITULO+AÑO+Entre+Rios"}]`;
+Con los resultados REALES que encuentres, generá un JSON con hasta 4 noticias para reflotear. SOLO incluí noticias que hayas encontrado realmente en la búsqueda — NUNCA inventar.
+
+Si una búsqueda no da resultados, probá con otros términos. Si no encontrás noticias relevantes para hoy, devolvé las noticias más destacadas de esos medios que hayas encontrado.
+
+Para cada noticia, usá la fuente real: "DRU" para diarioriouruguay.com, "ElHeraldo" para elheraldo.com.ar, "ElOnce" para elonce.com, "ElEntreRios" para elentrerios.com.
+
+Respondé SOLO con JSON al final (sin texto antes ni después):
+[{"source":"${srcLabels[refloteSrc]}","title":"titular real del artículo encontrado","date":"fecha de publicación","years_ago":${yy}-año,"excerpt":"resumen real del contenido del artículo","why_now":"por qué reflotear esta nota hoy","hook":"Hace X años en Concordia... — tono periodístico","url":"URL real del artículo encontrado","ig_copy":"hook máx 12 palabras\\nResumen + Link en bio + #Concordia #EntreRíos","fb_copy":"primera línea informativa\\ndato concreto del artículo\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio"}]`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2000,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:3000,tools:[{type:"web_search_20250305",name:"web_search",max_uses:5}],messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
+    if(data.error){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>${data.error.message||data.error}</div>`;return;}
     let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("").replace(/```json|```/g,"").trim();
     const parsed=repairJSON(text);
-    if(!parsed){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>Respuesta incompleta. Intentá de nuevo en unos segundos.</div>`;return;}
+    if(!parsed){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>No se encontraron artículos. Intentá con otro medio o actualizá.</div>`;return;}
     setCache(cacheKey,parsed);
     renderRefloteV2(parsed);
   }catch(e){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>Error al buscar en archivos. Verificá la API key y volvé a intentar.</div>`;}
@@ -1243,7 +1253,7 @@ Respondé SOLO con JSON (sin texto antes ni después):
 function renderRefloteV2(items){
   const area=document.getElementById("reflote-area");
   if(!items||!items.length){area.innerHTML=`<div class="empty-s"><div style="font-size:28px;margin-bottom:.5rem">📭</div>No se encontraron noticias en los archivos para hoy. Probá otro filtro de medio.</div>`;return;}
-  const ss={DRU:{cls:"dru",badge:"src-dru",label:"📰 DRU"},ElHeraldo:{cls:"heraldo",badge:"src-her",label:"📰 El Heraldo"},ElOnce:{cls:"elonce",badge:"src-elo",label:"📺 El Once"}};
+  const ss={DRU:{cls:"dru",badge:"src-dru",label:"📰 DRU"},ElHeraldo:{cls:"heraldo",badge:"src-her",label:"📰 El Heraldo"},ElOnce:{cls:"elonce",badge:"src-elo",label:"📺 El Once"},ElEntreRios:{cls:"entrerios",badge:"src-er",label:"📰 El Entre Ríos"}};
   area.innerHTML=`<div class="rg">${items.map(r=>{const s=ss[r.source]||ss["DRU"];return`<div class="rc ${s.cls}">
     <div class="rc-hdr">
       <span class="rc-src ${s.badge}">${s.label}</span>
@@ -1270,7 +1280,7 @@ function renderRefloteV2(items){
       <button class="ab" onclick="copyKw('${(r.hook||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar hook</button>
       <button class="ab" onclick="copyKw('${(r.ig_copy||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar IG</button>
       <button class="ab primary" onclick="copyKw('${(r.fb_copy||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar FB</button>
-      ${r.search_url?`<a href="${r.search_url}" target="_blank" class="ab" style="text-decoration:none">🔍 Verificar →</a>`:r.url?`<a href="${r.url}" target="_blank" class="ab" style="text-decoration:none">Ver nota →</a>`:""}
+      ${r.url?`<a href="${r.url}" target="_blank" class="ab primary" style="text-decoration:none">Ver nota original →</a>`:""}
     </div>
   </div>`;}).join("")}</div>`;
 }
