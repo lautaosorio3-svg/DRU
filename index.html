@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRU Editorial v7</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{--or:#F5A623;--orl:rgba(245,166,35,0.12);--orb:rgba(245,166,35,0.3);--bk:#0f0f0f;--dk:#1a1a1a;--dk2:#242424;--dk3:#2e2e2e;--md:#444;--mt:#888;--lt:#c8c8c8;--wh:#f5f3ef;--bg:#111;--cd:#191919;--cd2:#202020;--bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.13);--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--r:10px;--rl:14px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fb);background:var(--bg);color:var(--wh);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font-family:var(--fb);cursor:pointer}input,select,textarea{font-family:var(--fb)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--dk)}::-webkit-scrollbar-thumb{background:var(--dk3);border-radius:10px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* LOGIN */
+#ls{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000}
+.lbox{width:380px;background:var(--cd);border:1px solid var(--bd2);border-radius:var(--rl);padding:2.5rem;position:relative;overflow:hidden}
+.lbox::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--or),#ffcc55)}
+.l-logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+.l-b{background:var(--or);color:var(--bk);font-family:var(--fd);font-weight:800;font-size:13px;padding:4px 10px;border-radius:6px}
+.l-n{font-family:var(--fd);font-size:13px;font-weight:500;color:var(--lt)}
+.l-t{font-family:var(--fd);font-size:22px;font-weight:700;margin-bottom:.25rem}
+.l-s{font-size:13px;color:var(--mt);margin-bottom:1.75rem}
+.fl{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--mt);margin-bottom:6px;display:block}
+.fw{margin-bottom:1rem}
+.li{width:100%;background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:10px 14px;font-size:14px;color:var(--wh);outline:none;transition:border-color .2s}
+.li:focus{border-color:var(--or)}
+.lbtn{width:100%;background:var(--or);color:var(--bk);border:none;border-radius:var(--r);padding:11px;font-size:14px;font-weight:600;font-family:var(--fd);margin-top:.5rem;transition:background .2s}
+.lbtn:hover{background:#ffb733}
+.lerr{font-size:12px;color:#e05555;margin-top:.5rem;display:none}
+.lhint{font-size:11px;color:var(--md);margin-top:1.25rem;text-align:center;padding-top:1rem;border-top:1px solid var(--bd)}
+
+/* APP SHELL */
+#app{display:none;min-height:100vh}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--cd);border-right:1px solid var(--bd);display:flex;flex-direction:column;z-index:100;padding:1.5rem 0;overflow-y:auto}
+.sl{display:flex;align-items:center;gap:9px;padding:0 1.25rem 1.5rem;border-bottom:1px solid var(--bd);margin-bottom:1rem}
+.sl-b{background:var(--or);color:var(--bk);font-family:var(--fd);font-weight:800;font-size:12px;padding:3px 8px;border-radius:5px}
+.sl-n{font-family:var(--fd);font-size:12px;font-weight:600;color:var(--lt)}
+.ns{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--md);padding:0 1.25rem;margin:1rem 0 .4rem}
+.ni{display:flex;align-items:center;gap:10px;padding:8px 1.25rem;font-size:13px;color:var(--mt);cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.ni:hover{color:var(--wh);background:rgba(255,255,255,.04)}
+.ni.active{color:var(--or);border-left-color:var(--or);background:var(--orl)}
+.ni-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.ni-badge{margin-left:auto;background:var(--or);color:var(--bk);font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
+.ni-new{margin-left:auto;background:#5DCAA5;color:#04342C;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px}
+.sb-bot{margin-top:auto;padding:1rem 1.25rem 0;border-top:1px solid var(--bd)}
+.u-inf{display:flex;align-items:center;gap:9px;margin-bottom:.75rem}
+.u-av{width:30px;height:30px;border-radius:50%;background:var(--or);color:var(--bk);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--fd);flex-shrink:0}
+.u-nm{font-size:12px;font-weight:500;color:var(--wh)}
+.u-rl{font-size:10px;color:var(--mt)}
+.lo-btn{width:100%;background:none;border:1px solid var(--bd2);color:var(--mt);border-radius:var(--r);padding:6px;font-size:12px;transition:all .15s}
+.lo-btn:hover{color:var(--wh);background:var(--dk3)}
+.main{margin-left:220px;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(17,17,17,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem}
+.tb-t{font-family:var(--fd);font-size:16px;font-weight:700;flex:1}
+.tc{background:var(--orl);border:1px solid var(--orb);color:var(--or);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.tb-d{font-size:12px;color:var(--mt)}
+.page{padding:2rem;display:none}
+.page.active{display:block;animation:fadeIn .25s ease}
+.sec-hdr{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.sec-t{font-family:var(--fd);font-size:20px;font-weight:700;flex:1}
+.sec-c{font-size:12px;color:var(--mt);background:var(--cd2);border:1px solid var(--bd);padding:3px 10px;border-radius:20px}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem}
+.sc{background:var(--cd);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.sc-n{font-family:var(--fd);font-size:26px;font-weight:800;line-height:1;margin-bottom:4px}
+.sc-l{font-size:11px;color:var(--mt);text-transform:uppercase;letter-spacing:.06em}
+
+/* BANNERS */
+.today-banner{background:var(--orl);border:1px solid var(--orb);border-radius:var(--r);padding:12px 16px;margin-bottom:1.5rem;font-size:13px}
+.tdot{width:7px;height:7px;border-radius:50%;background:var(--or);flex-shrink:0;margin-top:5px}
+.ai-panel{background:var(--cd);border:1px solid var(--orb);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.ai-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),#ffcc55,var(--or));background-size:200% 100%;animation:shimmer 2s linear infinite}
+.asp-h{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.asp-t{font-family:var(--fd);font-size:14px;font-weight:700;flex:1}
+.aic{font-size:10px;font-weight:700;background:var(--or);color:var(--bk);padding:2px 8px;border-radius:10px;letter-spacing:.04em}
+.rb{font-size:11px;padding:4px 12px;border:1px solid var(--bd2);border-radius:var(--r);background:none;color:var(--mt);transition:all .15s}
+.rb:hover{color:var(--wh);background:var(--dk3)}
+.sgg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.sug-c{background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px}
+.sug-d{font-size:10px;color:var(--or);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.sug-t{font-size:13px;font-weight:600;color:var(--wh);margin-bottom:4px;line-height:1.35}
+.sug-x{font-size:11px;color:var(--mt);line-height:1.5;margin-bottom:10px}
+.sug-a{display:flex;gap:6px}
+.apbtn{font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;border:none;background:var(--or);color:var(--bk);transition:background .15s}
+.apbtn:hover{background:#ffb733}
+.dsbtn{font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--mt);transition:all .15s}
+.dsbtn:hover{color:var(--wh);background:var(--dk3)}
+.lds{display:flex;align-items:center;gap:12px;padding:.5rem 0;font-size:13px;color:var(--mt)}
+.sp{width:18px;height:18px;border:2px solid var(--bd2);border-top-color:var(--or);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+
+/* FILTERS */
+.fb-r{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.si{flex:1;min-width:200px;background:var(--cd);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 14px;font-size:13px;color:var(--wh);outline:none;transition:border-color .2s}
+.si::placeholder{color:var(--md)}
+.si:focus{border-color:var(--or)}
+.fs{background:var(--cd);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--lt);outline:none;cursor:pointer}
+.cps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem}
+.cp{font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;border:1px solid var(--bd2);background:none;color:var(--mt);cursor:pointer;transition:all .15s}
+.cp:hover{color:var(--wh)}
+.cp.active{border-color:currentColor}
+.cp-all.active{color:var(--or);background:var(--orl);border-color:var(--orb)}
+.cp-hist.active{color:#FAC775;background:rgba(250,199,117,.1);border-color:rgba(250,199,117,.3)}
+.cp-pol.active{color:#85B7EB;background:rgba(133,183,235,.1);border-color:rgba(133,183,235,.3)}
+.cp-cul.active{color:#97C459;background:rgba(151,196,89,.1);border-color:rgba(151,196,89,.3)}
+.cp-dep.active{color:#F09595;background:rgba(240,149,149,.1);border-color:rgba(240,149,149,.3)}
+.cp-fam.active{color:#AFA9EC;background:rgba(175,169,236,.1);border-color:rgba(175,169,236,.3)}
+.cp-ins.active{color:#5DCAA5;background:rgba(93,202,165,.1);border-color:rgba(93,202,165,.3)}
+
+/* EFEM CARDS */
+.eg{display:flex;flex-direction:column;gap:8px}
+.ec{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:16px 18px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s}
+.ec:hover{border-color:var(--bd2)}
+.ec.viral{border-left:3px solid var(--or)}
+.ec.new-e{border-color:rgba(93,202,165,.4)}
+.db{min-width:48px;text-align:center;background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:8px 4px;flex-shrink:0}
+.dd{font-family:var(--fd);font-size:20px;font-weight:800;line-height:1;color:var(--wh)}
+.dm{font-size:9px;color:var(--mt);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+.dy{font-size:9px;color:var(--md);margin-top:1px}
+.eb{flex:1;min-width:0}
+.et{font-family:var(--fd);font-size:14px;font-weight:600;color:var(--wh);margin-bottom:4px;line-height:1.35}
+.ed{font-size:12px;color:var(--mt);line-height:1.5;margin-bottom:8px}
+.em{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.tag{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
+.t-hist{background:rgba(250,199,117,.15);color:#FAC775}
+.t-pol{background:rgba(133,183,235,.15);color:#85B7EB}
+.t-cul{background:rgba(151,196,89,.15);color:#97C459}
+.t-dep{background:rgba(240,149,149,.15);color:#F09595}
+.t-fam{background:rgba(175,169,236,.15);color:#AFA9EC}
+.t-ins{background:rgba(93,202,165,.15);color:#5DCAA5}
+.t-soc{background:rgba(250,199,117,.12);color:#EF9F27}
+.t-new{background:rgba(93,202,165,.2);color:#5DCAA5}
+.city-t{font-size:11px;color:var(--md)}
+.vb{font-size:10px;font-weight:600;background:var(--orl);color:var(--or);border:1px solid var(--orb);padding:2px 7px;border-radius:10px}
+.hb{background:var(--dk2);border-left:2px solid var(--or);border-radius:0 var(--r) var(--r) 0;padding:7px 10px;font-size:11px;color:var(--lt);margin-bottom:8px}
+.hb strong{color:var(--or);font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px}
+.ea{display:flex;gap:6px;flex-wrap:wrap}
+.ab{font-size:11px;font-weight:500;padding:5px 12px;border-radius:8px;border:1px solid var(--bd2);background:none;color:var(--mt);transition:all .15s}
+.ab:hover{color:var(--wh);background:var(--dk3)}
+.ab.primary{background:var(--or);color:var(--bk);border-color:var(--or);font-weight:600}
+.ab.primary:hover{background:#ffb733}
+
+/* GENERATOR */
+.gl{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.gp{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem}
+.gp-t{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--wh);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.esl{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto}
+.esi{background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;gap:10px;align-items:center}
+.esi:hover{border-color:var(--bd2);background:var(--dk3)}
+.esi.selected{border-color:var(--or);background:var(--orl)}
+.esi-d{font-family:var(--fd);font-size:11px;color:var(--or);min-width:50px}
+.esi-t{font-size:12px;color:var(--wh);flex:1;line-height:1.3}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.fc{background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:12px;cursor:pointer;transition:all .15s;text-align:center}
+.fc:hover{border-color:var(--bd2)}
+.fc.selected{border-color:var(--or);background:var(--orl)}
+.fc-i{font-size:22px;margin-bottom:4px}
+.fc-n{font-size:12px;font-weight:600;color:var(--wh);margin-bottom:2px}
+.fc-s{font-size:10px;color:var(--mt)}
+.gnbtn{width:100%;background:var(--or);color:var(--bk);border:none;border-radius:var(--r);padding:11px;font-family:var(--fd);font-size:14px;font-weight:700;transition:background .15s;margin-top:.5rem}
+.gnbtn:hover{background:#ffb733}
+.gnbtn:disabled{background:var(--md);color:var(--dk);cursor:not-allowed}
+.op{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem;grid-column:1/-1;display:none}
+.op.visible{display:block;animation:fadeIn .3s ease}
+.op-h{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.op-t{font-family:var(--fd);font-size:14px;font-weight:700;flex:1}
+.cpbtn{font-size:12px;padding:5px 14px;border:1px solid var(--bd2);border-radius:var(--r);background:none;color:var(--mt);transition:all .15s}
+.cpbtn:hover{color:var(--wh);background:var(--dk3)}
+.oc{background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:16px 18px;font-size:13px;color:var(--lt);line-height:1.7;white-space:pre-wrap;min-height:180px}
+.om{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem}
+.mc{font-size:11px;background:var(--dk2);border:1px solid var(--bd);border-radius:20px;padding:3px 10px;color:var(--mt)}
+.mc span{color:var(--wh);font-weight:500}
+.oa{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+
+/* ADD FORM */
+.af{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem;max-width:720px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.ff{display:flex;flex-direction:column;gap:5px}
+.ff.full{grid-column:1/-1}
+.flbl{font-size:11px;font-weight:500;color:var(--mt);text-transform:uppercase;letter-spacing:.06em}
+.fi{width:100%;background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:9px 13px;font-size:13px;color:var(--wh);outline:none;transition:border-color .2s}
+.fi:focus{border-color:var(--or)}
+.fi::placeholder{color:var(--md)}
+textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
+.fsel{width:100%;background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:9px 13px;font-size:13px;color:var(--lt);outline:none;cursor:pointer}
+.cc{display:flex;gap:8px;flex-wrap:wrap;padding-top:4px}
+.ccl{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mt);cursor:pointer}
+.ccl input{accent-color:var(--or);cursor:pointer}
+.sbtn{background:var(--or);color:var(--bk);border:none;border-radius:var(--r);padding:10px 24px;font-family:var(--fd);font-size:13px;font-weight:700;transition:background .15s;margin-top:.5rem}
+.sbtn:hover{background:#ffb733}
+
+/* SEO PAGE */
+.seo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:2rem}
+.seo-card{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.25rem;display:flex;flex-direction:column;gap:10px}
+.seo-card:hover{border-color:var(--bd2)}
+.seo-card.local{border-left:3px solid #5DCAA5}
+.seo-card.nacional{border-left:3px solid #85B7EB}
+.seo-card.trending{border-left:3px solid var(--or)}
+.seo-card.hot{border-left:3px solid #F09595}
+.seo-hdr{display:flex;align-items:flex-start;gap:10px}
+.seo-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.seo-topic{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--wh);line-height:1.3;flex:1}
+.seo-type{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;margin-top:2px}
+.st-local{background:rgba(93,202,165,.2);color:#5DCAA5}
+.st-nac{background:rgba(133,183,235,.2);color:#85B7EB}
+.st-trend{background:var(--orl);color:var(--or)}
+.st-hot{background:rgba(240,149,149,.2);color:#F09595}
+.seo-ctx{font-size:12px;color:var(--mt);line-height:1.5}
+.seo-kws{display:flex;flex-wrap:wrap;gap:5px}
+.kw{font-size:11px;font-weight:500;background:var(--dk2);border:1px solid var(--bd2);border-radius:8px;padding:3px 9px;color:var(--lt);cursor:pointer;transition:all .15s}
+.kw:hover{border-color:var(--orb);color:var(--or)}
+.seo-angle{background:var(--dk2);border-left:2px solid var(--or);border-radius:0 var(--r) var(--r) 0;padding:8px 10px;font-size:12px;color:var(--lt);line-height:1.5}
+.seo-angle strong{color:var(--or);font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px}
+.seo-tb{background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px}
+.seo-tl{font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.seo-tt{font-size:12px;color:var(--wh);line-height:1.4;font-weight:500}
+.seo-acts{display:flex;gap:6px;margin-top:2px}
+.seo-sec{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--wh);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.trends-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-bottom:1.5rem}
+.trend-pill{background:var(--cd);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;display:flex;align-items:flex-start;gap:8px;transition:border-color .2s}
+.trend-pill:hover{border-color:var(--bd2)}
+.trend-icon{font-size:16px;flex-shrink:0}
+.trend-body{flex:1;min-width:0}
+.trend-name{font-size:12px;font-weight:600;color:var(--wh)}
+.trend-vol{font-size:10px;color:var(--mt);margin-top:1px}
+.trend-angle{font-size:10px;color:var(--mt);margin-top:3px;line-height:1.3}
+.trend-copy{font-size:10px;padding:3px 8px;border:1px solid var(--bd2);border-radius:6px;background:none;color:var(--mt);cursor:pointer;flex-shrink:0}
+.trend-copy:hover{color:var(--wh);background:var(--dk3)}
+
+/* REFLOTE */
+.rg{display:flex;flex-direction:column;gap:10px}
+.rc{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:14px 18px;transition:border-color .2s}
+.rc:hover{border-color:var(--bd2)}
+.rc.dru{border-left:3px solid var(--or)}
+.rc.heraldo{border-left:3px solid #85B7EB}
+.rc.elonce{border-left:3px solid #97C459}
+.rc-hdr{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.rc-src{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.src-dru{background:var(--orl);color:var(--or)}
+.src-her{background:rgba(133,183,235,.15);color:#85B7EB}
+.src-elo{background:rgba(151,196,89,.15);color:#97C459}
+.rc-yrs{font-size:11px;color:var(--mt)}
+.rc-t{font-family:var(--fd);font-size:14px;font-weight:600;color:var(--wh);margin-bottom:4px;line-height:1.35}
+.rc-x{font-size:12px;color:var(--mt);line-height:1.5;margin-bottom:8px}
+.rc-hook{background:var(--dk2);border-left:2px solid var(--or);padding:6px 10px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--lt);margin-bottom:8px}
+.rc-hook strong{color:var(--or);font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px}
+.rc-acts{display:flex;gap:6px;flex-wrap:wrap}
+
+/* TRASPASO PAGE */
+.tp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.tp-card{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem}
+.tp-title{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--wh);margin-bottom:1rem}
+.un-sel{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem}
+.un-opt{background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:10px}
+.un-opt:hover{border-color:var(--bd2)}
+.un-opt.sel{border-color:var(--or);background:var(--orl)}
+.un-dot{width:8px;height:8px;border-radius:50%;background:var(--bd2);flex-shrink:0;margin-top:4px;transition:background .15s}
+.un-opt.sel .un-dot{background:var(--or)}
+.un-name{font-size:12px;font-weight:600;color:var(--wh);margin-bottom:2px}
+.un-desc{font-size:11px;color:var(--mt);line-height:1.4}
+
+/* SEO METER */
+.seo-meter{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem}
+.score-ring{width:80px;height:80px;position:relative;margin:0 auto 1rem}
+.score-ring svg{width:80px;height:80px}
+.score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:22px;font-weight:800}
+.seo-checks{display:flex;flex-direction:column;gap:6px;margin-top:1rem}
+.seo-check{display:flex;align-items:flex-start;gap:8px;font-size:12px;padding:6px 0;border-bottom:0.5px solid var(--bd)}
+.seo-check:last-child{border-bottom:none}
+.chk-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+.chk-text{color:var(--lt);line-height:1.4;flex:1}
+.chk-status{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px}
+.cs-ok{background:rgba(93,202,165,.2);color:#5DCAA5}
+.cs-warn{background:rgba(245,166,35,.2);color:var(--or)}
+.cs-bad{background:rgba(240,149,149,.2);color:#F09595}
+
+/* DESGRABADOR */
+.dsg-wrap{max-width:720px}
+.upload-zone{background:var(--dk2);border:2px dashed var(--bd2);border-radius:var(--rl);padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1rem}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--or);background:var(--orl)}
+.upload-zone input{display:none}
+.uz-icon{font-size:36px;margin-bottom:.75rem}
+.uz-title{font-family:var(--fd);font-size:15px;font-weight:600;color:var(--wh);margin-bottom:.25rem}
+.uz-sub{font-size:12px;color:var(--mt)}
+.dsg-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.dsg-result{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem;display:none}
+.dsg-result.visible{display:block;animation:fadeIn .3s ease}
+.dsg-tabs{display:flex;gap:4px;margin-bottom:1rem;border-bottom:1px solid var(--bd)}
+.dsg-tab{font-size:12px;padding:6px 14px;cursor:pointer;border:none;background:none;color:var(--mt);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.dsg-tab.active{color:var(--or);border-bottom-color:var(--or);font-weight:500}
+.dsg-content{font-size:13px;color:var(--lt);line-height:1.7;white-space:pre-wrap}
+
+/* ENFOQUES */
+.enf-axes{display:flex;flex-direction:column;gap:12px}
+.enf-axis{display:flex;flex-direction:column;gap:6px}
+.enf-axis-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mt);padding:2px 0}
+.enf-btn{background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:all .15s}
+.enf-btn:hover{border-color:var(--bd2);background:var(--dk3)}
+.enf-btn.sel{border-color:var(--or);background:var(--orl)}
+.enf-btn-name{font-size:12px;font-weight:600;color:var(--wh);margin-bottom:2px}
+.enf-btn.sel .enf-btn-name{color:var(--or)}
+.enf-btn-desc{font-size:11px;color:var(--mt);line-height:1.4}
+
+/* SUGERENCIAS */
+.sug-item{background:var(--cd);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;transition:border-color .2s}
+.sug-item:hover{border-color:var(--bd2)}
+.sug-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.sug-author{font-size:12px;font-weight:600;color:var(--wh)}
+.sug-date{font-size:11px;color:var(--md)}
+.sug-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px}
+.st-feature{background:rgba(93,202,165,.15);color:#5DCAA5}
+.st-mejora{background:var(--orl);color:var(--or)}
+.st-bug{background:rgba(240,149,149,.15);color:#F09595}
+.st-contenido{background:rgba(175,169,236,.15);color:#AFA9EC}
+.st-otro{background:rgba(133,183,235,.15);color:#85B7EB}
+.sug-body{font-size:12px;color:var(--lt);line-height:1.5}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--cd);border:1px solid var(--bd2);border-radius:var(--r);padding:12px 18px;font-size:13px;color:var(--wh);z-index:9999;display:flex;align-items:center;gap:10px;animation:fadeIn .25s ease;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+
+/* DOTS */
+.dots{display:inline-flex;gap:4px;align-items:center;vertical-align:middle}
+.dots span{width:6px;height:6px;border-radius:50%;background:var(--or);animation:bounce .9s infinite}
+.dots span:nth-child(2){animation-delay:.15s}
+.dots span:nth-child(3){animation-delay:.3s}
+
+.empty-s{text-align:center;padding:3rem 1rem;color:var(--mt)}
+
+@media(max-width:900px){
+  .sidebar{width:60px}
+  .sl-n,.ni span:not(.ni-icon),.ni-badge,.ni-new,.u-nm,.u-rl,.lo-btn{display:none}
+  .ni{padding:10px;justify-content:center}
+  .sl{padding:0 .75rem 1rem;justify-content:center}
+  .sb-bot{padding:.75rem}
+  .u-inf{justify-content:center}
+  .main{margin-left:60px}
+  .sg{grid-template-columns:repeat(3,1fr)}
+  .gl,.tp-grid,.dsg-opts{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  #page-enfoques>div[style],#page-sugerencias>div[style]{display:block!important}
+  #page-enfoques>div[style]>div,#page-sugerencias>div[style]>div{margin-bottom:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="ls">
+  <div class="lbox">
+    <div class="l-logo"><div class="l-b">DRU</div><div class="l-n">Diario Río Uruguay</div></div>
+    <div class="l-t">Bienvenido</div>
+    <div class="l-s">Panel editorial interno</div>
+    <div class="fw"><label class="fl">Usuario</label><input class="li" type="text" id="lu" placeholder="usuario" autocomplete="username"></div>
+    <div class="fw"><label class="fl">Contraseña</label><input class="li" type="password" id="lp" placeholder="••••••••"></div>
+    <button class="lbtn" onclick="doLogin()">Ingresar →</button>
+    <div class="lerr" id="lerr">Usuario o contraseña incorrectos</div>
+    <div class="lhint">DRU Editorial v7 · Solo acceso interno</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sl"><div class="sl-b">DRU</div><div class="sl-n">Editorial</div></div>
+    <div class="ns">Contenido</div>
+    <div class="ni active" onclick="showPage('efem',this)"><span class="ni-icon">📅</span><span>Efemérides</span><span class="ni-badge" id="nb-cnt">0</span></div>
+    <div class="ni" onclick="showPage('gen',this)"><span class="ni-icon">✦</span><span>Generador IA</span></div>
+    <div class="ni" onclick="showPage('add',this)"><span class="ni-icon">＋</span><span>Agregar</span></div>
+    <div class="ns">Herramientas</div>
+    <div class="ni" onclick="showPage('seo',this)"><span class="ni-icon">🔍</span><span>SEO del día</span><span class="ni-new">HOY</span></div>
+    <div class="ni" onclick="showPage('reflote',this)"><span class="ni-icon">📰</span><span>Reflote archivos</span></div>
+    <div class="ni" onclick="showPage('traspaso',this)"><span class="ni-icon">📋</span><span>Traspaso a redes</span><span class="ni-new">NEW</span></div>
+    <div class="ni" onclick="showPage('desgrab',this)"><span class="ni-icon">🎙</span><span>Desgrabador</span><span class="ni-new">NEW</span></div>
+    <div class="ni" onclick="showPage('enfoques',this)"><span class="ni-icon">🎯</span><span>Enfoques</span><span class="ni-new">NEW</span></div>
+    <div class="ns">Feedback</div>
+    <div class="ni" onclick="showPage('sugerencias',this)"><span class="ni-icon">💬</span><span>Sugerencias</span></div>
+    <div class="sb-bot">
+      <div class="u-inf"><div class="u-av" id="uav">RD</div><div><div class="u-nm" id="unm">Redactor</div><div class="u-rl" id="url2">Redes</div></div></div>
+      <button class="lo-btn" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-t" id="pt">Base de Efemérides</div>
+      <div class="tc" id="tchip">📅 cargando...</div>
+      <div class="tb-d" id="tdate"></div>
+    </div>
+
+    <!-- EFEMERIDES -->
+    <div class="page active" id="page-efem">
+      <div class="sg">
+        <div class="sc"><div class="sc-n" style="color:var(--or)" id="st-tot">0</div><div class="sc-l">Total</div></div>
+        <div class="sc"><div class="sc-n" style="color:#FAC775" id="st-hist">0</div><div class="sc-l">Históricas</div></div>
+        <div class="sc"><div class="sc-n" style="color:#AFA9EC" id="st-fam">0</div><div class="sc-l">Famosos ER</div></div>
+        <div class="sc"><div class="sc-n" style="color:#5DCAA5" id="st-ins">0</div><div class="sc-l">Insólitas</div></div>
+        <div class="sc"><div class="sc-n" style="color:#F09595" id="st-dep">0</div><div class="sc-l">Deporte/Cul</div></div>
+      </div>
+      <div class="today-banner"><div style="display:flex;align-items:flex-start;gap:10px"><div class="tdot"></div><div id="today-txt">Cargando...</div></div></div>
+      <div class="ai-panel" id="ai-panel">
+        <div class="asp-h"><div class="asp-t">Sugerencias IA del día</div><span class="aic">IA</span><button class="rb" onclick="loadSuggestions()">↻ Actualizar</button></div>
+        <div id="suggest-area"><div class="lds"><div class="sp"></div>Buscando efemérides para hoy...</div></div>
+      </div>
+      <div class="sec-hdr"><div class="sec-t">Todas las efemérides</div><div class="sec-c" id="fcnt">0 resultados</div></div>
+      <div class="fb-r">
+        <input class="si" type="text" placeholder="🔍  Buscar..." id="srch" oninput="renderEfem()">
+        <select class="fs" id="fmes" onchange="renderEfem()">
+          <option value="">Todo el año</option>
+          <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select>
+        <select class="fs" id="fviral" onchange="renderEfem()"><option value="">Todos</option><option value="1">⚡ Solo viralizables</option></select>
+      </div>
+      <div class="cps">
+        <button class="cp cp-all active" data-cat="all" onclick="setCat(this)">Todas</button>
+        <button class="cp cp-hist" data-cat="hist" onclick="setCat(this)">🟡 Históricas</button>
+        <button class="cp cp-fam" data-cat="fam" onclick="setCat(this)">🟣 Famosos ER</button>
+        <button class="cp cp-ins" data-cat="ins" onclick="setCat(this)">🟢 Insólitas</button>
+        <button class="cp cp-dep" data-cat="dep" onclick="setCat(this)">🔴 Deporte</button>
+        <button class="cp cp-cul" data-cat="cul" onclick="setCat(this)">🟩 Cultural</button>
+        <button class="cp cp-pol" data-cat="pol" onclick="setCat(this)">🔵 Política</button>
+      </div>
+      <div class="eg" id="egrid"></div>
+    </div>
+
+    <!-- GENERADOR -->
+    <div class="page" id="page-gen">
+      <div class="sec-hdr"><div class="sec-t">Generador de Contenido IA</div></div>
+      <div class="gl">
+        <div class="gp">
+          <div class="gp-t">1. Seleccioná una efeméride</div>
+          <input class="si" type="text" placeholder="Filtrar..." id="gs" oninput="renderGenList()" style="margin-bottom:10px;width:100%">
+          <div class="esl" id="glist"></div>
+        </div>
+        <div class="gp">
+          <div class="gp-t">2. Formato <span class="aic">IA</span></div>
+          <div class="fg">
+            <div class="fc selected" data-fmt="carrusel" onclick="selFmt(this)"><div class="fc-i">⬛</div><div class="fc-n">Carrusel</div><div class="fc-s">4 slides + CTA</div></div>
+            <div class="fc" data-fmt="reel" onclick="selFmt(this)"><div class="fc-i">▶</div><div class="fc-n">Guión Reel</div><div class="fc-s">45 seg gancho</div></div>
+            <div class="fc" data-fmt="nota" onclick="selFmt(this)"><div class="fc-i">📝</div><div class="fc-n">Nota SEO</div><div class="fc-s">700 palabras</div></div>
+            <div class="fc" data-fmt="story" onclick="selFmt(this)"><div class="fc-i">◻</div><div class="fc-n">Story</div><div class="fc-s">4 slides encadenadas</div></div>
+          </div>
+          <div id="sel-disp" style="background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--mt);min-height:48px;display:flex;align-items:center">Seleccioná una efeméride →</div>
+          <button class="gnbtn" id="gbtn" onclick="generateContent()" disabled>Generar con IA →</button>
+        </div>
+        <div class="op" id="opanel">
+          <div class="op-h"><div class="op-t">Contenido generado</div><span class="aic" id="ofmt-chip">Carrusel</span><button class="cpbtn" onclick="copyOut()">Copiar</button></div>
+          <div class="oc" id="ocontent"></div>
+          <div class="om" id="ometa"></div>
+          <div class="oa"><button class="ab" onclick="generateContent()">Regenerar</button><button class="ab primary" onclick="copyOut()">Copiar texto</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGREGAR -->
+    <div class="page" id="page-add">
+      <div class="sec-hdr"><div class="sec-t">Agregar nueva efeméride</div></div>
+      <div class="af">
+        <div class="fgrid">
+          <div class="ff full"><label class="flbl">Título *</label><input class="fi" type="text" id="nt" placeholder="Ej: Fundación del Club Atlético Concordia"></div>
+          <div class="ff"><label class="flbl">Día *</label><input class="fi" type="number" id="nd" min="1" max="31" placeholder="13"></div>
+          <div class="ff"><label class="flbl">Mes *</label><select class="fsel" id="nm"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></div>
+          <div class="ff"><label class="flbl">Año *</label><input class="fi" type="number" id="ny" placeholder="1975"></div>
+          <div class="ff"><label class="flbl">Ciudad *</label><input class="fi" type="text" id="nc" placeholder="Concordia"></div>
+          <div class="ff full"><label class="flbl">Descripción *</label><textarea class="fi" id="ndesc" placeholder="Contexto histórico, protagonistas..."></textarea></div>
+          <div class="ff full"><label class="flbl">Hook para redes</label><input class="fi" type="text" id="nhook" placeholder="Ej: Lo que pasó ese día cambió Entre Ríos 👇"></div>
+          <div class="ff full"><label class="flbl">Categorías</label><div class="cc"><label class="ccl"><input type="checkbox" value="hist"> Histórica</label><label class="ccl"><input type="checkbox" value="pol"> Política</label><label class="ccl"><input type="checkbox" value="cul"> Cultural</label><label class="ccl"><input type="checkbox" value="dep"> Deportiva</label><label class="ccl"><input type="checkbox" value="fam"> Famosos ER</label><label class="ccl"><input type="checkbox" value="ins"> Insólita</label></div></div>
+          <div class="ff"><label class="flbl">¿Viralizable?</label><select class="fsel" id="nv"><option value="1">Sí</option><option value="0">No</option></select></div>
+        </div>
+        <button class="sbtn" onclick="addEfem()">Guardar →</button>
+        <div id="add-ok" style="display:none;margin-top:10px;font-size:13px;color:#5DCAA5">✓ Guardada correctamente</div>
+      </div>
+    </div>
+
+    <!-- SEO DEL DÍA -->
+    <div class="page" id="page-seo">
+      <div class="sec-hdr"><div class="sec-t">SEO del día</div><div class="sec-c" id="seo-date-label"></div></div>
+
+      <!-- FUENTES DE TENDENCIAS -->
+      <div class="ai-panel" style="margin-bottom:1.5rem">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),#ffcc55,var(--or));background-size:200% 100%;animation:shimmer 2s linear infinite"></div>
+        <div class="asp-h"><div class="asp-t">Paso 1 — Descubrí las tendencias</div></div>
+        <p style="font-size:13px;color:var(--mt);line-height:1.6;margin-bottom:1rem">Abrí estas fuentes para ver qué se está hablando hoy en Argentina. Después usá el buscador de ángulos para que la IA encuentre la conexión con Entre Ríos.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+          <a href="https://trends.google.com.ar/trending?geo=AR" target="_blank" style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor='var(--orb)'" onmouseout="this.style.borderColor='var(--bd2)'">
+            <span style="font-size:20px">📊</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--wh)">Google Trends</div><div style="font-size:10px;color:var(--mt)">Tendencias en tiempo real</div></div>
+          </a>
+          <a href="https://www.google.com/search?q=tendencias+argentina+hoy" target="_blank" style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor='var(--orb)'" onmouseout="this.style.borderColor='var(--bd2)'">
+            <span style="font-size:20px">🔍</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--wh)">Google Search</div><div style="font-size:10px;color:var(--mt)">Tendencias Argentina hoy</div></div>
+          </a>
+          <a href="https://x.com/search?q=%23Argentina&src=trend_click&vertical=trends" target="_blank" style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor='var(--orb)'" onmouseout="this.style.borderColor='var(--bd2)'">
+            <span style="font-size:20px">🐦</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--wh)">X / Twitter</div><div style="font-size:10px;color:var(--mt)">Trending topics Argentina</div></div>
+          </a>
+          <a href="https://www.google.com/search?q=noticias+entre+rios+hoy&tbm=nws" target="_blank" style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor='var(--orb)'" onmouseout="this.style.borderColor='var(--bd2)'">
+            <span style="font-size:20px">📍</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--wh)">Noticias ER</div><div style="font-size:10px;color:var(--mt)">Búsqueda local hoy</div></div>
+          </a>
+          <a href="https://www.google.com/search?q=noticias+concordia+hoy&tbm=nws" target="_blank" style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor='var(--orb)'" onmouseout="this.style.borderColor='var(--bd2)'">
+            <span style="font-size:20px">🏙</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--wh)">Noticias Concordia</div><div style="font-size:10px;color:var(--mt)">Búsqueda local hoy</div></div>
+          </a>
+          <a href="https://www.google.com/search?q=site:diarioriouruguay.com" target="_blank" style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;text-decoration:none;transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor='var(--orb)'" onmouseout="this.style.borderColor='var(--bd2)'">
+            <span style="font-size:20px">📰</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--wh)">Archivo DRU</div><div style="font-size:10px;color:var(--mt)">Búsqueda en el sitio</div></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- BUSCADOR DE ÁNGULO LOCAL -->
+      <div style="background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem;margin-bottom:1.5rem">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+          <span style="font-family:var(--fd);font-size:14px;font-weight:700">Paso 2 — Buscá el ángulo entrerriano</span>
+          <span class="aic">IA</span>
+        </div>
+        <p style="font-size:12px;color:var(--mt);margin-bottom:1rem;line-height:1.5">Pegá un tema trending y la IA busca si tiene conexión con Entre Ríos + genera el título SEO, keywords y ángulo para la nota.</p>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <input class="si" type="text" id="seo-topic" placeholder="Ej: Adorni, Yanina Latorre, dólar blue, River Plate..." style="flex:1;min-width:250px">
+          <button class="gnbtn" style="width:auto;padding:10px 24px" onclick="searchAngle()">Buscar ángulo ER →</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem">
+          <button class="cp cp-all" style="font-size:10px;padding:4px 10px" onclick="document.getElementById('seo-topic').value='dólar blue hoy';searchAngle()">💰 Dólar blue</button>
+          <button class="cp cp-hist" style="font-size:10px;padding:4px 10px" onclick="document.getElementById('seo-topic').value='política argentina hoy';searchAngle()">🏛 Política</button>
+          <button class="cp cp-dep" style="font-size:10px;padding:4px 10px" onclick="document.getElementById('seo-topic').value='futbol argentino resultados';searchAngle()">⚽ Fútbol</button>
+          <button class="cp cp-fam" style="font-size:10px;padding:4px 10px" onclick="document.getElementById('seo-topic').value='farándula argentina';searchAngle()">🌟 Farándula</button>
+          <button class="cp cp-ins" style="font-size:10px;padding:4px 10px" onclick="document.getElementById('seo-topic').value='clima entre rios';searchAngle()">🌤 Clima ER</button>
+        </div>
+        <div id="seo-angle-result" style="display:none"></div>
+      </div>
+
+      <!-- HISTORIAL DE BÚSQUEDAS -->
+      <div id="seo-history"></div>
+    </div>
+
+    <!-- REFLOTE -->
+    <div class="page" id="page-reflote">
+      <div class="sec-hdr"><div class="sec-t">Reflote de archivos</div><div class="sec-c" id="reflote-date">Un día como hoy</div></div>
+      <div class="ai-panel" style="margin-bottom:1.5rem">
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),#ffcc55,var(--or));background-size:200% 100%;animation:shimmer 2s linear infinite"></div>
+        <div class="asp-h"><div class="asp-t">Noticias para reflotear hoy</div><span class="aic">IA</span></div>
+        <p style="font-size:13px;color:var(--mt);line-height:1.6">La IA sugiere noticias destacadas de Entre Ríos publicadas un día como hoy en años anteriores. Cada resultado incluye el copy listo para Instagram y Facebook.</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center">
+        <button class="cp cp-all active" id="rs-all" onclick="setRefloteSrc('all',this)">Todos los medios</button>
+        <button class="cp cp-hist" onclick="setRefloteSrc('dru',this)">📰 DRU</button>
+        <button class="cp cp-pol" onclick="setRefloteSrc('heraldo',this)">📰 El Heraldo</button>
+        <button class="cp cp-cul" onclick="setRefloteSrc('elonce',this)">📺 El Once</button>
+        <button class="rb" style="margin-left:auto;padding:8px 16px;font-size:13px;border-color:var(--orb);color:var(--or)" onclick="loadReflote()">↻ Actualizar recomendaciones</button>
+      </div>
+      <div id="reflote-area"><div class="lds"><div class="sp"></div>Buscando noticias para reflotear hoy...</div></div>
+    </div>
+
+    <!-- TRASPASO A REDES -->
+    <div class="page" id="page-traspaso">
+      <div class="sec-hdr"><div class="sec-t">Traspaso a redes</div><div class="sec-c">Pre-publicación</div></div>
+      <p style="font-size:13px;color:var(--mt);line-height:1.6;margin-bottom:1.5rem">Herramienta <strong style="color:var(--wh)">previa a la publicación</strong>. El redactor pega el texto de la nota, la IA analiza el SEO, sugiere mejoras y genera el contenido para redes. Todo antes de publicar.</p>
+      <div class="tp-grid">
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div class="tp-card">
+            <div class="tp-title">1. Texto de la nota</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="ff"><label class="flbl">Titular propuesto</label><input class="fi" type="text" id="tp-title" placeholder="Escribí el titular que pensás publicar" oninput="localSEOCheck()"></div>
+              <div class="ff"><label class="flbl">Cuerpo de la nota</label><textarea class="fi" id="tp-body" placeholder="Pegá acá el texto completo de la nota. La IA va a analizar el SEO, la estructura y sugerir mejoras." style="min-height:200px" oninput="localSEOCheck()"></textarea></div>
+              <div class="ff"><label class="flbl">Redactor</label><select class="fsel" id="tp-redactor"><option>Redactor 1</option><option>Redactor 2</option><option>Redactor 3</option><option>Redactor 4</option><option>Redactor 5</option></select></div>
+            </div>
+          </div>
+          <div class="tp-card">
+            <div class="tp-title">2. Necesidad de usuario</div>
+            <div class="un-sel" id="un-sel">
+              <div class="un-opt" data-un="Update me" onclick="selUN(this)"><div class="un-dot"></div><div><div class="un-name">Update me</div><div class="un-desc">Noticia de última hora o actualización</div></div></div>
+              <div class="un-opt" data-un="Educate me" onclick="selUN(this)"><div class="un-dot"></div><div><div class="un-name">Educate me</div><div class="un-desc">Contexto profundo, explicación</div></div></div>
+              <div class="un-opt" data-un="Inspire me" onclick="selUN(this)"><div class="un-dot"></div><div><div class="un-name">Inspire me</div><div class="un-desc">Historia humana, logro local</div></div></div>
+              <div class="un-opt" data-un="Help me" onclick="selUN(this)"><div class="un-dot"></div><div><div class="un-name">Help me</div><div class="un-desc">Guía práctica, servicio útil</div></div></div>
+              <div class="un-opt" data-un="Give me perspective" onclick="selUN(this)"><div class="un-dot"></div><div><div class="un-name">Give me perspective</div><div class="un-desc">Análisis, opinión experta, qué significa</div></div></div>
+              <div class="un-opt" data-un="Divert me" onclick="selUN(this)"><div class="un-dot"></div><div><div class="un-name">Divert me</div><div class="un-desc">Curiosidad, dato sorprendente</div></div></div>
+              <div class="un-opt" data-un="Connect me" onclick="selUN(this)"><div class="un-dot"></div><div><div class="un-name">Connect me</div><div class="un-desc">Comunidad, empatía, experiencia compartida</div></div></div>
+              <div class="un-opt" data-un="Keep me engaged" onclick="selUN(this)"><div class="un-dot"></div><div><div class="un-name">Keep me engaged</div><div class="un-desc">Tema de debate, seguimiento</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div class="tp-card">
+            <div class="tp-title">3. Análisis SEO <span class="aic">Local</span></div>
+            <div id="seo-meter-area">
+              <div style="font-size:12px;color:var(--mt);text-align:center;padding:1rem 0">Escribí el titular y pegá el cuerpo de la nota para analizar</div>
+            </div>
+          </div>
+          <div class="tp-card">
+            <div class="tp-title">4. Análisis IA profundo <span class="aic">IA</span></div>
+            <p style="font-size:12px;color:var(--mt);margin-bottom:10px">La IA analiza tu nota completa y sugiere mejoras concretas de titular, estructura, keywords y meta tags.</p>
+            <button class="gnbtn" id="tp-ai-btn" onclick="runAISEO()" disabled>Analizar con IA y sugerir mejoras →</button>
+            <div id="ai-seo-result" style="display:none;margin-top:1rem">
+              <div class="oc" id="ai-seo-content" style="min-height:120px;font-size:12px;line-height:1.7"></div>
+              <div style="display:flex;gap:6px;margin-top:8px">
+                <button class="ab" onclick="copyAISEO()">Copiar sugerencias</button>
+                <button class="ab primary" onclick="applyAISuggestions()">Aplicar titular sugerido</button>
+              </div>
+            </div>
+          </div>
+          <div class="tp-card">
+            <div class="tp-title">5. Destino y contenido para redes</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div class="ff"><label class="flbl">¿Va a Instagram?</label><select class="fsel" id="tp-ig"><option value="no">No</option><option value="post">Sí — Post estático</option><option value="carrusel">Sí — Carrusel</option><option value="reel">Sí — Reel</option><option value="story">Sí — Story</option></select></div>
+              <div class="ff"><label class="flbl">¿Va a Facebook?</label><select class="fsel" id="tp-fb"><option value="si">Sí</option><option value="destacada">Sí — Destacar</option><option value="no">No</option></select></div>
+              <button class="gnbtn" id="tp-social-btn" onclick="genSocialFromNote()" disabled>Generar copy para redes IA →</button>
+              <div id="social-result" style="display:none;margin-top:8px">
+                <div class="oc" id="social-content" style="min-height:100px;font-size:12px;line-height:1.7"></div>
+                <button class="ab" style="margin-top:6px" onclick="copySocial()">Copiar copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESGRABADOR -->
+    <div class="page" id="page-desgrab">
+      <div class="sec-hdr"><div class="sec-t">Desgrabador</div><div class="sec-c">Transcripción → Nota periodística</div></div>
+      <div style="max-width:720px">
+        <div class="ai-panel" style="margin-bottom:1.5rem">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),#ffcc55,var(--or));background-size:200% 100%;animation:shimmer 2s linear infinite"></div>
+          <div class="asp-h"><div class="asp-t">Paso 1: Transcribir audio</div><span class="aic">Whisper IA</span></div>
+          <p style="font-size:13px;color:var(--mt);line-height:1.6;margin-bottom:1rem">Subí el archivo de audio directamente. Whisper (OpenAI) lo transcribe en español automáticamente. Máx ~4.5 MB por Netlify (5-10 min de MP3). Para audios más largos, usá las alternativas externas.</p>
+
+          <div class="upload-zone" id="dsg-dropzone" onclick="document.getElementById('dsg-audio-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');handleAudioDrop(event)">
+            <input type="file" id="dsg-audio-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm,.mp4,.mpeg,.mpga" onchange="handleAudioSelect(event)" style="display:none">
+            <div class="uz-icon">🎙</div>
+            <div class="uz-title">Arrastrá el audio acá o hacé clic para elegir</div>
+            <div class="uz-sub">MP3, WAV, M4A, OGG, WebM — Máx 4.5 MB</div>
+          </div>
+
+          <div id="dsg-audio-info" style="display:none;background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">🎵</span>
+              <div style="flex:1;min-width:0">
+                <div id="dsg-audio-name" style="font-size:13px;font-weight:600;color:var(--wh);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+                <div id="dsg-audio-meta" style="font-size:11px;color:var(--mt);margin-top:2px"></div>
+              </div>
+              <button class="ab" onclick="clearAudioFile()" style="flex-shrink:0">✕ Quitar</button>
+            </div>
+          </div>
+
+          <button class="gnbtn" id="dsg-transcribe-btn" onclick="transcribeAudio()" disabled style="margin-bottom:0">Transcribir audio con Whisper →</button>
+
+          <div id="dsg-transcribe-progress" style="display:none;margin-top:10px">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+              <div class="sp"></div>
+              <span id="dsg-transcribe-status" style="font-size:13px;color:var(--mt)">Enviando audio a Whisper...</span>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--bd)">
+            <div style="font-size:11px;color:var(--md);margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:6px" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'grid':'none';this.querySelector('span').textContent=this.nextElementSibling.style.display==='none'?'▸':'▾'"><span>▸</span> Alternativas externas (para audios muy largos)</div>
+            <div style="display:none;grid-template-columns:1fr 1fr;gap:8px">
+              <a href="https://claude.ai/new" target="_blank" style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:10px;display:flex;align-items:center;gap:8px;text-decoration:none;transition:border-color .15s" onmouseover="this.style.borderColor='var(--orb)'" onmouseout="this.style.borderColor='var(--bd2)'">
+                <span style="font-size:18px">🤖</span>
+                <div><div style="font-size:12px;font-weight:600;color:var(--lt)">Claude.ai</div><div style="font-size:10px;color:var(--md)">Subí el audio y pedile transcripción</div></div>
+              </a>
+              <a href="https://turboscribe.ai/" target="_blank" style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:10px;display:flex;align-items:center;gap:8px;text-decoration:none;transition:border-color .15s" onmouseover="this.style.borderColor='var(--orb)'" onmouseout="this.style.borderColor='var(--bd2)'">
+                <span style="font-size:18px">⚡</span>
+                <div><div style="font-size:12px;font-weight:600;color:var(--lt)">TurboScribe</div><div style="font-size:10px;color:var(--md)">3 gratis/día, hasta 30 min</div></div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem;margin-bottom:1rem">
+          <div class="ff" style="margin-bottom:12px"><label class="flbl">Paso 2: Transcripción <span style="font-weight:400;text-transform:none;letter-spacing:0">(se completa automáticamente con Whisper, o pegá manualmente)</span></label><textarea class="fi" id="dsg-text" placeholder="La transcripción aparece acá automáticamente al usar Whisper. También podés pegar texto manualmente." style="min-height:220px"></textarea></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div class="ff"><label class="flbl">Tipo de contenido</label><select class="fsel" id="dsg-type"><option value="entrevista">Entrevista</option><option value="conferencia">Conferencia de prensa</option><option value="declaracion">Declaración puntual</option></select></div>
+            <div class="ff"><label class="flbl">Sección</label><select class="fsel" id="dsg-section"><option>Política</option><option>Economía</option><option>Policiales</option><option>Deportes</option><option>Sociedad</option><option>Cultura</option><option>General</option></select></div>
+          </div>
+          <div class="ff" style="margin-bottom:12px"><label class="flbl">Nombre del entrevistado / protagonista</label><input class="fi" type="text" id="dsg-person" placeholder="Ej: Juan Pérez, intendente de Concordia"></div>
+          <button class="gnbtn" id="dsg-btn" onclick="processTranscription()">Generar nota periodística →</button>
+        </div>
+
+        <div id="dsg-result" style="display:none">
+          <div style="background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem">
+            <div style="display:flex;border-bottom:1px solid var(--bd);margin-bottom:1rem">
+              <button class="dsg-tab active" onclick="showDsgTab('nota',this)">Nota periodística</button>
+              <button class="dsg-tab" onclick="showDsgTab('social',this)">Copy para redes</button>
+            </div>
+            <div class="oc" id="dsg-nota" style="min-height:180px;font-size:13px"></div>
+            <div class="oc" id="dsg-social" style="min-height:100px;font-size:13px;display:none"></div>
+            <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap">
+              <button class="ab" onclick="copyDsg()">Copiar</button>
+              <button class="ab primary" onclick="copyDsg()">Copiar texto completo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENFOQUES — News User Needs (Shishkin Model) -->
+    <div class="page" id="page-enfoques">
+      <div class="sec-hdr"><div class="sec-t">Enfoques editoriales</div><div class="sec-c">News User Needs — Shishkin Model</div></div>
+      <p style="font-size:13px;color:var(--mt);line-height:1.6;margin-bottom:1.5rem">Pegá una noticia o información y elegí un enfoque. La IA reescribe el contenido adaptándolo a la <strong style="color:var(--wh)">necesidad del usuario</strong> seleccionada, según el modelo de Dmitry Shishkin (BBC / smartocto). Cada enfoque responde a una motivación distinta de la audiencia.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div class="tp-card">
+            <div class="tp-title">1. Texto base</div>
+            <div class="ff"><label class="flbl">Titular original</label><input class="fi" type="text" id="enf-title" placeholder="Ej: El municipio inauguró la nueva planta potabilizadora"></div>
+            <div class="ff" style="margin-top:10px"><label class="flbl">Nota / información</label><textarea class="fi" id="enf-body" placeholder="Pegá acá la nota, el comunicado, la información en bruto o el texto que querés reescribir con un enfoque específico." style="min-height:220px"></textarea></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <div class="tp-card">
+            <div class="tp-title">2. Elegí el enfoque <span style="font-size:11px;color:var(--mt);font-weight:400;margin-left:6px">4 ejes · 8 necesidades</span></div>
+            <div class="enf-axes">
+              <div class="enf-axis"><div class="enf-axis-label">🧠 CONOCER</div>
+                <div class="enf-btn" data-enf="Update me" onclick="selEnf(this)"><div class="enf-btn-name">Update me</div><div class="enf-btn-desc">¿Qué pasó? Hechos, datos, última hora.</div></div>
+                <div class="enf-btn" data-enf="Keep me engaged" onclick="selEnf(this)"><div class="enf-btn-name">Keep me engaged</div><div class="enf-btn-desc">Seguimiento, debate, participación activa.</div></div>
+              </div>
+              <div class="enf-axis"><div class="enf-axis-label">📖 COMPRENDER</div>
+                <div class="enf-btn" data-enf="Educate me" onclick="selEnf(this)"><div class="enf-btn-name">Educate me</div><div class="enf-btn-desc">Contexto profundo, explicación accesible.</div></div>
+                <div class="enf-btn" data-enf="Give me perspective" onclick="selEnf(this)"><div class="enf-btn-name">Give me perspective</div><div class="enf-btn-desc">Análisis, opinión experta, qué significa esto.</div></div>
+              </div>
+              <div class="enf-axis"><div class="enf-axis-label">💡 SENTIR</div>
+                <div class="enf-btn" data-enf="Inspire me" onclick="selEnf(this)"><div class="enf-btn-name">Inspire me</div><div class="enf-btn-desc">Historia humana, logro, solución positiva.</div></div>
+                <div class="enf-btn" data-enf="Divert me" onclick="selEnf(this)"><div class="enf-btn-name">Divert me</div><div class="enf-btn-desc">Curiosidad, dato sorprendente, pausa al hard news.</div></div>
+              </div>
+              <div class="enf-axis"><div class="enf-axis-label">🤝 ACTUAR</div>
+                <div class="enf-btn" data-enf="Help me" onclick="selEnf(this)"><div class="enf-btn-name">Help me</div><div class="enf-btn-desc">Guía práctica, servicio útil, qué puedo hacer.</div></div>
+                <div class="enf-btn" data-enf="Connect me" onclick="selEnf(this)"><div class="enf-btn-name">Connect me</div><div class="enf-btn-desc">Comunidad, empatía, experiencias compartidas.</div></div>
+              </div>
+            </div>
+          </div>
+          <button class="gnbtn" id="enf-gen-btn" onclick="genEnfoque()" disabled>Generar enfoque IA →</button>
+          <div id="enf-result" style="display:none">
+            <div class="tp-card">
+              <div class="tp-title" style="display:flex;align-items:center;gap:8px">Resultado <span class="aic">IA</span><span id="enf-sel-label" style="font-size:11px;color:var(--mt);font-weight:400"></span></div>
+              <div class="oc" id="enf-content" style="min-height:140px;font-size:12px;line-height:1.7"></div>
+              <button class="ab" style="margin-top:8px" onclick="copyEnf()">Copiar resultado</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUGERENCIAS -->
+    <div class="page" id="page-sugerencias">
+      <div class="sec-hdr"><div class="sec-t">Sugerencias y ajustes</div><div class="sec-c" id="sug-count">0 sugerencias</div></div>
+      <p style="font-size:13px;color:var(--mt);line-height:1.6;margin-bottom:1.5rem">Dejá tus ideas para mejorar la plataforma. Cada sugerencia queda registrada para que el administrador pueda revisarla.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+        <div class="tp-card">
+          <div class="tp-title">Nueva sugerencia</div>
+          <div class="ff" style="margin-bottom:10px"><label class="flbl">Tu nombre</label><input class="fi" type="text" id="sug-name" placeholder="Ej: Redactor 1"></div>
+          <div class="ff" style="margin-bottom:10px"><label class="flbl">Categoría</label>
+            <select class="fsel" id="sug-cat">
+              <option value="feature">Nueva función</option>
+              <option value="mejora">Mejora de algo existente</option>
+              <option value="bug">Algo no funciona bien</option>
+              <option value="contenido">Contenido / criterios editoriales</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="ff" style="margin-bottom:10px"><label class="flbl">Descripción</label><textarea class="fi" id="sug-text" placeholder="Describí tu sugerencia, qué cambiarías, qué agregarías, qué no funciona..." style="min-height:140px"></textarea></div>
+          <button class="gnbtn" onclick="addSugerencia()">Enviar sugerencia →</button>
+        </div>
+        <div>
+          <div style="font-family:var(--fd);font-size:14px;font-weight:700;color:var(--wh);margin-bottom:1rem">Sugerencias enviadas</div>
+          <div id="sug-list"><div style="font-size:13px;color:var(--md);padding:2rem;text-align:center">No hay sugerencias todavía. ¡Sé el primero!</div></div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<script>
+const USERS={admin:{pass:"dru2024",name:"Administrador",role:"Admin",av:"AD"},redactor:{pass:"redactor123",name:"Redactor DRU",role:"Redacción",av:"RD"},redes:{pass:"redes123",name:"Community",role:"Redes sociales",av:"CM"}};
+const SK="dru_efem_v6";
+const MES=["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const MESF=["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const CATM={hist:["t-hist","Histórica"],pol:["t-pol","Política"],cul:["t-cul","Cultural"],dep:["t-dep","Deportiva"],fam:["t-fam","Famosos ER"],ins:["t-ins","Insólita"],soc:["t-soc","Social"]};
+
+const SEED=[
+  {id:1,d:6,m:5,y:1841,title:"Urquiza asume como 1° Gobernador de Entre Ríos",desc:"Justo José de Urquiza toma posesión por primera vez de la gobernación entrerriana.",city:"Concepción del Uruguay",cats:["hist","pol"],viral:1,hook:"El hombre que derrotó a Rosas empezó todo acá 👇"},
+  {id:2,d:13,m:5,y:1832,title:"Fundación oficial de Concordia",desc:"Nace Concordia a orillas del Río Uruguay. Su nombre fue elegido como símbolo de paz.",city:"Concordia",cats:["hist"],viral:1,hook:"La 2da ciudad de ER nació hace casi 200 años por una razón muy especial 🧵"},
+  {id:3,d:15,m:11,y:1975,title:"El 'Milagro de Concordia': avión cae y 60 sobreviven",desc:"Un avión de Aerolíneas confunde las luces de Salto Grande con la pista y cae en un bosque. Los 60 pasajeros sobreviven.",city:"Concordia",cats:["hist","ins"],viral:1,hook:"Un piloto confundió Salto Grande con el aeropuerto 😳"},
+  {id:4,d:20,m:2,y:1852,title:"Batalla de Caseros: la victoria entrerriana que cambió Argentina",desc:"Urquiza derrota a Rosas en Caseros. El entrerriano lideró la campaña que terminó con la dictadura rosista.",city:"Entre Ríos",cats:["hist","pol"],viral:1,hook:"Un entrerriano derrocó al dictador más poderoso de Argentina 🇦🇷"},
+  {id:5,d:29,m:10,y:1996,title:"Nace Emilia Mernes en Nogoyá",desc:"María Emilia Mernes nace en Nogoyá. Años después agotaría 10 fechas en el Movistar Arena.",city:"Nogoyá",cats:["fam","cul"],viral:1,hook:"La artista que rompió todos los récords del pop argentino nació en Entre Ríos 🎤"},
+  {id:6,d:19,m:10,y:1949,title:"Nace el Indio Solari en Paraná",desc:"Carlos Solari, fundador de Los Redondos, nació en Paraná, capital de Entre Ríos.",city:"Paraná",cats:["fam","cul"],viral:1,hook:"El Indio Solari es entrerriano. Y no, no lo inventamos 🎸"},
+  {id:7,d:11,m:9,y:1969,title:"Nace José Pékerman en Villa Domínguez",desc:"El técnico más exitoso en mundiales juveniles nació en un pequeño pueblo entrerriano. Ganó 3 mundiales sub-20.",city:"Villa Domínguez",cats:["fam","dep"],viral:1,hook:"El DT que más mundiales ganó en la historia es de ER ⚽"},
+  {id:8,d:1,m:2,y:2005,title:"Gualeguaychú bloquea el puente a Uruguay por las papeleras",desc:"Comienza el corte del Puente Gualeguaychú-Fray Bentos, uno de los conflictos ambientales más mediáticos de Argentina.",city:"Gualeguaychú",cats:["ins","pol"],viral:1,hook:"Cuando un pueblo entrerriano paró el tráfico internacional durante años 💪"},
+  {id:9,d:28,m:2,y:1983,title:"Carnaval de Gualeguaychú declarado de interés nacional",desc:"El carnaval más largo del mundo recibe reconocimiento nacional. Convoca más de 300.000 turistas.",city:"Gualeguaychú",cats:["cul","ins"],viral:1,hook:"El carnaval más largo del mundo está en Entre Ríos 🎭"},
+  {id:10,d:1,m:3,y:2015,title:"Patronato de Paraná llega a Primera División",desc:"El club fundado en un hospital psiquiátrico logra el histórico ascenso a Primera División.",city:"Paraná",cats:["dep","ins"],viral:1,hook:"El único club fundado en un manicomio es de Entre Ríos 😱⚽"},
+  {id:11,d:11,m:4,y:1870,title:"Asesinato de los hijos de Urquiza en Concordia",desc:"Un doble crimen político sacude a Concordia: los coroneles Waldino y Carmelo son asesinados el mismo día que su padre.",city:"Concordia",cats:["hist","pol"],viral:1,hook:"La noche de sangre que cambió la política entrerriana 🔴"},
+  {id:12,d:28,m:5,y:1969,title:"Creación de la Universidad Nacional de Entre Ríos",desc:"Se funda la UNER, marcando un hito en el acceso a la educación universitaria en la provincia.",city:"Concepción del Uruguay",cats:["hist","cul"],viral:0,hook:""},
+];
+
+let DB=[];
+let activeCat="all";
+let selEfemObj=null;
+let selFmtStr="carrusel";
+let selUN_val="";
+let refloteSrc="all";
+let traspasos=[];
+
+
+
+// ══ STORAGE ══
+function loadDB(){
+  try{const r=localStorage.getItem(SK);if(r){const p=JSON.parse(r);if(p&&p.length>0)return p;}}catch(e){}
+  localStorage.setItem(SK,JSON.stringify(SEED));return[...SEED];
+}
+function saveDB(){localStorage.setItem(SK,JSON.stringify(DB));}
+
+// ══ LOGIN ══
+function doLogin(){
+  const u=document.getElementById("lu").value.trim().toLowerCase();
+  const p=document.getElementById("lp").value;
+  const user=USERS[u];
+  if(user&&user.pass===p){
+    document.getElementById("ls").style.display="none";
+    document.getElementById("app").style.display="block";
+    document.getElementById("uav").textContent=user.av;
+    document.getElementById("unm").textContent=user.name;
+    document.getElementById("url2").textContent=user.role;
+    DB=loadDB();initApp();
+  } else {document.getElementById("lerr").style.display="block";}
+}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.getElementById("ls").style.display!=="none")doLogin();});
+function doLogout(){document.getElementById("ls").style.display="flex";document.getElementById("app").style.display="none";}
+
+// ══ INIT ══
+function initApp(){
+  const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
+  document.getElementById("tdate").textContent=`${dd} de ${MESF[mm]} de ${yy}`;
+  const ti=DB.filter(e=>e.d===dd&&e.m===mm);
+  document.getElementById("tchip").textContent=ti.length?`📅 ${ti.length} efeméride${ti.length>1?"s":""} hoy`:"📅 Sin efemérides hoy";
+  document.getElementById("today-txt").innerHTML=ti.length?`<strong>Hoy ${dd} de ${MESF[mm]}:</strong> `+ti.map(e=>e.title).join(" · "):`<strong>Hoy ${dd} de ${MESF[mm]}:</strong> Sin efemérides registradas.`;
+  document.getElementById("fmes").value=String(mm);
+  updateStats();renderEfem();renderGenList();loadSuggestions();
+}
+
+// ══ STATS ══
+function updateStats(){
+  document.getElementById("st-tot").textContent=DB.length;
+  document.getElementById("st-hist").textContent=DB.filter(e=>e.cats.includes("hist")).length;
+  document.getElementById("st-fam").textContent=DB.filter(e=>e.cats.includes("fam")).length;
+  document.getElementById("st-ins").textContent=DB.filter(e=>e.cats.includes("ins")).length;
+  document.getElementById("st-dep").textContent=DB.filter(e=>e.cats.includes("dep")).length;
+  document.getElementById("nb-cnt").textContent=DB.length;
+}
+
+// ══ AI SUGGESTIONS ══
+async function loadSuggestions(){
+  const area=document.getElementById("suggest-area");
+  area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando efemérides para hoy...</div>`;
+  const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
+  const prompt=`Generá EXACTAMENTE 3 efemérides para el día ${dd} de ${MESF[mm]} relacionadas con Entre Ríos, Argentina. Incluí históricas, famosos y curiosidades viralizables. Solo JSON sin markdown:\n[{"title":"","year":0,"desc":"","city":"","cats":["hist"],"viral":1,"hook":""}]`;
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:600,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("").replace(/```json|```/g,"").trim();
+    renderSuggestions(JSON.parse(text),dd,mm);
+  }catch(e){renderSuggestions(getFallback(dd,mm),dd,mm);}
+}
+function getFallback(dd,mm){return[{title:`Efeméride del ${dd} de ${MESF[mm]}`,year:1900,desc:"La IA no pudo conectarse. Podés agregar efemérides manualmente.",city:"Entre Ríos",cats:["hist"],viral:0,hook:""}];}
+function renderSuggestions(items,dd,mm){
+  const area=document.getElementById("suggest-area");
+  if(!items||!items.length){area.innerHTML=`<div style="font-size:13px;color:var(--mt)">Sin sugerencias. Intentá actualizar.</div>`;return;}
+  area.innerHTML=`<div class="sgg">${items.map((s,i)=>`<div class="sug-c" id="sug-${i}"><div class="sug-d">${dd} de ${MESF[mm]} de ${s.year}</div><div class="sug-t">${s.title}</div><div class="sug-x">${s.desc}</div><div class="sug-a"><button class="apbtn" onclick='approveSug(${i},${JSON.stringify(s).replace(/'/g,"&#39;")})'>✓ Aprobar</button><button class="dsbtn" onclick="dismissSug(${i})">Descartar</button></div></div>`).join("")}</div>`;
+}
+function approveSug(i,s){
+  const now=new Date();
+  DB.push({id:Date.now(),d:now.getDate(),m:now.getMonth()+1,y:s.year||now.getFullYear(),title:s.title,desc:s.desc,city:s.city||"Entre Ríos",cats:s.cats||["hist"],viral:s.viral||0,hook:s.hook||"",isNew:true});
+  saveDB();updateStats();renderEfem();renderGenList();
+  document.getElementById("sug-"+i).style.display="none";
+  showToast("✓ Efeméride aprobada y agregada");
+}
+function dismissSug(i){document.getElementById("sug-"+i).style.display="none";}
+
+// ══ FILTERS ══
+function setCat(el){document.querySelectorAll(".cp").forEach(p=>p.classList.remove("active"));el.classList.add("active");activeCat=el.dataset.cat;renderEfem();}
+function getFiltered(){
+  const q=document.getElementById("srch").value.toLowerCase();
+  const mes=document.getElementById("fmes").value;
+  const vir=document.getElementById("fviral").value;
+  return DB.filter(e=>{
+    const mq=!q||e.title.toLowerCase().includes(q)||(e.desc||"").toLowerCase().includes(q)||(e.city||"").toLowerCase().includes(q)||String(e.y).includes(q);
+    const mm=!mes||e.m===parseInt(mes);
+    const mc=activeCat==="all"||e.cats.includes(activeCat);
+    const mv=!vir||e.viral;
+    return mq&&mm&&mc&&mv;
+  });
+}
+function catTags(cats){return(cats||[]).map(c=>CATM[c]?`<span class="tag ${CATM[c][0]}">${CATM[c][1]}</span>`:"").join("");}
+function renderEfem(){
+  const list=getFiltered();
+  document.getElementById("fcnt").textContent=list.length+" resultado"+(list.length!==1?"s":"");
+  const grid=document.getElementById("egrid");
+  if(!list.length){grid.innerHTML=`<div class="empty-s"><div style="font-size:28px;margin-bottom:.5rem">📭</div>Sin resultados</div>`;return;}
+  grid.innerHTML=list.map(e=>`<div class="ec ${e.viral?"viral":""} ${e.isNew?"new-e":""}"><div class="db"><div class="dd">${e.d}</div><div class="dm">${MES[e.m]}</div><div class="dy">${e.y}</div></div><div class="eb"><div class="et">${e.title}${e.isNew?' <span class="tag t-new">Nueva</span>':''}</div><div class="ed">${e.desc}</div><div class="em">${catTags(e.cats)}<span class="city-t">📍 ${e.city}</span>${e.viral?`<span class="vb">⚡ Viralizable</span>`:""}</div>${e.hook?`<div class="hb"><strong>Hook</strong>"${e.hook}"</div>`:""}<div class="ea"><button class="ab" onclick="goGen(${e.id})">Generar →</button><button class="ab" onclick="quickGen(${e.id},'carrusel')">Carrusel</button><button class="ab" onclick="quickGen(${e.id},'reel')">Reel</button></div></div></div>`).join("");
+}
+
+// ══ GENERATOR ══
+function renderGenList(){
+  const q=(document.getElementById("gs")?.value||"").toLowerCase();
+  const items=DB.filter(e=>!q||e.title.toLowerCase().includes(q)||(e.city||"").toLowerCase().includes(q));
+  document.getElementById("glist").innerHTML=items.map(e=>`<div class="esi ${selEfemObj?.id===e.id?"selected":""}" onclick="pickEfem(${e.id})"><div class="esi-d">${e.d}/${e.m}/${e.y}</div><div class="esi-t">${e.title}</div></div>`).join("");
+}
+function pickEfem(id){
+  selEfemObj=DB.find(e=>e.id===id);renderGenList();
+  document.getElementById("sel-disp").innerHTML=`<div><strong style="color:var(--wh)">${selEfemObj.title}</strong><br><span style="font-size:11px">${selEfemObj.d}/${selEfemObj.m}/${selEfemObj.y} · ${selEfemObj.city}</span></div>`;
+  document.getElementById("gbtn").disabled=false;
+}
+function selFmt(el){document.querySelectorAll(".fc").forEach(c=>c.classList.remove("selected"));el.classList.add("selected");selFmtStr=el.dataset.fmt;}
+function goGen(id){showPage("gen",document.querySelectorAll(".ni")[1]);setTimeout(()=>pickEfem(id),100);}
+function quickGen(id,fmt){showPage("gen",document.querySelectorAll(".ni")[1]);selFmtStr=fmt;document.querySelectorAll(".fc").forEach(c=>{c.classList.toggle("selected",c.dataset.fmt===fmt);});setTimeout(()=>{pickEfem(id);setTimeout(generateContent,200);},100);}
+
+async function generateContent(){
+  if(!selEfemObj)return;
+  const panel=document.getElementById("opanel");const content=document.getElementById("ocontent");const meta=document.getElementById("ometa");const chip=document.getElementById("ofmt-chip");
+  const fmtNames={carrusel:"Carrusel 4 slides",reel:"Guión Reel 45s",nota:"Nota SEO 700 palabras",story:"Story + encuesta"};
+  chip.textContent=fmtNames[selFmtStr];panel.classList.add("visible");
+  content.innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Generando con IA...`;meta.innerHTML="";
+
+  const e=selEfemObj;
+  const prompts={
+    carrusel:`Actuá como editor de redes de un medio periodístico serio: Diario Río Uruguay (Concordia, Entre Ríos). Generá un carrusel de Instagram de 4 slides para esta efeméride:
+
+Efeméride: ${e.title}
+Fecha: ${e.d} de ${MESF[e.m]} de ${e.y}
+Ciudad: ${e.city}
+Descripción: ${e.desc}
+Hook sugerido: ${e.hook||"No definido"}
+
+CRITERIOS EDITORIALES DRU:
+- Somos un medio de comunicación serio, no una cuenta de entretenimiento. El tono en redes debe ser periodístico: informar primero, atraer después.
+- Escribir como titulares de diario adaptados a placa visual, no como frases de marketing.
+- NUNCA inventar datos ni citas. Solo información del contexto provisto.
+- Siempre incluir keyword geográfica: "Concordia", "Entre Ríos" o "${e.city}"
+- Máximo 12 palabras por slide. Estructura: dato verificable + geolocalización.
+- SLIDE 1: titular informativo de impacto — NO repetir el caption. Debe informar algo concreto.
+- SLIDE 2: dato clave, cifra o cita textual entre comillas con fuente. Máximo 3 líneas.
+- SLIDE 3: contexto histórico o consecuencia concreta. Si hay cifra, destacarla.
+- SLIDE 4: CTA — "Leé la nota completa en diarioriouruguay.com" — FONDO NARANJA #F5A623
+- META TITLE: keyword geográfica al INICIO, máximo 60 caracteres.
+- META DESCRIPTION: dato informativo + CTA implícito, máximo 155 caracteres.
+- CAPTION: redactado como bajada periodística. Primera línea informativa autónoma (se ve antes del "Ver más"). Segundo párrafo con contexto o antecedentes. Cierre con "📍 Concordia, Entre Ríos" + "Nota completa en el link de la bio" + 3-5 hashtags (#Concordia #EntreRíos + temáticos). Sin emojis decorativos innecesarios.
+
+Respondé con secciones: SLIDE 1, SLIDE 2, SLIDE 3, SLIDE 4, META TITLE, META DESCRIPTION, CAPTION, KEYWORDS.`,
+
+    reel:`Actuá como editor audiovisual de un medio periodístico serio: Diario Río Uruguay (Concordia, Entre Ríos). Generá el guión completo de un Reel de 45 segundos para esta efeméride:
+
+Efeméride: ${e.title}
+Descripción: ${e.desc}
+Hook: ${e.hook||"Usá el dato más relevante del hecho como apertura informativa"}
+Ciudad: ${e.city}
+
+CRITERIOS EDITORIALES DRU:
+- Somos un medio de comunicación, no un creador de contenido. El Reel debe informar con rigor, no entretener.
+- Tono de voz en off: narración periodística, como un informe especial. Sin muletillas de redes ("amigos", "no lo van a creer", "esto es increíble").
+- NUNCA inventar datos ni citas. Solo información del contexto provisto.
+- Estructura obligatoria:
+  • GANCHO 0-3s: el dato periodístico más fuerte primero. NO empezar con saludos ni presentaciones.
+  • DESARROLLO 3-35s: texto en pantalla + voz en off. Cada placa con un dato verificable. Cortes cada 3-5 segundos.
+  • CIERRE 35-42s: por qué esto importa hoy para ${e.city} o Entre Ríos. Dato de contexto actual.
+  • CTA 42-45s: "Nota completa en diarioriouruguay.com — Link en bio"
+- SIEMPRE indicar texto en pantalla (muchos ven sin audio)
+- Incluir keyword geográfica "${e.city}" o "Entre Ríos" en los primeros 5 segundos
+- Audio: voz en off seria + música instrumental de fondo suave. No trending audio.`,
+
+    nota:`Actuá como periodista SEO de Diario Río Uruguay (Concordia, Entre Ríos). Redactá una nota periodística completa de 700 palabras sobre:
+
+${e.title} — ${e.d} de ${MESF[e.m]} de ${e.y} — ${e.city}, Entre Ríos
+
+Descripción base: ${e.desc}
+
+CRITERIOS EDITORIALES DRU — ESTRUCTURA OBLIGATORIA:
+1. META TITLE: keyword geográfica al INICIO ("${e.city}" o "Entre Ríos"), máximo 60 caracteres.
+2. META DESCRIPTION: gancho + dato clave + CTA implícito, máximo 155 caracteres.
+3. H1: titular periodístico con keyword geográfica. Estructura: consecuencia + causa. Sujeto + verbo + complemento. Máximo 65 chars para SEO.
+4. ENTRADILLA: 2-3 oraciones. Las 5W (Quién, Qué, Cuándo, Dónde, Por qué) en las primeras líneas. Keyword "Concordia" o "Entre Ríos" OBLIGATORIA en el primer párrafo.
+5. CUERPO: mínimo 400 palabras. H2 cada aproximadamente 200 palabras.
+   - H2 subtema 1: contexto o desarrollo del hecho
+   - H2 subtema 2: datos, citas o antecedentes
+   - H2 subtema 3: impacto actual o proyección para la región
+6. CITAS: entre comillas dobles, con nombre completo y cargo de la fuente. NUNCA inventar citas.
+7. KEYWORDS: 6 palabras clave relevantes para posicionamiento local.
+8. SLUG: URL con guiones, sin tildes, sin mayúsculas.
+
+TONO: formal-periodístico sin sensacionalismo. Respetuoso con las fuentes. Sin opinión en notas informativas. NUNCA inventar datos. Audiencia: lectores de Concordia y Entre Ríos.`,
+
+    story:`Actuá como editor de redes de un medio periodístico serio: Diario Río Uruguay (Concordia, Entre Ríos). Generá 4 stories de Instagram encadenadas para esta efeméride:
+
+${e.title} — ${e.city} — ${e.y}
+${e.desc}
+
+CRITERIOS EDITORIALES DRU:
+- Somos un diario, no una cuenta de entretenimiento. Cada story debe aportar información, no solo engagement.
+- NUNCA inventar datos ni citas.
+- Formato 1080x1920px (9:16 vertical). Texto mínimo, informativo.
+- STORY 1: titular principal del hecho — redactado como placa informativa de diario. Máximo 12 palabras. Foto sugerida.
+- STORY 2: encuesta con 2 opciones que generen reflexión sobre el tema (no triviales). Sticker encuesta.
+- STORY 3: dato de contexto verificable, cifra o antecedente histórico. Incluir keyword "${e.city}" o "Entre Ríos".
+- STORY 4: CTA con sticker de link — "Nota completa en diarioriouruguay.com". Logo DRU centrado.
+- Para cada story indicar: texto en pantalla + foto/video sugerido + stickers recomendados.
+- Sin emojis decorativos. Solo emojis funcionales (📍 ubicación, 🔗 link).`
+  };
+
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:1000,messages:[{role:"user",content:prompts[selFmtStr]}]})});
+    const data=await res.json();
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    content.textContent=text;
+    const metaData={carrusel:[["Formato","Carrusel 4 slides"],["Producción","~20 min Adobe Express"],["Alcance","Alto — guardable"]],reel:[["Duración","45 segundos"],["Edición","Premiere Pro"],["Audio","Voz en off + música"]],nota:[["Palabras","700+"],["SEO","Meta incluida"],["Publicar","Antes del "+e.d+"/"+e.m]],story:[["Stories","4 encadenadas"],["Interacción","Encuesta incluida"],["Guardar en","Destacados ER"]]};
+    meta.innerHTML=(metaData[selFmtStr]||[]).map(([k,v])=>`<div class="mc">${k}: <span>${v}</span></div>`).join("");
+  }catch(err){content.textContent="Error al conectar con la IA. Intentá de nuevo.";}
+}
+function copyOut(){const t=document.getElementById("ocontent").textContent;navigator.clipboard&&navigator.clipboard.writeText(t);const btn=event.target;const orig=btn.textContent;btn.textContent="✓ Copiado";setTimeout(()=>btn.textContent=orig,1500);}
+
+// ══ ADD EFEM ══
+function addEfem(){
+  const title=document.getElementById("nt").value.trim();const day=parseInt(document.getElementById("nd").value);const month=parseInt(document.getElementById("nm").value);const year=parseInt(document.getElementById("ny").value);const city=document.getElementById("nc").value.trim();const desc=document.getElementById("ndesc").value.trim();const hook=document.getElementById("nhook").value.trim();const viral=parseInt(document.getElementById("nv").value);const cats=[...document.querySelectorAll(".cc input:checked")].map(i=>i.value);
+  if(!title||!day||!month||!year||!city||!desc){showToast("⚠ Completá todos los campos");return;}
+  DB.push({id:Date.now(),d:day,m:month,y:year,title,desc,city,hook,cats,viral,isNew:true});
+  saveDB();updateStats();renderEfem();renderGenList();
+  document.getElementById("add-ok").style.display="block";setTimeout(()=>document.getElementById("add-ok").style.display="none",3000);
+  ["nt","nd","ny","nc","ndesc","nhook"].forEach(id=>document.getElementById(id).value="");
+  document.querySelectorAll(".cc input").forEach(i=>i.checked=false);
+  showToast("✓ Efeméride guardada");
+}
+
+// ══ JSON REPAIR + CACHE ══
+function repairJSON(str){
+  // Try to fix truncated JSON by closing open structures
+  try{ return JSON.parse(str); }catch(e){}
+  let s = str.trim();
+  // Count open brackets/braces
+  let opens = 0, openB = 0;
+  let inStr = false, escape = false;
+  for(let i=0;i<s.length;i++){
+    const c=s[i];
+    if(escape){escape=false;continue;}
+    if(c==="\\"&&inStr){escape=true;continue;}
+    if(c==='"'&&!escape){inStr=!inStr;continue;}
+    if(!inStr){
+      if(c==='['||c==='{')opens++;
+      if(c===']'||c==='}')opens--;
+      if(c==='[')openB++;
+      if(c===']')openB--;
+    }
+  }
+  // If we're inside a string, close it
+  if(inStr) s += '"';
+  // Close any open objects/arrays
+  const stack=[];
+  inStr=false;escape=false;
+  for(let i=0;i<s.length;i++){
+    const c=s[i];
+    if(escape){escape=false;continue;}
+    if(c==="\\"&&inStr){escape=true;continue;}
+    if(c==='"'&&!escape){inStr=!inStr;continue;}
+    if(!inStr){
+      if(c==='['||c==='{')stack.push(c==='['?']':'}');
+      if((c===']'||c==='}')&&stack.length)stack.pop();
+    }
+  }
+  while(stack.length) s += stack.pop();
+  try{ return JSON.parse(s); }catch(e){ return null; }
+}
+
+const CACHE_KEY_SEO = "dru_seo_cache";
+const CACHE_KEY_REFLOTE = "dru_reflote_cache";
+function getCached(key){
+  try{
+    const raw=sessionStorage.getItem(key);
+    if(!raw)return null;
+    const {data,date}=JSON.parse(raw);
+    const today=new Date().toDateString();
+    return date===today?data:null;
+  }catch(e){return null;}
+}
+function setCache(key,data){
+  try{sessionStorage.setItem(key,JSON.stringify({data,date:new Date().toDateString()}));}catch(e){}
+}
+
+// ══ SEO DEL DÍA ══
+let seoHistory=[];
+
+async function searchAngle(){
+  const topic=document.getElementById("seo-topic").value.trim();
+  if(!topic){showToast("⚠ Escribí un tema trending para buscar el ángulo");return;}
+  const result=document.getElementById("seo-angle-result");
+  result.style.display="block";
+  result.innerHTML=`<div class="lds"><div class="sp"></div>Buscando conexión de "${topic}" con Entre Ríos...</div>`;
+
+  const prompt=`Sos jefe de redacción de Diario Río Uruguay (Concordia, Entre Ríos). Tema trending en Argentina: "${topic}".
+
+Tu trabajo tiene DOS partes:
+1. DATOS QUE EL REDACTOR NO PUEDE IGNORAR: proporcioná los hechos, cifras, nombres, fechas y antecedentes clave del tema. Esto es lo más importante — el redactor necesita contexto duro para no publicar información incompleta.
+2. ÁNGULO LOCAL: buscá si tiene conexión real con Entre Ríos, Concordia o Salto Grande (personas, eventos, repercusiones). NUNCA inventar conexiones — si no existe, decilo.
+
+Respondé en JSON:
+{"topic":"${topic}","key_facts":"Los 3-5 datos esenciales del tema que todo redactor debe conocer antes de publicar: cifras, nombres completos con cargo, fechas, antecedentes directos. Separados con punto y coma.","er_connection":"conexión encontrada o Sin conexión directa — con datos específicos si la hay","has_connection":true/false,"angle":"ángulo periodístico concreto para DRU — qué nota se puede hacer, con qué fuentes locales contactar","sources_to_check":"2-3 fuentes o personas que el redactor debería consultar para verificar o ampliar","seo_title":"keyword geográfica al inicio — máx 60 chars","meta_desc":"dato informativo + CTA implícito — máx 155 chars","keywords":["kw1","kw2","kw3","kw4"],"ig_hook":"titular informativo máx 12 palabras — redactado como placa de diario, sin clickbait","fb_copy":"primera línea informativa autónoma\\npárrafo con dato concreto y consecuencia local\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos"}`;
+
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:800,messages:[{role:"user",content:prompt}]})});
+    const raw=await res.text();
+    let data;
+    try{data=JSON.parse(raw);}catch(pe){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Error al procesar. Intentá de nuevo.</div>`;return;}
+    if(data.error){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Error: ${data.error}</div>`;return;}
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("").replace(/```json|```/g,"").trim();
+    const parsed=repairJSON(text);
+    if(!parsed){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Respuesta incompleta. Intentá con un tema más corto.</div>`;return;}
+    renderAngleResult(parsed);
+    seoHistory.unshift(parsed);
+    renderSEOHistory();
+  }catch(e){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Error de conexión. Intentá de nuevo.</div>`;}
+}
+
+function renderAngleResult(r){
+  const result=document.getElementById("seo-angle-result");
+  const hasER=r.has_connection;
+  result.innerHTML=`
+    <div style="background:var(--dk2);border:1px solid ${hasER?"rgba(93,202,165,.3)":"var(--bd2)"};border-radius:var(--rl);padding:1.25rem;${hasER?"border-left:3px solid #5DCAA5":""}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-family:var(--fd);font-size:15px;font-weight:700;color:var(--wh)">${r.topic}</span>
+        <span class="seo-type ${hasER?"st-local":"st-nac"}">${hasER?"✅ Conexión ER encontrada":"❌ Sin conexión directa"}</span>
+      </div>
+      ${r.key_facts?`<div style="font-size:13px;color:var(--wh);line-height:1.6;margin-bottom:10px;padding:10px 12px;background:var(--cd);border-radius:var(--r);border-left:3px solid #F09595">
+        <strong style="color:#F09595;font-size:10px;text-transform:uppercase;display:block;margin-bottom:5px">⚠ Datos que no podés ignorar</strong>
+        ${r.key_facts}
+      </div>`:""}
+      <div style="font-size:13px;color:var(--lt);line-height:1.6;margin-bottom:10px;padding:8px 10px;background:var(--cd);border-radius:var(--r);border-left:2px solid ${hasER?"#5DCAA5":"var(--or)"}">
+        <strong style="color:${hasER?"#5DCAA5":"var(--or)"};font-size:10px;text-transform:uppercase;display:block;margin-bottom:3px">${hasER?"Conexión con Entre Ríos":"Ángulo sugerido"}</strong>
+        ${r.er_connection}
+      </div>
+      ${r.angle?`<div style="font-size:12px;color:var(--lt);line-height:1.5;margin-bottom:10px;padding:8px 10px;background:var(--cd);border-radius:var(--r);border-left:2px solid var(--or)"><strong style="color:var(--or);font-size:10px;text-transform:uppercase;display:block;margin-bottom:3px">Ángulo para DRU</strong>${r.angle}</div>`:""}
+      ${r.sources_to_check?`<div style="font-size:12px;color:var(--lt);line-height:1.5;margin-bottom:10px;padding:8px 10px;background:var(--cd);border-radius:var(--r);border-left:2px solid #85B7EB"><strong style="color:#85B7EB;font-size:10px;text-transform:uppercase;display:block;margin-bottom:3px">Fuentes a consultar</strong>${r.sources_to_check}</div>`:""}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:var(--cd);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
+          <div style="font-size:10px;color:var(--mt);text-transform:uppercase;margin-bottom:4px">Título SEO</div>
+          <div style="font-size:12px;color:var(--wh);font-weight:500">${r.seo_title||""}</div>
+        </div>
+        <div style="background:var(--cd);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
+          <div style="font-size:10px;color:var(--mt);text-transform:uppercase;margin-bottom:4px">Meta Description</div>
+          <div style="font-size:11px;color:var(--lt)">${r.meta_desc||""}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">${(r.keywords||[]).map(k=>`<span class="kw" onclick="copyKw('${k.replace(/'/g,"\\'")}')">${k}</span>`).join("")}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:var(--cd);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
+          <div style="font-size:10px;color:var(--mt);text-transform:uppercase;margin-bottom:4px">📸 Instagram hook</div>
+          <div style="font-size:12px;color:var(--wh)">${r.ig_hook||""}</div>
+        </div>
+        <div style="background:var(--cd);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
+          <div style="font-size:10px;color:var(--mt);text-transform:uppercase;margin-bottom:4px">📘 Facebook</div>
+          <div style="font-size:12px;color:var(--wh);line-height:1.4">${r.fb_copy||""}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="ab" onclick="copyKw('${(r.seo_title||"").replace(/'/g,"\\'")}')">Copiar título</button>
+        <button class="ab" onclick="copyKw('${(r.keywords||[]).join(", ").replace(/'/g,"\\'")}')">Copiar KWs</button>
+        <button class="ab" onclick="copyKw('${(r.ig_hook||"").replace(/'/g,"\\'")}')">Copiar IG</button>
+        <button class="ab primary" onclick="copyKw('${(r.fb_copy||"").replace(/'/g,"\\'")}')">Copiar FB</button>
+      </div>
+    </div>`;
+}
+
+function renderSEOHistory(){
+  const el=document.getElementById("seo-history");
+  if(!seoHistory.length){el.innerHTML="";return;}
+  el.innerHTML=`<div style="font-family:var(--fd);font-size:14px;font-weight:700;color:var(--wh);margin-bottom:1rem;padding-top:.5rem;border-top:1px solid var(--bd)">Búsquedas de hoy</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px">${seoHistory.map(r=>{
+      const hasER=r.has_connection;
+      return`<div style="background:var(--cd);border:1px solid var(--bd);border-radius:var(--r);padding:12px;${hasER?"border-left:3px solid #5DCAA5":""}">
+        <div style="font-size:13px;font-weight:600;color:var(--wh);margin-bottom:4px">${r.topic}</div>
+        <div style="font-size:11px;color:var(--mt);margin-bottom:6px">${hasER?"✅ "+r.er_connection:"❌ Sin conexión directa"}</div>
+        <div style="font-size:11px;color:var(--lt);margin-bottom:4px"><strong style="color:var(--or)">SEO:</strong> ${r.seo_title||""}</div>
+        <button class="ab" style="font-size:10px;padding:3px 8px" onclick="copyKw('${(r.seo_title||"").replace(/'/g,"\\'")}')">Copiar título</button>
+      </div>`;
+    }).join("")}</div>`;
+}
+
+function copyKw(text){navigator.clipboard&&navigator.clipboard.writeText(text);showToast(`✓ Copiado: "${text.substring(0,40)}${text.length>40?"...":""}"`); }
+
+// ══ REFLOTE ══
+function setRefloteSrc(src,el){refloteSrc=src;document.querySelectorAll("#page-reflote .cp").forEach(p=>p.classList.remove("active"));el.classList.add("active");}
+
+async function loadReflote(){
+  const area=document.getElementById("reflote-area");
+  const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
+  document.getElementById("reflote-date").textContent=`${dd} de ${MESF[mm]} — Noticias para reflotear`;
+
+  const cacheKey=CACHE_KEY_REFLOTE+"_"+refloteSrc;
+  const cached=getCached(cacheKey);
+  if(cached){renderRefloteV2(cached);return;}
+
+  const srcNames={all:"los tres medios",dru:"Diario Río Uruguay",heraldo:"El Heraldo",elonce:"El Once"};
+  area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando en ${srcNames[refloteSrc]}...</div>`;
+  const sf=refloteSrc==="dru"?"solo en site:diarioriouruguay.com":refloteSrc==="heraldo"?"solo en site:elheraldo.com.ar":refloteSrc==="elonce"?"solo en site:elonce.com":"en site:diarioriouruguay.com, site:elheraldo.com.ar y site:elonce.com";
+
+  const prompt=`Actuá como editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos). Hoy es ${dd}/${mm}/${yy}. Buscá en tu conocimiento noticias destacadas publicadas en ${sf} un día como hoy (${dd} de ${MESF[mm]}) en años anteriores. NUNCA inventar noticias — solo incluir hechos verificables. Generá 4 noticias para reflotear. Solo JSON:
+[{"source":"DRU|ElHeraldo|ElOnce","title":"titular periodístico con keyword geográfica","date":"","years_ago":0,"excerpt":"resumen factual sin sensacionalismo","why_now":"conexión con la actualidad de Concordia/Entre Ríos","hook":"gancho tipo Hace X años — tono formal sin exagerar","ig_copy":"hook máx 12 palabras por línea, persuasivo sin clickbait vacío. Caption: primera línea autónoma + CTA 'Link en bio' + #Concordia #EntreRíos","fb_copy":"primera línea gancho autónomo\\npárrafo con dato concreto y consecuencia local\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio","url":""}]`;
+
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("").replace(/```json|```/g,"").trim();
+    const parsed=repairJSON(text);
+    if(!parsed){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>Respuesta incompleta. Intentá de nuevo en unos segundos.</div>`;return;}
+    setCache(cacheKey,parsed);
+    renderRefloteV2(parsed);
+  }catch(e){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>Error al buscar en archivos. Verificá la API key y volvé a intentar.</div>`;}
+}
+
+function renderRefloteV2(items){
+  const area=document.getElementById("reflote-area");
+  if(!items||!items.length){area.innerHTML=`<div class="empty-s"><div style="font-size:28px;margin-bottom:.5rem">📭</div>No se encontraron noticias en los archivos para hoy. Probá otro filtro de medio.</div>`;return;}
+  const ss={DRU:{cls:"dru",badge:"src-dru",label:"📰 DRU"},ElHeraldo:{cls:"heraldo",badge:"src-her",label:"📰 El Heraldo"},ElOnce:{cls:"elonce",badge:"src-elo",label:"📺 El Once"}};
+  area.innerHTML=`<div class="rg">${items.map(r=>{const s=ss[r.source]||ss["DRU"];return`<div class="rc ${s.cls}">
+    <div class="rc-hdr">
+      <span class="rc-src ${s.badge}">${s.label}</span>
+      <span class="rc-yrs">📅 ${r.date}${r.years_ago?` · hace ${r.years_ago} años`:""}</span>
+      ${r.viral_potential==="alto"?`<span class="vb">⚡ Alto potencial viral</span>`:""}
+    </div>
+    <div class="rc-t">${r.title}</div>
+    <div class="rc-x">${r.excerpt}</div>
+    <div style="background:var(--dk2);border-left:2px solid #5DCAA5;border-radius:0 var(--r) var(--r) 0;padding:7px 10px;font-size:11px;color:var(--lt);margin-bottom:8px">
+      <strong style="color:#5DCAA5;font-size:10px;text-transform:uppercase;display:block;margin-bottom:2px">¿Por qué reflotear hoy?</strong>${r.why_now}
+    </div>
+    <div class="rc-hook"><strong>Hook para redes</strong>${r.hook}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
+        <div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">📸 Instagram</div>
+        <div style="font-size:12px;color:var(--wh);line-height:1.5">${r.ig_copy||""}</div>
+      </div>
+      <div style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
+        <div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">📘 Facebook</div>
+        <div style="font-size:12px;color:var(--wh);line-height:1.5">${r.fb_copy||""}</div>
+      </div>
+    </div>
+    <div class="rc-acts">
+      <button class="ab" onclick="copyKw('${(r.hook||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar hook</button>
+      <button class="ab" onclick="copyKw('${(r.ig_copy||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar IG</button>
+      <button class="ab primary" onclick="copyKw('${(r.fb_copy||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar FB</button>
+      ${r.url?`<a href="${r.url}" target="_blank" class="ab" style="text-decoration:none">Ver nota →</a>`:""}
+    </div>
+  </div>`;}).join("")}</div>`;
+}
+
+// ══ TRASPASO ══
+function selUN(el){document.querySelectorAll(".un-opt").forEach(o=>o.classList.remove("sel"));el.classList.add("sel");selUN_val=el.dataset.un;checkTpButtons();}
+
+function checkTpButtons(){
+  const title=document.getElementById("tp-title").value.trim();
+  const body=document.getElementById("tp-body").value.trim();
+  document.getElementById("tp-ai-btn").disabled=!(title&&body.length>50);
+  document.getElementById("tp-social-btn").disabled=!(title&&body.length>50);
+}
+
+function localSEOCheck(){
+  checkTpButtons();
+  const title=document.getElementById("tp-title").value.trim();
+  const body=document.getElementById("tp-body").value.trim();
+  const area=document.getElementById("seo-meter-area");
+  if(!title&&!body){area.innerHTML=`<div style="font-size:12px;color:var(--mt);text-align:center;padding:1rem 0">Escribí el titular y pegá el cuerpo para analizar</div>`;return;}
+  const checks=[];let score=0;
+  const tlen=title.length;
+  if(tlen>=30&&tlen<=60){checks.push({icon:"✓",text:`Titular: ${tlen} chars (ideal 30-60)`,status:"ok"});score+=20;}
+  else if(tlen>0&&tlen<30){checks.push({icon:"⚠",text:`Titular corto: ${tlen} chars. Ideal: 50-60 para Google`,status:"warn"});score+=8;}
+  else if(tlen>60){checks.push({icon:"⚠",text:`Titular largo: ${tlen} chars. Google corta en ~60`,status:"warn"});score+=8;}
+  else{checks.push({icon:"✗",text:"Sin titular",status:"bad"});}
+  const hasLocal=/concordia|entre ríos|entre rios|salto grande|gualeguaychú|paraná|región|departamento/i.test(title+" "+body);
+  if(hasLocal){checks.push({icon:"✓",text:"Contiene keyword geográfica local",status:"ok"});score+=15;}
+  else{checks.push({icon:"⚠",text:"Sin keyword local (Concordia/Entre Ríos). Sumá referencia geográfica",status:"warn"});score+=3;}
+  const hasNumbers=/\d+/.test(title);
+  if(hasNumbers){checks.push({icon:"✓",text:"Titular con número — mejora CTR hasta 36%",status:"ok"});score+=10;}
+  else{checks.push({icon:"ℹ",text:"Sin números en titular. Cifras mejoran CTR",status:"warn"});score+=5;}
+  const hasQ=/\?/.test(title)||/cómo|qué|cuándo|cuánto|quién|por qué|dónde/i.test(title);
+  if(hasQ){checks.push({icon:"✓",text:"Formato pregunta o keyword interrogativa — buen SEO long tail",status:"ok"});score+=10;}
+  else{checks.push({icon:"ℹ",text:"Considerar formato pregunta para long tail SEO",status:"warn"});score+=5;}
+  const wc=body.split(/\s+/).filter(w=>w).length;
+  if(wc>=400){checks.push({icon:"✓",text:`Cuerpo: ${wc} palabras (ideal 400+ para SEO)`,status:"ok"});score+=15;}
+  else if(wc>=200){checks.push({icon:"⚠",text:`Cuerpo: ${wc} palabras. Ideal: 400+ para posicionar bien`,status:"warn"});score+=8;}
+  else if(wc>0){checks.push({icon:"⚠",text:`Cuerpo corto: ${wc} palabras. Para SEO se recomienda 400+`,status:"warn"});score+=4;}
+  else{checks.push({icon:"✗",text:"Sin cuerpo de nota",status:"bad"});}
+  const hasH2=body.includes("\n\n")||/^#{2}/m.test(body)||body.length>800;
+  if(body.length>800&&hasH2){checks.push({icon:"✓",text:"Estructura con párrafos — buena legibilidad",status:"ok"});score+=10;}
+  else if(body.length>400){checks.push({icon:"ℹ",text:"Considerá usar subtítulos cada 200 palabras aprox.",status:"warn"});score+=5;}
+  const firstPar=body.split("\n")[0]||"";
+  const hasKeyInFirst=/concordia|entre ríos|entre rios/i.test(firstPar);
+  if(hasKeyInFirst&&firstPar.length>50){checks.push({icon:"✓",text:"Primer párrafo con keyword local — excelente para SEO",status:"ok"});score+=10;}
+  else if(firstPar.length>50){checks.push({icon:"ℹ",text:"Incluí keyword local en el primer párrafo",status:"warn"});score+=5;}
+  const keyInTitle=/concordia|entre ríos|entre rios/i.test(title);
+  if(keyInTitle){checks.push({icon:"✓",text:"Keyword local en el titular — muy bueno para SEO local",status:"ok"});score+=10;}
+  else{checks.push({icon:"ℹ",text:"Sin keyword local en el titular. Ayuda mucho al posicionamiento",status:"warn"});score+=3;}
+  score=Math.min(score,100);
+  const col=score>=75?"#5DCAA5":score>=50?"#F5A623":"#F09595";
+  const stroke=score*2.51;
+  area.innerHTML=`<div class="score-ring"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--bd2)" stroke-width="6"/><circle cx="40" cy="40" r="32" fill="none" stroke="${col}" stroke-width="6" stroke-dasharray="${stroke} 201" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg><div class="score-num" style="color:${col}">${score}</div></div><div style="font-size:10px;color:var(--mt);text-align:center;margin-bottom:8px">${score>=75?"Excelente para SEO":score>=50?"Mejorable — revisá las sugerencias":"Necesita trabajo — seguí los consejos"}</div><div class="seo-checks">${checks.map(c=>`<div class="seo-check"><span class="chk-icon">${c.icon}</span><span class="chk-text">${c.text}</span><span class="chk-status cs-${c.status}">${c.status==="ok"?"OK":c.status==="warn"?"Revisar":"Falta"}</span></div>`).join("")}</div>`;
+}
+
+async function runAISEO(){
+  const title=document.getElementById("tp-title").value.trim();
+  const body=document.getElementById("tp-body").value.trim();
+  if(!title||body.length<50)return;
+  const btn=document.getElementById("tp-ai-btn");
+  btn.textContent="Analizando con IA...";btn.disabled=true;
+  const result=document.getElementById("ai-seo-result");
+  const content=document.getElementById("ai-seo-content");
+  result.style.display="block";
+  content.innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Analizando nota completa...`;
+  const prompt=`Actuá como periodista SEO de Diario Río Uruguay (Concordia, Entre Ríos). Analizá esta nota y dá sugerencias CONCRETAS aplicando los criterios editoriales DRU.
+
+TITULAR ACTUAL:
+${title}
+
+CUERPO DE LA NOTA:
+${body.substring(0,3000)}
+
+CRITERIOS EDITORIALES DRU A EVALUAR:
+- Meta title: keyword geográfica al inicio, máx 60 chars
+- Entradilla: 5W en primeras líneas, keyword "Concordia"/"Entre Ríos" en primer párrafo
+- Estructura: H1 + H2 cada ~200 palabras
+- Citas: entre comillas dobles con nombre y cargo. Nunca inventadas.
+- Tono: formal-periodístico sin sensacionalismo
+- Slug: sin tildes, con guiones
+
+Respondé con este formato exacto:
+
+SCORE SEO: X/100
+
+META TITLE SUGERIDO (keyword geográfica al inicio, máx 60 chars):
+[tu sugerencia]
+
+META DESCRIPTION SUGERIDA (gancho + dato + CTA implícito, máx 155 chars):
+[tu sugerencia]
+
+TITULAR ALTERNATIVO 1: [más SEO — consecuencia antes que causa, con keyword geo]
+TITULAR ALTERNATIVO 2: [más redes — "qué se sabe" / "qué pasó" / cifra destacada]
+
+KEYWORDS PRINCIPALES (6 keywords con foco local):
+[lista]
+
+MEJORAS SUGERIDAS:
+1. [mejora concreta — incluir/excluir qué y dónde]
+2. [mejora concreta]
+3. [mejora concreta]
+4. [mejora concreta]
+
+H2 SUGERIDOS (uno cada ~200 palabras):
+[subtítulos que mejoren estructura SEO]
+
+ENTRADILLA SUGERIDA (5W en 2-3 oraciones, keyword geográfica en primera oración):
+[tu sugerencia]`;
+
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    content.textContent=text;
+  }catch(e){content.textContent="Error al conectar con la IA. Verificá que la API key esté configurada en Netlify.";}
+  btn.textContent="Analizar con IA y sugerir mejoras →";btn.disabled=false;
+}
+
+function copyAISEO(){const t=document.getElementById("ai-seo-content").textContent;navigator.clipboard&&navigator.clipboard.writeText(t);showToast("✓ Sugerencias copiadas");}
+
+function applyAISuggestions(){
+  const text=document.getElementById("ai-seo-content").textContent;
+  const match=text.match(/META TITLE SUGERIDO[^:]*:\s*(.+)/i);
+  if(match&&match[1]){
+    document.getElementById("tp-title").value=match[1].trim();
+    localSEOCheck();
+    showToast("✓ Titular actualizado con sugerencia IA");
+  }else{showToast("⚠ No se encontró un título sugerido en el análisis");}
+}
+
+async function genSocialFromNote(){
+  const title=document.getElementById("tp-title").value.trim();
+  const body=document.getElementById("tp-body").value.trim();
+  const ig=document.getElementById("tp-ig").value;
+  const un=selUN_val||"Update me";
+  if(!title||body.length<50)return;
+  const btn=document.getElementById("tp-social-btn");
+  btn.textContent="Generando...";btn.disabled=true;
+  const result=document.getElementById("social-result");
+  const content=document.getElementById("social-content");
+  result.style.display="block";
+  content.innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Generando copy para redes...`;
+  const igFormat={no:"",post:"post estático",carrusel:"carrusel de 4 slides (máximo 12 palabras por slide, tono informativo de diario)",reel:"guión de Reel de 45 segundos",story:"4 stories encadenadas"}[ig]||"";
+  const prompt=`Actuá como editor de redes de un medio periodístico serio: Diario Río Uruguay (Concordia, Entre Ríos, 56K IG / 103K FB). La necesidad de usuario es "${un}".
+
+CRITERIOS EDITORIALES DRU — OBLIGATORIOS:
+- Somos un diario, no una cuenta de entretenimiento. El copy debe informar con rigor periodístico, adaptado al formato de cada red.
+- Tono: formal-periodístico. Sin sensacionalismo, sin muletillas de redes ("no lo van a creer", "mirá esto"), sin emojis decorativos innecesarios.
+- NUNCA inventar datos ni citas. Solo usar información que está en la nota.
+- Keyword geográfica obligatoria: "Concordia" o "Entre Ríos" presente en todos los formatos.
+- ANTI-CLICKBAIT: el copy nunca debe prometer lo que la nota no cumple. Si el titular de redes fuera clickbait, reescribilo como bajada periodística. El lector que se siente estafado no vuelve.
+- CALIDAD SOBRE CLICS: priorizar que el usuario quede bien informado sobre maximizar el tráfico. Un copy honesto construye comunidad; el clickbait la destruye.
+- BIDIRECCIONALIDAD: cuando sea pertinente, incluir una pregunta abierta o invitación al debate genuino. Las redes son un canal de diálogo, no de difusión unilateral.
+- COMUNIDAD: el copy debe poder informar aunque el usuario no haga clic. El objetivo es que el lector se interese por el medio, no solo por la nota de turno.
+
+Generá copy para redes a partir de esta nota:
+
+TITULAR: ${title}
+NOTA: ${body.substring(0,2000)}
+
+FACEBOOK:
+- Primera línea: oración informativa autónoma que funcione sola (se ve antes del "Ver más"). Redactada como bajada de diario — dato concreto, no gancho emocional.
+- Párrafo 2: dato duro + consecuencia o impacto para el lector de Concordia/Entre Ríos.
+- Párrafo 3: antecedente o contexto verificable.
+- CTA: "Leé la nota completa en diarioriouruguay.com"
+- 3-5 hashtags: #Concordia #EntreRíos + temáticos. Sin emojis en los hashtags.
+
+${ig!=="no"?`INSTAGRAM (${igFormat}):
+- ${ig==="carrusel"?"SLIDE 1: titular informativo de impacto — NO repetir el caption (máx 12 palabras). Redactado como placa de diario.\nSLIDE 2: dato clave o cita textual entre comillas con fuente (máx 12 palabras)\nSLIDE 3: contexto verificable o cifra destacada (máx 12 palabras)\nSLIDE 4: CTA — fondo naranja DRU — \"Leé más en diarioriouruguay.com\"\nCAPTION: bajada periodística — primera línea informativa autónoma + párrafo de contexto + 📍 Concordia, Entre Ríos + CTA + 3-5 hashtags":ig==="reel"?"GANCHO 0-3s: dato periodístico más fuerte primero (sin saludos ni presentaciones)\nDESARROLLO 3-35s: texto en pantalla informativo + voz en off seria, cortes cada 3-5s\nCIERRE 35-42s: por qué importa para Concordia/Entre Ríos\nCTA 42-45s: 'Nota completa en diarioriouruguay.com'":ig==="story"?"STORY 1: titular como placa informativa + foto sugerida (máx 12 palabras)\nSTORY 2: encuesta con 2 opciones que generen reflexión (no triviales)\nSTORY 3: dato de contexto verificable con keyword geográfica\nSTORY 4: CTA con sticker de link":"Caption: primera línea informativa autónoma (máx 12 palabras) + párrafo de contexto + 'Nota completa en el link de la bio' + 3-5 hashtags"}
+
+`:""}THREADS:
+- Texto informativo directo, 2-3 líneas. Sin emojis decorativos.
+
+HASHTAGS (3-5, no más):
+#Concordia #EntreRíos + [2-3 temáticos específicos]`;
+
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:800,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    content.textContent=text;
+  }catch(e){content.textContent="Error al conectar con la IA.";}
+  btn.textContent="Generar copy para redes IA →";btn.disabled=false;
+}
+
+function copySocial(){const t=document.getElementById("social-content").textContent;navigator.clipboard&&navigator.clipboard.writeText(t);showToast("✓ Copy copiado");}
+
+// ══ WHISPER TRANSCRIPTION ══
+let dsgAudioFile=null;
+
+function handleAudioSelect(e){
+  const file=e.target.files[0];
+  if(file)setAudioFile(file);
+}
+
+function handleAudioDrop(e){
+  const file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith("audio/"))setAudioFile(file);
+  else if(file)showToast("⚠ Solo archivos de audio");
+}
+
+function setAudioFile(file){
+  const maxSize=4.5*1024*1024;
+  if(file.size>maxSize){showToast("⚠ El archivo supera 4.5 MB. Usá las alternativas externas para audios largos.");return;}
+  dsgAudioFile=file;
+  document.getElementById("dsg-audio-info").style.display="block";
+  document.getElementById("dsg-audio-name").textContent=file.name;
+  const sizeMB=(file.size/1024/1024).toFixed(1);
+  document.getElementById("dsg-audio-meta").textContent=`${sizeMB} MB · ${file.type||"audio"}`;
+  document.getElementById("dsg-dropzone").style.display="none";
+  document.getElementById("dsg-transcribe-btn").disabled=false;
+}
+
+function clearAudioFile(){
+  dsgAudioFile=null;
+  document.getElementById("dsg-audio-info").style.display="none";
+  document.getElementById("dsg-dropzone").style.display="block";
+  document.getElementById("dsg-transcribe-btn").disabled=true;
+  document.getElementById("dsg-audio-input").value="";
+}
+
+async function transcribeAudio(){
+  if(!dsgAudioFile)return;
+  const btn=document.getElementById("dsg-transcribe-btn");
+  const progress=document.getElementById("dsg-transcribe-progress");
+  const status=document.getElementById("dsg-transcribe-status");
+  btn.disabled=true;btn.textContent="Transcribiendo...";
+  progress.style.display="block";
+  status.textContent="Leyendo archivo de audio...";
+
+  try{
+    const reader=new FileReader();
+    const base64=await new Promise((resolve,reject)=>{
+      reader.onload=()=>resolve(reader.result.split(",")[1]);
+      reader.onerror=reject;
+      reader.readAsDataURL(dsgAudioFile);
+    });
+
+    status.textContent=`Enviando ${(dsgAudioFile.size/1024/1024).toFixed(1)} MB a Whisper... Esto puede tardar unos segundos.`;
+
+    const res=await fetch("/.netlify/functions/transcribe",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({audio:base64,filename:dsgAudioFile.name,model:"whisper-1"})
+    });
+
+    const data=await res.json();
+
+    if(data.error){
+      status.textContent="";progress.style.display="none";
+      showToast("⚠ Error: "+data.error);
+      btn.textContent="Transcribir audio con Whisper →";btn.disabled=false;
+      return;
+    }
+
+    document.getElementById("dsg-text").value=data.text;
+    const durMin=data.duration?Math.round(data.duration/60):null;
+    progress.style.display="none";
+    showToast(`✓ Transcripción completa${durMin?" ("+durMin+" min de audio)":""}`);
+  }catch(err){
+    progress.style.display="none";
+    showToast("⚠ Error de conexión: "+err.message);
+  }
+  btn.textContent="Transcribir audio con Whisper →";btn.disabled=!dsgAudioFile;
+}
+
+// ══ DESGRABADOR ══
+let dsgActiveTab="nota";
+
+async function processTranscription(){
+  const text=document.getElementById("dsg-text").value.trim();
+  if(!text||text.length<50){showToast("⚠ Pegá la transcripción completa (mínimo 50 caracteres)");return;}
+  const tipo=document.getElementById("dsg-type").value;
+  const seccion=document.getElementById("dsg-section").value;
+  const persona=document.getElementById("dsg-person").value.trim();
+  const btn=document.getElementById("dsg-btn");
+  btn.textContent="Procesando...";btn.disabled=true;
+  const result=document.getElementById("dsg-result");
+  result.style.display="block";
+  document.getElementById("dsg-nota").innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Generando nota periodística...`;
+
+  const prompt=`Actuá como periodista SEO de Diario Río Uruguay (Concordia, Entre Ríos). Procesás esta transcripción de ${tipo} (sección ${seccion})${persona?" con "+persona:""}.
+
+TRANSCRIPCIÓN:
+${text.substring(0,3000)}
+
+CRITERIOS EDITORIALES DRU — OBLIGATORIOS:
+- Tono: formal-periodístico sin sensacionalismo. Sin opinión en notas informativas.
+- NUNCA inventar datos ni citas. Las comillas son sagradas — solo transcribir lo que dijo la fuente.
+- Citas textuales: entre comillas dobles, con nombre completo y cargo de la fuente.
+- Keyword geográfica "Concordia" o "Entre Ríos" en el primer párrafo.
+
+Generá:
+1. NOTA PERIODÍSTICA (400-600 palabras):
+- META TITLE: keyword geográfica al INICIO, máximo 60 caracteres.
+- META DESCRIPTION: gancho + dato clave, máximo 155 caracteres.
+- H1: titular periodístico. Consecuencia antes que causa. Con keyword geográfica. Máx 65 chars.
+- ENTRADILLA: 2-3 oraciones con las 5W (Quién, Qué, Cuándo, Dónde, Por qué). Keyword geo en primera oración.
+- CUERPO: H2 cada ~200 palabras. Citas textuales entre comillas con nombre y cargo. Sin inventar datos.
+- SLUG: sin tildes, con guiones, sin mayúsculas.
+
+2. COPY REDES (separado con "---REDES---"):
+- FACEBOOK: primera línea informativa autónoma (bajada periodística, no gancho emocional) + párrafo con dato concreto y consecuencia local + "Leé más en diarioriouruguay.com" + #Concordia #EntreRíos + 2-3 hashtags temáticos. Sin emojis decorativos.
+- INSTAGRAM: titular informativo máx 12 palabras por línea — redactado como placa de diario, no como copy publicitario. Caption con contexto verificable + CTA al link de la bio.
+- THREADS: 2-3 líneas informativas directas. Tono serio.`;
+
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+    const raw=await res.text();
+    let data;try{data=JSON.parse(raw);}catch(e){document.getElementById("dsg-nota").textContent="Error al procesar. Intentá de nuevo.";btn.textContent="Generar nota periodística →";btn.disabled=false;return;}
+    if(data.error){document.getElementById("dsg-nota").textContent="Error: "+data.error;btn.textContent="Generar nota periodística →";btn.disabled=false;return;}
+    const fullText=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    const parts=fullText.split(/---REDES---|COPY REDES|2\.\s*COPY/i);
+    document.getElementById("dsg-nota").textContent=parts[0]||fullText;
+    document.getElementById("dsg-social").textContent=parts[1]||"Generá el copy desde la nota.";
+  }catch(e){document.getElementById("dsg-nota").textContent="Error de conexión. Intentá de nuevo.";}
+  btn.textContent="Generar nota periodística →";btn.disabled=false;
+}
+
+function showDsgTab(tab,el){
+  dsgActiveTab=tab;
+  document.querySelectorAll(".dsg-tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("dsg-nota").style.display=tab==="nota"?"block":"none";
+  document.getElementById("dsg-social").style.display=tab==="social"?"block":"none";
+}
+
+function copyDsg(){
+  const t=document.getElementById("dsg-"+dsgActiveTab).textContent;
+  navigator.clipboard&&navigator.clipboard.writeText(t);
+  showToast("✓ Copiado");
+}
+
+// ══ NAV ══
+function showPage(id,navEl){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-"+id).classList.add("active");
+  document.querySelectorAll(".ni").forEach(n=>n.classList.remove("active"));
+  if(navEl)navEl.classList.add("active");
+  // Set SEO date
+  if(id==="seo"){const now=new Date();document.getElementById("seo-date-label").textContent=now.getDate()+" de "+MESF[now.getMonth()+1]+" de "+now.getFullYear();}
+  const titles={efem:"Base de Efemérides",gen:"Generador de Contenido IA",add:"Agregar Efeméride",seo:"SEO del día — Tendencias y Noticias",reflote:"Reflote de Archivos",traspaso:"Traspaso a Redes",desgrab:"Desgrabador de Audio",enfoques:"Enfoques Editoriales — News User Needs",sugerencias:"Sugerencias y Ajustes"};
+  document.getElementById("pt").textContent=titles[id]||"";
+  if(id==="sugerencias")renderSugerencias();
+  if(id==="gen")renderGenList();
+  if(id==="reflote"&&!document.getElementById("reflote-area").querySelector(".rc"))loadReflote();
+}
+
+// ══ TOAST ══
+function showToast(msg){const t=document.createElement("div");t.className="toast";t.innerHTML=`<span>${msg}</span>`;document.body.appendChild(t);setTimeout(()=>{t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(()=>t.remove(),300);},3000);}
+
+// ══ ENFOQUES (News User Needs — Shishkin) ══
+let selEnf_val="";
+function selEnf(el){
+  document.querySelectorAll(".enf-btn").forEach(b=>b.classList.remove("sel"));
+  el.classList.add("sel");
+  selEnf_val=el.dataset.enf;
+  const t=document.getElementById("enf-title").value.trim();
+  const b=document.getElementById("enf-body").value.trim();
+  document.getElementById("enf-gen-btn").disabled=!(t&&b.length>30&&selEnf_val);
+}
+document.addEventListener("input",function(e){
+  if(e.target.id==="enf-title"||e.target.id==="enf-body"){
+    const t=document.getElementById("enf-title").value.trim();
+    const b=document.getElementById("enf-body").value.trim();
+    document.getElementById("enf-gen-btn").disabled=!(t&&b.length>30&&selEnf_val);
+  }
+});
+
+const ENF_PROMPTS={
+  "Update me":"Reescribí esta información como NOTICIA DE ÚLTIMA HORA. Enfoque 'Update me': responder ¿qué pasó? ¿cuáles son los datos concretos? Estructura: titular factual + entradilla con las 5W (quién, qué, cuándo, dónde, por qué) + desarrollo cronológico de los hechos. Tono directo, sin opinión. Solo hechos verificables.",
+  "Keep me engaged":"Reescribí esta información con enfoque 'Keep me engaged': el objetivo es que el lector quiera seguir el tema, participar en la conversación y volver por actualizaciones. Incluí: titular que genere seguimiento + contexto de por qué esto sigue siendo relevante + preguntas abiertas para el debate + conexión con lo que viene (próximos pasos, fechas clave). Hacé que el lector se sienta parte de la historia.",
+  "Educate me":"Reescribí esta información con enfoque 'Educate me': el objetivo es que el lector entienda un tema complejo de forma clara y accesible. Estructura: titular explicativo (con 'qué es', 'cómo funciona', 'por qué importa') + entradilla que simplifique el concepto central + desarrollo con analogías, datos clave y contexto histórico si aplica. Tono didáctico pero no condescendiente. Pensá en un lector curioso que quiere aprender.",
+  "Give me perspective":"Reescribí esta información con enfoque 'Give me perspective': el objetivo es que el lector entienda qué significa esto y cómo lo afecta. Incluí: titular analítico + voces de expertos o analistas (sin inventar citas, usá solo las del texto) + comparaciones con situaciones similares + implicancias a futuro. Tono reflexivo, desmenuzar el argumento complejo para hacerlo comprensible.",
+  "Inspire me":"Reescribí esta información con enfoque 'Inspire me': el objetivo es que el lector termine con una sensación positiva o motivadora. Destacar: la dimensión humana, logros contra las dificultades, soluciones concretas o giros positivos. Estructura: titular que destaque el logro o la solución + historia personal o colectiva + impacto positivo en la comunidad. Sin inventar datos, pero enfatizar lo constructivo que haya.",
+  "Divert me":"Reescribí esta información con enfoque 'Divert me': el objetivo es ofrecer un respiro del hard news con un ángulo curioso, sorprendente o entretenido. Buscar: el dato insólito, la anécdota, el costado inesperado. Titular que despierte curiosidad genuina (sin clickbait). Tono ameno pero periodístico — informar divirtiendo, no trivializar.",
+  "Help me":"Reescribí esta información con enfoque 'Help me': el objetivo es que el lector pueda ACTUAR con lo que lee. Estructura: titular orientado a la acción ('Cómo...', 'Qué hacer si...', 'Guía para...') + pasos concretos o información práctica + datos de contacto, plazos, requisitos si aplica. Periodismo de servicio: que el lector cierre la nota sabiendo qué hacer.",
+  "Connect me":"Reescribí esta información con enfoque 'Connect me': el objetivo es que el lector se sienta conectado con otros, genere empatía y quiera actuar colectivamente. Destacar: experiencias compartidas, testimonios, iniciativas comunitarias, vínculos entre personas afectadas. Estructura: titular que apele a la pertenencia + historia que genere empatía + llamado a la acción colectiva o solidaria."
+};
+
+async function genEnfoque(){
+  const title=document.getElementById("enf-title").value.trim();
+  const body=document.getElementById("enf-body").value.trim();
+  if(!title||body.length<30||!selEnf_val)return;
+  const btn=document.getElementById("enf-gen-btn");
+  btn.textContent="Generando...";btn.disabled=true;
+  const result=document.getElementById("enf-result");
+  const content=document.getElementById("enf-content");
+  result.style.display="block";
+  content.innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Aplicando enfoque "${selEnf_val}"...`;
+  document.getElementById("enf-sel-label").textContent=selEnf_val;
+
+  const prompt=`Actuá como editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos).
+
+${ENF_PROMPTS[selEnf_val]}
+
+CRITERIOS EDITORIALES DRU:
+- Tono formal-periodístico. Sin sensacionalismo. Sin muletillas de redes.
+- NUNCA inventar datos ni citas. Solo usar información del texto provisto.
+- Keyword geográfica obligatoria: "Concordia" o "Entre Ríos" donde sea natural.
+- Anti-clickbait: el titular debe cumplir lo que promete.
+- Calidad sobre clics: informar bien es más importante que atraer tráfico.
+
+TITULAR ORIGINAL: ${title}
+TEXTO BASE:
+${body.substring(0,2500)}
+
+Generá:
+1. TITULAR NUEVO (adaptado al enfoque "${selEnf_val}", máx 70 chars)
+2. BAJADA (1-2 oraciones)
+3. NOTA REESCRITA (mínimo 300 palabras, adaptada al enfoque)
+4. COPY FACEBOOK (3 párrafos + CTA + hashtags)
+5. COPY INSTAGRAM (hook + caption)`;
+
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    content.textContent=text;
+  }catch(e){content.textContent="Error al conectar con la IA. Intentá de nuevo.";}
+  btn.textContent="Generar enfoque IA →";btn.disabled=false;
+}
+
+function copyEnf(){
+  const t=document.getElementById("enf-content").textContent;
+  navigator.clipboard&&navigator.clipboard.writeText(t);
+  showToast("✓ Enfoque copiado");
+}
+
+// ══ SUGERENCIAS ══
+const SUG_KEY="dru_sugerencias";
+function getSugerencias(){try{return JSON.parse(localStorage.getItem(SUG_KEY))||[];}catch(e){return[];}}
+function saveSugerencias(arr){localStorage.setItem(SUG_KEY,JSON.stringify(arr));}
+
+function addSugerencia(){
+  const name=document.getElementById("sug-name").value.trim();
+  const cat=document.getElementById("sug-cat").value;
+  const text=document.getElementById("sug-text").value.trim();
+  if(!name||!text){showToast("⚠ Completá nombre y descripción");return;}
+  const sugs=getSugerencias();
+  sugs.unshift({name,cat,text,date:new Date().toISOString()});
+  saveSugerencias(sugs);
+  document.getElementById("sug-name").value="";
+  document.getElementById("sug-text").value="";
+  renderSugerencias();
+  showToast("✓ Sugerencia enviada");
+}
+
+function renderSugerencias(){
+  const sugs=getSugerencias();
+  document.getElementById("sug-count").textContent=sugs.length+" sugerencia"+(sugs.length!==1?"s":"");
+  const list=document.getElementById("sug-list");
+  if(!sugs.length){list.innerHTML=`<div style="font-size:13px;color:var(--md);padding:2rem;text-align:center">No hay sugerencias todavía.</div>`;return;}
+  const catLabels={feature:"Nueva función",mejora:"Mejora",bug:"Bug",contenido:"Contenido",otro:"Otro"};
+  const catCls={feature:"st-feature",mejora:"st-mejora",bug:"st-bug",contenido:"st-contenido",otro:"st-otro"};
+  list.innerHTML=sugs.map((s,i)=>{
+    const d=new Date(s.date);
+    const ds=d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear()+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
+    return `<div class="sug-item"><div class="sug-meta"><span class="sug-author">${s.name}</span><span class="sug-tag ${catCls[s.cat]||"st-otro"}">${catLabels[s.cat]||s.cat}</span><span class="sug-date">${ds}</span></div><div class="sug-body">${s.text.replace(/</g,"&lt;")}</div></div>`;
+  }).join("");
+}
+
+// workaround for CSS var in JS
+const var_or="#F5A623";
+</script>
+</body>
+</html>
