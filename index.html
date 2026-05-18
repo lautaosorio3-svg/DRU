@@ -784,7 +784,7 @@ const MES=["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov",
 const MESF=["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const CATM={hist:["t-hist","Histórica"],pol:["t-pol","Política"],cul:["t-cul","Cultural"],dep:["t-dep","Deportiva"],fam:["t-fam","Famosos ER"],ins:["t-ins","Insólita"],soc:["t-soc","Social"]};
 
-const SEED=[];
+let ARCHIVO_EFEM=[];
 
 let DB=[];
 let activeCat="all";
@@ -797,11 +797,20 @@ let traspasos=[];
 
 
 // ══ STORAGE ══
+const SK_CUSTOM="dru_efem_custom";
 function loadDB(){
-  try{const r=localStorage.getItem(SK);if(r){const p=JSON.parse(r);if(p&&p.length>0)return p;}}catch(e){}
-  localStorage.setItem(SK,JSON.stringify(SEED));return[...SEED];
+  const custom=loadCustomEfem();
+  return [...ARCHIVO_EFEM, ...custom];
 }
-function saveDB(){localStorage.setItem(SK,JSON.stringify(DB));}
+function loadCustomEfem(){
+  try{const r=localStorage.getItem(SK_CUSTOM);if(r)return JSON.parse(r)||[];}catch(e){}
+  return[];
+}
+function saveDB(){
+  const customIds=new Set(loadCustomEfem().map(e=>e.id));
+  const custom=DB.filter(e=>customIds.has(e.id)||e.id>90000);
+  localStorage.setItem(SK_CUSTOM,JSON.stringify(custom));
+}
 
 // ══ LOGIN ══
 function doLogin(){
@@ -814,14 +823,21 @@ function doLogin(){
     document.getElementById("uav").textContent=user.av;
     document.getElementById("unm").textContent=user.name;
     document.getElementById("url2").textContent=user.role;
-    DB=loadDB();initApp();
+    initApp();
   } else {document.getElementById("lerr").style.display="block";}
 }
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.getElementById("ls").style.display!=="none")doLogin();});
 function doLogout(){document.getElementById("ls").style.display="flex";document.getElementById("app").style.display="none";}
 
 // ══ INIT ══
-function initApp(){
+async function initApp(){
+  if(!ARCHIVO_EFEM.length){
+    try{
+      const r=await fetch("efemerides.json");
+      if(r.ok)ARCHIVO_EFEM=await r.json();
+    }catch(e){}
+  }
+  DB=loadDB();
   const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
   document.getElementById("tdate").textContent=`${dd} de ${MESF[mm]} de ${yy}`;
   const ti=DB.filter(e=>e.d===dd&&e.m===mm);
@@ -841,22 +857,13 @@ function updateStats(){
   document.getElementById("nb-cnt").textContent=DB.length;
 }
 
-// ══ AI SUGGESTIONS ══
-async function loadSuggestions(){
+// ══ EFEMÉRIDES DEL DÍA ══
+function loadSuggestions(){
   const area=document.getElementById("suggest-area");
-  area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando efemérides para hoy...</div>`;
-  const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
-  const prompt=`Buscá con web_search "efemérides ${dd} de ${MESF[mm]} Argentina" y "efemérides ${dd} de ${MESF[mm]} Entre Ríos". Con resultados verificados, devolvé 3 efemérides reales. NUNCA inventar.
-
-JSON al final:
-[{"title":"hecho histórico","year":0,"desc":"descripción verificada","city":"ciudad","cats":["hist"],"viral":1,"hook":"gancho máx 15 palabras"}]`;
-  try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:800,tools:[{type:"web_search_20250305",name:"web_search",max_uses:2}],messages:[{role:"user",content:prompt}]})});
-    const data=await res.json();
-    let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
-    const parsed=extractJSON(text);
-    renderSuggestions(parsed||getFallback(dd,mm),dd,mm);
-  }catch(e){renderSuggestions(getFallback(dd,mm),dd,mm);}
+  const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1;
+  const today=ARCHIVO_EFEM.filter(e=>e.d===dd&&e.m===mm);
+  if(!today.length){area.innerHTML=`<div style="font-size:13px;color:var(--mt)">No hay efemérides del Archivo General de ER para hoy.</div>`;return;}
+  renderSuggestions(today.map(e=>({title:e.title,year:e.y,desc:e.desc,city:e.city,cats:e.cats,viral:0,hook:""})),dd,mm);
 }
 function getFallback(dd,mm){return[{title:`Efeméride del ${dd} de ${MESF[mm]}`,year:1900,desc:"La IA no pudo conectarse. Podés agregar efemérides manualmente.",city:"Entre Ríos",cats:["hist"],viral:0,hook:""}];}
 function renderSuggestions(items,dd,mm){
