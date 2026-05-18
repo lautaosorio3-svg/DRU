@@ -779,7 +779,7 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
 
 <script>
 const USERS={admin:{pass:"dru2024",name:"Administrador",role:"Admin",av:"AD"},redactor:{pass:"redactor123",name:"Redactor DRU",role:"Redacción",av:"RD"},redes:{pass:"redes123",name:"Community",role:"Redes sociales",av:"CM"}};
-const SK="dru_efem_v6";
+const SK="dru_efem_v7";
 const MES=["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const MESF=["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const CATM={hist:["t-hist","Histórica"],pol:["t-pol","Política"],cul:["t-cul","Cultural"],dep:["t-dep","Deportiva"],fam:["t-fam","Famosos ER"],ins:["t-ins","Insólita"],soc:["t-soc","Social"]};
@@ -846,19 +846,12 @@ async function loadSuggestions(){
   const area=document.getElementById("suggest-area");
   area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando efemérides para hoy...</div>`;
   const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
-  const prompt=`Usá la herramienta web_search para buscar efemérides REALES del ${dd} de ${MESF[mm]} relacionadas con Entre Ríos, Concordia o Argentina.
+  const prompt=`Buscá con web_search "efemérides ${dd} de ${MESF[mm]} Argentina" y "efemérides ${dd} de ${MESF[mm]} Entre Ríos". Con resultados verificados, devolvé 3 efemérides reales. NUNCA inventar.
 
-Hacé estas búsquedas:
-1. "efemérides ${dd} de ${MESF[mm]} Entre Ríos"
-2. "efemérides ${dd} de ${MESF[mm]} Argentina"
-3. "${dd} de ${MESF[mm]} Concordia historia"
-
-Con los resultados VERIFICADOS, generá EXACTAMENTE 3 efemérides. NUNCA inventar fechas, datos ni hechos — solo información confirmada en los resultados de búsqueda.
-
-Respondé SOLO con JSON al final (sin texto antes ni después):
-[{"title":"titular del hecho histórico","year":0,"desc":"descripción factual verificada","city":"ciudad de Entre Ríos o Argentina","cats":["hist"],"viral":1,"hook":"gancho para redes, máx 15 palabras"}]`;
+JSON al final:
+[{"title":"hecho histórico","year":0,"desc":"descripción verificada","city":"ciudad","cats":["hist"],"viral":1,"hook":"gancho máx 15 palabras"}]`;
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,tools:[{type:"web_search_20250305",name:"web_search",max_uses:3}],messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:800,tools:[{type:"web_search_20250305",name:"web_search",max_uses:2}],messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     const parsed=extractJSON(text);
@@ -1108,30 +1101,15 @@ async function searchAngle(){
   result.style.display="block";
   result.innerHTML=`<div class="lds"><div class="sp"></div>Buscando conexión de "${topic}" con Entre Ríos...</div>`;
 
-  const prompt=`Sos periodista especializado en medios locales de Entre Ríos, con 15 años cubriendo Concordia y la región del río Uruguay. Trabajás para Diario Río Uruguay (diarioriouruguay.com), el principal medio digital de Concordia, Entre Ríos.
+  const prompt=`Sos periodista de Diario Río Uruguay (Concordia, Entre Ríos). Tema trending: "${topic}".
 
-CONTEXTO DE TU ZONA DE COBERTURA:
-- Ciudad principal: Concordia (Entre Ríos, Argentina), 170.000 habitantes, sobre el río Uruguay
-- Represa Salto Grande (binacional Argentina-Uruguay): fuente de energía, turismo, pesca
-- Economía local: citricultura (naranja, mandarina), arándanos para exportación, turismo termal (Concordia tiene las mejores aguas termales del país), ganadería, agricultura
-- Instituciones clave: Municipalidad de Concordia, gobernación Entre Ríos (Paraná), ATER (rentas), CAME regional, Cámara de Comercio Concordia, Hospital Masvernat, Universidad Autónoma de Entre Ríos (UADER), UTN Concordia
-- Política: intendente de Concordia, gobernador de Entre Ríos, diputados y senadores entrerrianos en el Congreso Nacional
-- Infraestructura: Ruta 14 (corredor bioceánico), Puente Concordia-Salto (Uruguay), aeródromo local
-- Medios regionales: El Heraldo (Concordia), El Once (Paraná), Radio LT15 (Concordia)
-- Temas recurrentes: tarifa eléctrica (Salto Grande), inundaciones del río Uruguay, cosecha citrícola, exportaciones agropecuarias, turismo termal
+Analizá: 1) datos clave del tema, 2) conexión con Entre Ríos/Concordia (economía citrícola, Salto Grande, termas, política provincial, Ruta 14, río Uruguay), 3) 3 búsquedas Google para verificar.
 
-TEMA TRENDING EN ARGENTINA: "${topic}"
-
-Tu análisis tiene 3 partes OBLIGATORIAS:
-1. DATOS DUROS: hechos verificables, cifras exactas, nombres con cargo, fechas. Lo que el redactor NECESITA antes de publicar.
-2. CONEXIÓN ENTRERRIANA: analizá con criterio periodístico si este tema tiene impacto real en Entre Ríos o Concordia — económico, político, social, ambiental. Si no hay conexión directa, decilo honestamente y sugerí el ángulo más cercano posible.
-3. BÚSQUEDAS SUGERIDAS: generá 4 queries de Google específicos que el periodista puede usar para verificar y ampliar. Formato: texto de búsqueda exacto (no URL).
-
-Respondé SOLO en JSON (sin texto antes ni después):
-{"topic":"${topic}","key_facts":"3-5 datos esenciales separados por punto y coma: cifras exactas, nombres completos con cargo, fechas, antecedentes directos","er_connection":"descripción específica de la conexión con Entre Ríos/Concordia o explicación de por qué no hay conexión directa","has_connection":true,"angle":"ángulo periodístico concreto para DRU: qué nota exacta se puede hacer, desde qué enfoque, qué fuente local contactar primero","sources_to_check":"2-3 fuentes o personas específicas del medio local que el redactor debería llamar para verificar o ampliar","search_queries":["query 1 específico para verificar en Google","query 2 con nombre local + tema","query 3 con ángulo regional","query 4 con dato económico o político local"],"seo_title":"keyword geográfica al inicio — máx 60 chars","meta_desc":"dato informativo + consecuencia local + CTA implícito — máx 155 chars","keywords":["kw1 con geo","kw2","kw3","kw4 local"],"ig_hook":"titular informativo máx 12 palabras — placa de diario, sin clickbait","fb_copy":"primera línea informativa autónoma\\npárrafo con dato concreto y consecuencia local\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos"}`;
+JSON sin texto antes ni después:
+{"topic":"${topic}","key_facts":"3-5 datos clave separados por ;","er_connection":"conexión con ER o por qué no hay","has_connection":true,"angle":"ángulo para DRU y fuente local a contactar","sources_to_check":"2-3 fuentes locales","search_queries":["query1","query2","query3"],"seo_title":"keyword geo al inicio, máx 60 chars","meta_desc":"máx 155 chars","keywords":["kw1","kw2","kw3","kw4"],"ig_hook":"máx 12 palabras","fb_copy":"línea informativa\\ndato concreto\\ndiarioriouruguay.com\\n#Concordia #EntreRíos"}`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
     const raw=await res.text();
     let data;
     try{data=JSON.parse(raw);}catch(pe){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Error al procesar. Intentá de nuevo.</div>`;return;}
@@ -1234,29 +1212,15 @@ async function loadReflote(){
   for(let i=-3;i<=3;i++){const d=new Date(now);d.setDate(d.getDate()+i);daysOfWeek.push(`${d.getDate()} de ${MESF[d.getMonth()+1]}`);}
   const weekRange=daysOfWeek.join(", ");
 
-  const prompt=`Sos editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos). Hoy es ${dd} de ${MESF[mm]} de ${yy}.
+  const prompt=`Buscá noticias REALES en medios entrerrianos para reflotear. Hoy: ${dd}/${MESF[mm]}/${yy}. Semana: ${weekRange}.
 
-TAREA: Usá la herramienta web_search para buscar noticias REALES publicadas en medios entrerrianos. Tu objetivo es encontrar artículos reales para reflotear como "Un día como hoy" o "Esta semana en la historia".
+Buscá con web_search: "site:${siteFilter} ${dd} de ${MESF[mm]}", si hay pocos resultados ampliá a "${MESF[mm]} Concordia Entre Ríos". Solo noticias reales encontradas, NUNCA inventar. Fuentes: "DRU"=diarioriouruguay.com, "ElHeraldo"=elheraldo.com.ar, "ElOnce"=elonce.com, "ElEntreRios"=elentrerios.com. Devolvé 2-4 resultados.
 
-ESTRATEGIA DE BÚSQUEDA (seguí este orden):
-1. Primero buscá para el día exacto: "site:${siteFilter} ${dd} de ${MESF[mm]} Concordia"
-2. Si hay pocos resultados, ampliá a la semana: "site:${siteFilter} ${MESF[mm]} Concordia Entre Ríos"
-3. Buscá también temas emblemáticos: "site:${siteFilter} Concordia historia" o "site:${siteFilter} Concordia aniversario"
-4. Si seguís sin resultados, buscá noticias destacadas recientes: "site:${siteFilter} Concordia" para traer las más relevantes
-
-Hacé al menos 3-4 búsquedas distintas. Rango de la semana: ${weekRange}.
-
-REGLAS:
-- SOLO incluí noticias que hayas encontrado realmente en la búsqueda — NUNCA inventar artículos, URLs ni datos.
-- Fuentes: "DRU" para diarioriouruguay.com, "ElHeraldo" para elheraldo.com.ar, "ElOnce" para elonce.com, "ElEntreRios" para elentrerios.com.
-- Si el artículo es de esta semana o reciente (no histórico), poné years_ago: 0 y en why_now explicá por qué vale la pena republicarlo.
-- SIEMPRE devolvé al menos 2-4 resultados. Si no hay noticias históricas, devolvé las mejores notas recientes que hayas encontrado en esos sitios.
-
-Respondé SOLO con JSON al final (sin texto antes ni después):
-[{"source":"${srcLabels[refloteSrc]}","title":"titular real del artículo","date":"fecha de publicación","years_ago":0,"excerpt":"resumen real del contenido","why_now":"por qué reflotear esta nota hoy","hook":"frase tipo Hace X años en Concordia... o Esta semana en...","url":"URL real del artículo","ig_copy":"hook máx 12 palabras\\nResumen + Link en bio + #Concordia #EntreRíos","fb_copy":"primera línea informativa\\ndato concreto\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio"}]`;
+JSON al final:
+[{"source":"${srcLabels[refloteSrc]}","title":"titular real","date":"fecha","years_ago":0,"excerpt":"resumen","why_now":"relevancia hoy","hook":"Hace X años...","url":"URL real","ig_copy":"hook 12 palabras\\n#Concordia #EntreRíos","fb_copy":"línea informativa\\ndiarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio"}]`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:3000,tools:[{type:"web_search_20250305",name:"web_search",max_uses:5}],messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2000,tools:[{type:"web_search_20250305",name:"web_search",max_uses:3}],messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     if(data.error){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>${data.error.message||data.error}</div>`;return;}
     let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
