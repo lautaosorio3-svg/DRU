@@ -1035,6 +1035,18 @@ function addEfem(){
 }
 
 // ══ JSON REPAIR + CACHE ══
+function extractJSON(rawText){
+  const s=rawText.replace(/```json|```/g,"").trim();
+  const starts=[];
+  for(let i=0;i<s.length;i++){if(s[i]==='['||s[i]==='{')starts.push(i);}
+  for(let k=starts.length-1;k>=0;k--){
+    const sub=s.substring(starts[k]);
+    const r=repairJSON(sub);
+    if(r)return r;
+  }
+  return repairJSON(s);
+}
+
 function repairJSON(str){
   // Try to fix truncated JSON by closing open structures
   try{ return JSON.parse(str); }catch(e){}
@@ -1126,8 +1138,8 @@ Respondé SOLO en JSON (sin texto antes ni después):
     let data;
     try{data=JSON.parse(raw);}catch(pe){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Error al procesar. Intentá de nuevo.</div>`;return;}
     if(data.error){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Error: ${data.error}</div>`;return;}
-    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("").replace(/```json|```/g,"").trim();
-    const parsed=repairJSON(text);
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    const parsed=extractJSON(text);
     if(!parsed){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Respuesta incompleta. Intentá con un tema más corto.</div>`;return;}
     renderAngleResult(parsed);
     seoHistory.unshift(parsed);
@@ -1249,8 +1261,8 @@ Respondé SOLO con JSON al final (sin texto antes ni después):
     const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:3000,tools:[{type:"web_search_20250305",name:"web_search",max_uses:5}],messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     if(data.error){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>${data.error.message||data.error}</div>`;return;}
-    let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("").replace(/```json|```/g,"").trim();
-    const parsed=repairJSON(text);
+    let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    const parsed=extractJSON(text);
     if(!parsed){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>No se encontraron artículos. Intentá con otro medio o actualizá.</div>`;return;}
     setCache(cacheKey,parsed);
     renderRefloteV2(parsed);
