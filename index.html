@@ -232,27 +232,6 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
 .trend-copy{font-size:10px;padding:3px 8px;border:1px solid var(--bd2);border-radius:6px;background:none;color:var(--mt);cursor:pointer;flex-shrink:0}
 .trend-copy:hover{color:var(--wh);background:var(--dk3)}
 
-/* REFLOTE */
-.rg{display:flex;flex-direction:column;gap:10px}
-.rc{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:14px 18px;transition:border-color .2s}
-.rc:hover{border-color:var(--bd2)}
-.rc.dru{border-left:3px solid var(--or)}
-.rc.heraldo{border-left:3px solid #85B7EB}
-.rc.elonce{border-left:3px solid #97C459}
-.rc.entrerios{border-left:3px solid #D4A5E5}
-.rc-hdr{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
-.rc-src{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
-.src-dru{background:var(--orl);color:var(--or)}
-.src-her{background:rgba(133,183,235,.15);color:#85B7EB}
-.src-elo{background:rgba(151,196,89,.15);color:#97C459}
-.src-er{background:rgba(212,165,229,.15);color:#D4A5E5}
-.rc-yrs{font-size:11px;color:var(--mt)}
-.rc-t{font-family:var(--fd);font-size:14px;font-weight:600;color:var(--wh);margin-bottom:4px;line-height:1.35}
-.rc-x{font-size:12px;color:var(--mt);line-height:1.5;margin-bottom:8px}
-.rc-hook{background:var(--dk2);border-left:2px solid var(--or);padding:6px 10px;border-radius:0 var(--r) var(--r) 0;font-size:11px;color:var(--lt);margin-bottom:8px}
-.rc-hook strong{color:var(--or);font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px}
-.rc-acts{display:flex;gap:6px;flex-wrap:wrap}
-
 /* TRASPASO PAGE */
 .tp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
 .tp-card{background:var(--cd);border:1px solid var(--bd);border-radius:var(--rl);padding:1.5rem}
@@ -375,7 +354,6 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
     <div class="ni" onclick="showPage('add',this)"><span class="ni-icon">＋</span><span>Agregar</span></div>
     <div class="ns">Herramientas</div>
     <div class="ni" onclick="showPage('seo',this)"><span class="ni-icon">🔍</span><span>SEO del día</span><span class="ni-new">HOY</span></div>
-    <div class="ni" onclick="showPage('reflote',this)"><span class="ni-icon">📰</span><span>Reflote archivos</span></div>
     <div class="ni" onclick="showPage('traspaso',this)"><span class="ni-icon">📋</span><span>Traspaso a redes</span><span class="ni-new">NEW</span></div>
     <div class="ni" onclick="showPage('desgrab',this)"><span class="ni-icon">🎙</span><span>Desgrabador</span><span class="ni-new">NEW</span></div>
     <div class="ni" onclick="showPage('enfoques',this)"><span class="ni-icon">🎯</span><span>Enfoques</span><span class="ni-new">NEW</span></div>
@@ -538,25 +516,6 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
 
       <!-- HISTORIAL DE BÚSQUEDAS -->
       <div id="seo-history"></div>
-    </div>
-
-    <!-- REFLOTE -->
-    <div class="page" id="page-reflote">
-      <div class="sec-hdr"><div class="sec-t">Reflote de archivos</div><div class="sec-c" id="reflote-date">Un día como hoy</div></div>
-      <div class="ai-panel" style="margin-bottom:1.5rem">
-        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),#ffcc55,var(--or));background-size:200% 100%;animation:shimmer 2s linear infinite"></div>
-        <div class="asp-h"><div class="asp-t">Noticias para reflotear hoy</div><span class="aic">IA</span></div>
-        <p style="font-size:13px;color:var(--mt);line-height:1.6">La IA sugiere noticias destacadas de Entre Ríos publicadas un día como hoy en años anteriores. Cada resultado incluye el copy listo para Instagram y Facebook.</p>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center">
-        <button class="cp cp-all active" id="rs-all" onclick="setRefloteSrc('all',this)">Todos los medios</button>
-        <button class="cp cp-hist" onclick="setRefloteSrc('dru',this)">📰 DRU</button>
-        <button class="cp cp-pol" onclick="setRefloteSrc('heraldo',this)">📰 El Heraldo</button>
-        <button class="cp cp-cul" onclick="setRefloteSrc('elonce',this)">📺 El Once</button>
-        <button class="cp cp-dep" onclick="setRefloteSrc('entrerios',this)">📰 El Entre Ríos</button>
-        <button class="rb" style="margin-left:auto;padding:8px 16px;font-size:13px;border-color:var(--orb);color:var(--or)" onclick="loadReflote()">↻ Actualizar recomendaciones</button>
-      </div>
-      <div id="reflote-area"><div class="lds"><div class="sp"></div>Buscando noticias para reflotear hoy...</div></div>
     </div>
 
     <!-- TRASPASO A REDES -->
@@ -791,7 +750,6 @@ let activeCat="all";
 let selEfemObj=null;
 let selFmtStr="carrusel";
 let selUN_val="";
-let refloteSrc="all";
 let traspasos=[];
 
 
@@ -1084,7 +1042,6 @@ function repairJSON(str){
 }
 
 const CACHE_KEY_SEO = "dru_seo_cache";
-const CACHE_KEY_REFLOTE = "dru_reflote_cache";
 function getCached(key){
   try{
     const raw=sessionStorage.getItem(key);
@@ -1196,82 +1153,6 @@ function renderSEOHistory(){
 }
 
 function copyKw(text){navigator.clipboard&&navigator.clipboard.writeText(text);showToast(`✓ Copiado: "${text.substring(0,40)}${text.length>40?"...":""}"`); }
-
-// ══ REFLOTE ══
-function setRefloteSrc(src,el){refloteSrc=src;document.querySelectorAll("#page-reflote .cp").forEach(p=>p.classList.remove("active"));el.classList.add("active");}
-
-async function loadReflote(){
-  const area=document.getElementById("reflote-area");
-  const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
-  document.getElementById("reflote-date").textContent=`${dd} de ${MESF[mm]} — Noticias para reflotear`;
-
-  const cacheKey=CACHE_KEY_REFLOTE+"_"+refloteSrc;
-  const cached=getCached(cacheKey);
-  if(cached){renderRefloteV2(cached);return;}
-
-  const srcNames={all:"todos los medios",dru:"Diario Río Uruguay",heraldo:"El Heraldo",elonce:"El Once",entrerios:"El Entre Ríos"};
-  const srcSites={all:"diarioriouruguay.com OR site:elheraldo.com.ar OR site:elonce.com OR site:elentrerios.com",dru:"diarioriouruguay.com",heraldo:"elheraldo.com.ar",elonce:"elonce.com",entrerios:"elentrerios.com"};
-  const srcLabels={all:"DRU|ElHeraldo|ElOnce|ElEntreRios",dru:"DRU",heraldo:"ElHeraldo",elonce:"ElOnce",entrerios:"ElEntreRios"};
-  area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando noticias reales en ${srcNames[refloteSrc]}...</div>`;
-
-  const siteFilter=srcSites[refloteSrc];
-  const daysOfWeek=[];
-  for(let i=-3;i<=3;i++){const d=new Date(now);d.setDate(d.getDate()+i);daysOfWeek.push(`${d.getDate()} de ${MESF[d.getMonth()+1]}`);}
-  const weekRange=daysOfWeek.join(", ");
-
-  const prompt=`Buscá noticias REALES en medios entrerrianos para reflotear. Hoy: ${dd}/${MESF[mm]}/${yy}. Semana: ${weekRange}.
-
-Buscá con web_search: "site:${siteFilter} ${dd} de ${MESF[mm]}", si hay pocos resultados ampliá a "${MESF[mm]} Concordia Entre Ríos". Solo noticias reales encontradas, NUNCA inventar. Fuentes: "DRU"=diarioriouruguay.com, "ElHeraldo"=elheraldo.com.ar, "ElOnce"=elonce.com, "ElEntreRios"=elentrerios.com. Devolvé 2-4 resultados.
-
-JSON al final:
-[{"source":"${srcLabels[refloteSrc]}","title":"titular real","date":"fecha","years_ago":0,"excerpt":"resumen","why_now":"relevancia hoy","hook":"Hace X años...","url":"URL real","ig_copy":"hook 12 palabras\\n#Concordia #EntreRíos","fb_copy":"línea informativa\\ndiarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio"}]`;
-
-  try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2000,tools:[{type:"web_search_20250305",name:"web_search",max_uses:3}],messages:[{role:"user",content:prompt}]})});
-    const data=await res.json();
-    if(data.error){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>${data.error.message||data.error}</div>`;return;}
-    let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
-    const parsed=extractJSON(text);
-    if(!parsed){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>No se encontraron artículos. Intentá con otro medio o actualizá.</div>`;return;}
-    setCache(cacheKey,parsed);
-    renderRefloteV2(parsed);
-  }catch(e){area.innerHTML=`<div class="empty-s"><div style="font-size:24px;margin-bottom:.5rem">⚠</div>Error al buscar en archivos. Verificá la API key y volvé a intentar.</div>`;}
-}
-
-function renderRefloteV2(items){
-  const area=document.getElementById("reflote-area");
-  if(!items||!items.length){area.innerHTML=`<div class="empty-s"><div style="font-size:28px;margin-bottom:.5rem">📭</div>No se encontraron noticias en los archivos para hoy. Probá otro filtro de medio.</div>`;return;}
-  const ss={DRU:{cls:"dru",badge:"src-dru",label:"📰 DRU"},ElHeraldo:{cls:"heraldo",badge:"src-her",label:"📰 El Heraldo"},ElOnce:{cls:"elonce",badge:"src-elo",label:"📺 El Once"},ElEntreRios:{cls:"entrerios",badge:"src-er",label:"📰 El Entre Ríos"}};
-  area.innerHTML=`<div class="rg">${items.map(r=>{const s=ss[r.source]||ss["DRU"];return`<div class="rc ${s.cls}">
-    <div class="rc-hdr">
-      <span class="rc-src ${s.badge}">${s.label}</span>
-      <span class="rc-yrs">📅 ${r.date}${r.years_ago?` · hace ${r.years_ago} años`:""}</span>
-      ${r.viral_potential==="alto"?`<span class="vb">⚡ Alto potencial viral</span>`:""}
-    </div>
-    <div class="rc-t">${r.title}</div>
-    <div class="rc-x">${r.excerpt}</div>
-    <div style="background:var(--dk2);border-left:2px solid #5DCAA5;border-radius:0 var(--r) var(--r) 0;padding:7px 10px;font-size:11px;color:var(--lt);margin-bottom:8px">
-      <strong style="color:#5DCAA5;font-size:10px;text-transform:uppercase;display:block;margin-bottom:2px">¿Por qué reflotear hoy?</strong>${r.why_now}
-    </div>
-    <div class="rc-hook"><strong>Hook para redes</strong>${r.hook}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-      <div style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
-        <div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">📸 Instagram</div>
-        <div style="font-size:12px;color:var(--wh);line-height:1.5">${r.ig_copy||""}</div>
-      </div>
-      <div style="background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
-        <div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">📘 Facebook</div>
-        <div style="font-size:12px;color:var(--wh);line-height:1.5">${r.fb_copy||""}</div>
-      </div>
-    </div>
-    <div class="rc-acts">
-      <button class="ab" onclick="copyKw('${(r.hook||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar hook</button>
-      <button class="ab" onclick="copyKw('${(r.ig_copy||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar IG</button>
-      <button class="ab primary" onclick="copyKw('${(r.fb_copy||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar FB</button>
-      ${r.url?`<a href="${r.url}" target="_blank" class="ab primary" style="text-decoration:none">Ver nota original →</a>`:""}
-    </div>
-  </div>`;}).join("")}</div>`;
-}
 
 // ══ TRASPASO ══
 function selUN(el){document.querySelectorAll(".un-opt").forEach(o=>o.classList.remove("sel"));el.classList.add("sel");selUN_val=el.dataset.un;checkTpButtons();}
@@ -1611,11 +1492,10 @@ function showPage(id,navEl){
   if(navEl)navEl.classList.add("active");
   // Set SEO date
   if(id==="seo"){const now=new Date();document.getElementById("seo-date-label").textContent=now.getDate()+" de "+MESF[now.getMonth()+1]+" de "+now.getFullYear();}
-  const titles={efem:"Base de Efemérides",gen:"Generador de Contenido IA",add:"Agregar Efeméride",seo:"SEO del día — Tendencias y Noticias",reflote:"Reflote de Archivos",traspaso:"Traspaso a Redes",desgrab:"Desgrabador de Audio",enfoques:"Enfoques Editoriales — News User Needs",sugerencias:"Sugerencias y Ajustes"};
+  const titles={efem:"Base de Efemérides",gen:"Generador de Contenido IA",add:"Agregar Efeméride",seo:"SEO del día — Tendencias y Noticias",traspaso:"Traspaso a Redes",desgrab:"Desgrabador de Audio",enfoques:"Enfoques Editoriales — News User Needs",sugerencias:"Sugerencias y Ajustes"};
   document.getElementById("pt").textContent=titles[id]||"";
   if(id==="sugerencias")renderSugerencias();
   if(id==="gen")renderGenList();
-  if(id==="reflote"&&!document.getElementById("reflote-area").querySelector(".rc"))loadReflote();
 }
 
 // ══ TOAST ══
