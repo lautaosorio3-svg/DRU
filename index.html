@@ -1095,17 +1095,30 @@ async function searchAngle(){
   result.style.display="block";
   result.innerHTML=`<div class="lds"><div class="sp"></div>Buscando conexión de "${topic}" con Entre Ríos...</div>`;
 
-  const prompt=`Sos jefe de redacción de Diario Río Uruguay (Concordia, Entre Ríos). Tema trending en Argentina: "${topic}".
+  const prompt=`Sos periodista especializado en medios locales de Entre Ríos, con 15 años cubriendo Concordia y la región del río Uruguay. Trabajás para Diario Río Uruguay (diarioriouruguay.com), el principal medio digital de Concordia, Entre Ríos.
 
-Tu trabajo tiene DOS partes:
-1. DATOS QUE EL REDACTOR NO PUEDE IGNORAR: proporcioná los hechos, cifras, nombres, fechas y antecedentes clave del tema. Esto es lo más importante — el redactor necesita contexto duro para no publicar información incompleta.
-2. ÁNGULO LOCAL: buscá si tiene conexión real con Entre Ríos, Concordia o Salto Grande (personas, eventos, repercusiones). NUNCA inventar conexiones — si no existe, decilo.
+CONTEXTO DE TU ZONA DE COBERTURA:
+- Ciudad principal: Concordia (Entre Ríos, Argentina), 170.000 habitantes, sobre el río Uruguay
+- Represa Salto Grande (binacional Argentina-Uruguay): fuente de energía, turismo, pesca
+- Economía local: citricultura (naranja, mandarina), arándanos para exportación, turismo termal (Concordia tiene las mejores aguas termales del país), ganadería, agricultura
+- Instituciones clave: Municipalidad de Concordia, gobernación Entre Ríos (Paraná), ATER (rentas), CAME regional, Cámara de Comercio Concordia, Hospital Masvernat, Universidad Autónoma de Entre Ríos (UADER), UTN Concordia
+- Política: intendente de Concordia, gobernador de Entre Ríos, diputados y senadores entrerrianos en el Congreso Nacional
+- Infraestructura: Ruta 14 (corredor bioceánico), Puente Concordia-Salto (Uruguay), aeródromo local
+- Medios regionales: El Heraldo (Concordia), El Once (Paraná), Radio LT15 (Concordia)
+- Temas recurrentes: tarifa eléctrica (Salto Grande), inundaciones del río Uruguay, cosecha citrícola, exportaciones agropecuarias, turismo termal
 
-Respondé en JSON:
-{"topic":"${topic}","key_facts":"Los 3-5 datos esenciales del tema que todo redactor debe conocer antes de publicar: cifras, nombres completos con cargo, fechas, antecedentes directos. Separados con punto y coma.","er_connection":"conexión encontrada o Sin conexión directa — con datos específicos si la hay","has_connection":true/false,"angle":"ángulo periodístico concreto para DRU — qué nota se puede hacer, con qué fuentes locales contactar","sources_to_check":"2-3 fuentes o personas que el redactor debería consultar para verificar o ampliar","seo_title":"keyword geográfica al inicio — máx 60 chars","meta_desc":"dato informativo + CTA implícito — máx 155 chars","keywords":["kw1","kw2","kw3","kw4"],"ig_hook":"titular informativo máx 12 palabras — redactado como placa de diario, sin clickbait","fb_copy":"primera línea informativa autónoma\\npárrafo con dato concreto y consecuencia local\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos"}`;
+TEMA TRENDING EN ARGENTINA: "${topic}"
+
+Tu análisis tiene 3 partes OBLIGATORIAS:
+1. DATOS DUROS: hechos verificables, cifras exactas, nombres con cargo, fechas. Lo que el redactor NECESITA antes de publicar.
+2. CONEXIÓN ENTRERRIANA: analizá con criterio periodístico si este tema tiene impacto real en Entre Ríos o Concordia — económico, político, social, ambiental. Si no hay conexión directa, decilo honestamente y sugerí el ángulo más cercano posible.
+3. BÚSQUEDAS SUGERIDAS: generá 4 queries de Google específicos que el periodista puede usar para verificar y ampliar. Formato: texto de búsqueda exacto (no URL).
+
+Respondé SOLO en JSON (sin texto antes ni después):
+{"topic":"${topic}","key_facts":"3-5 datos esenciales separados por punto y coma: cifras exactas, nombres completos con cargo, fechas, antecedentes directos","er_connection":"descripción específica de la conexión con Entre Ríos/Concordia o explicación de por qué no hay conexión directa","has_connection":true,"angle":"ángulo periodístico concreto para DRU: qué nota exacta se puede hacer, desde qué enfoque, qué fuente local contactar primero","sources_to_check":"2-3 fuentes o personas específicas del medio local que el redactor debería llamar para verificar o ampliar","search_queries":["query 1 específico para verificar en Google","query 2 con nombre local + tema","query 3 con ángulo regional","query 4 con dato económico o político local"],"seo_title":"keyword geográfica al inicio — máx 60 chars","meta_desc":"dato informativo + consecuencia local + CTA implícito — máx 155 chars","keywords":["kw1 con geo","kw2","kw3","kw4 local"],"ig_hook":"titular informativo máx 12 palabras — placa de diario, sin clickbait","fb_copy":"primera línea informativa autónoma\\npárrafo con dato concreto y consecuencia local\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos"}`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:800,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
     const raw=await res.text();
     let data;
     try{data=JSON.parse(raw);}catch(pe){result.innerHTML=`<div style="color:var(--mt);padding:.5rem 0">Error al procesar. Intentá de nuevo.</div>`;return;}
@@ -1138,6 +1151,7 @@ function renderAngleResult(r){
       </div>
       ${r.angle?`<div style="font-size:12px;color:var(--lt);line-height:1.5;margin-bottom:10px;padding:8px 10px;background:var(--cd);border-radius:var(--r);border-left:2px solid var(--or)"><strong style="color:var(--or);font-size:10px;text-transform:uppercase;display:block;margin-bottom:3px">Ángulo para DRU</strong>${r.angle}</div>`:""}
       ${r.sources_to_check?`<div style="font-size:12px;color:var(--lt);line-height:1.5;margin-bottom:10px;padding:8px 10px;background:var(--cd);border-radius:var(--r);border-left:2px solid #85B7EB"><strong style="color:#85B7EB;font-size:10px;text-transform:uppercase;display:block;margin-bottom:3px">Fuentes a consultar</strong>${r.sources_to_check}</div>`:""}
+      ${r.search_queries&&r.search_queries.length?`<div style="margin-bottom:10px;padding:8px 10px;background:var(--cd);border-radius:var(--r);border-left:2px solid #A78BFA"><strong style="color:#A78BFA;font-size:10px;text-transform:uppercase;display:block;margin-bottom:6px">🔍 Búsquedas para verificar</strong><div style="display:flex;flex-wrap:wrap;gap:5px">${r.search_queries.map(q=>`<a href="https://www.google.com/search?q=${encodeURIComponent(q)}" target="_blank" style="font-size:11px;color:var(--lt);background:var(--dk2);border:1px solid var(--bd2);border-radius:20px;padding:3px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">🔍 ${q}</a>`).join("")}</div></div>`:""}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
         <div style="background:var(--cd);border:1px solid var(--bd2);border-radius:var(--r);padding:8px 10px">
           <div style="font-size:10px;color:var(--mt);text-transform:uppercase;margin-bottom:4px">Título SEO</div>
@@ -1199,13 +1213,24 @@ async function loadReflote(){
 
   const srcNames={all:"los tres medios",dru:"Diario Río Uruguay",heraldo:"El Heraldo",elonce:"El Once"};
   area.innerHTML=`<div class="lds"><div class="sp"></div>Buscando en ${srcNames[refloteSrc]}...</div>`;
-  const sf=refloteSrc==="dru"?"solo en site:diarioriouruguay.com":refloteSrc==="heraldo"?"solo en site:elheraldo.com.ar":refloteSrc==="elonce"?"solo en site:elonce.com":"en site:diarioriouruguay.com, site:elheraldo.com.ar y site:elonce.com";
+  const srcLabel=refloteSrc==="dru"?"Diario Río Uruguay":refloteSrc==="heraldo"?"El Heraldo":refloteSrc==="elonce"?"El Once":"los tres medios regionales (Diario Río Uruguay, El Heraldo, El Once)";
+  const srcVal=refloteSrc==="dru"?"DRU":refloteSrc==="heraldo"?"ElHeraldo":refloteSrc==="elonce"?"ElOnce":null;
 
-  const prompt=`Actuá como editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos). Hoy es ${dd}/${mm}/${yy}. Buscá en tu conocimiento noticias destacadas publicadas en ${sf} un día como hoy (${dd} de ${MESF[mm]}) en años anteriores. NUNCA inventar noticias — solo incluir hechos verificables. Generá 4 noticias para reflotear. Solo JSON:
-[{"source":"DRU|ElHeraldo|ElOnce","title":"titular periodístico con keyword geográfica","date":"","years_ago":0,"excerpt":"resumen factual sin sensacionalismo","why_now":"conexión con la actualidad de Concordia/Entre Ríos","hook":"gancho tipo Hace X años — tono formal sin exagerar","ig_copy":"hook máx 12 palabras por línea, persuasivo sin clickbait vacío. Caption: primera línea autónoma + CTA 'Link en bio' + #Concordia #EntreRíos","fb_copy":"primera línea gancho autónomo\\npárrafo con dato concreto y consecuencia local\\nLeé más en diarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio","url":""}]`;
+  const prompt=`Sos editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos, Argentina). Hoy es ${dd} de ${MESF[mm]} de ${yy}.
+
+Tu tarea: generá 4 propuestas de "reflote" — noticias o hechos históricos de Entre Ríos/Concordia/Salto Grande que ocurrieron un ${dd} de ${MESF[mm]} en cualquier año anterior (o en esa semana si no hay exacta para el día). Priorizá hechos con impacto local real: política provincial, economía local, obras de infraestructura, eventos culturales, deportes regionales, cronología de Concordia o de la región del río Uruguay.
+
+Reglas:
+- Solo hechos verificables de Entre Ríos o Concordia — NUNCA inventar datos, nombres o fechas.
+- Si el medio pedido es ${srcLabel}, asignale esa fuente. Si no podés confirmar en qué medio se publicó, usá "DRU" como fuente por defecto.
+- El campo "search_url" debe ser una URL de Google Search con el título y año del hecho, para que el redactor lo verifique.
+- "years_ago" = ${yy} menos el año del hecho.
+
+Respondé SOLO con JSON (sin texto antes ni después):
+[{"source":"${srcVal||"DRU|ElHeraldo|ElOnce"}","title":"titular periodístico con keyword geográfica","date":"DD/MM/AAAA","years_ago":0,"excerpt":"resumen factual de 2-3 oraciones sin sensacionalismo","why_now":"por qué es relevante reflotearlo hoy — conexión con actualidad o efeméride","hook":"frase tipo 'Hace X años en Concordia...' — tono periodístico sin exagerar","ig_copy":"texto para Instagram: hook máx 12 palabras por línea\\nCaption informativo + 'Link en bio' + #Concordia #EntreRíos","fb_copy":"primera línea autónoma informativa\\npárrafo con dato concreto\\nLeé la historia completa en diarioriouruguay.com\\n#Concordia #EntreRíos","viral_potential":"alto|medio","search_url":"https://www.google.com/search?q=TITULO+AÑO+Entre+Rios"}]`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     let text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("").replace(/```json|```/g,"").trim();
     const parsed=repairJSON(text);
@@ -1245,7 +1270,7 @@ function renderRefloteV2(items){
       <button class="ab" onclick="copyKw('${(r.hook||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar hook</button>
       <button class="ab" onclick="copyKw('${(r.ig_copy||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar IG</button>
       <button class="ab primary" onclick="copyKw('${(r.fb_copy||"").replace(/'/g,"\\'").replace(/\n/g," ")}')">Copiar FB</button>
-      ${r.url?`<a href="${r.url}" target="_blank" class="ab" style="text-decoration:none">Ver nota →</a>`:""}
+      ${r.search_url?`<a href="${r.search_url}" target="_blank" class="ab" style="text-decoration:none">🔍 Verificar →</a>`:r.url?`<a href="${r.url}" target="_blank" class="ab" style="text-decoration:none">Ver nota →</a>`:""}
     </div>
   </div>`;}).join("")}</div>`;
 }
