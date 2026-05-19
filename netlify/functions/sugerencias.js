@@ -7,6 +7,17 @@ const HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS"
 };
 
+function initStore() {
+  try {
+    return getStore("sugerencias");
+  } catch {
+    const siteID = process.env.SITE_ID;
+    const token = process.env.NETLIFY_PAT;
+    if (!siteID || !token) throw new Error("Configurá NETLIFY_PAT en las variables de entorno de Netlify");
+    return getStore({ name: "sugerencias", siteID, token });
+  }
+}
+
 async function getAll(store) {
   try {
     const data = await store.get("all", { type: "json" });
@@ -16,39 +27,6 @@ async function getAll(store) {
   }
 }
 
-async function sendEmailNotification(sug) {
-  const RESEND_KEY = process.env.RESEND_API_KEY;
-  const NOTIFY_EMAILS = process.env.NOTIFICATION_EMAILS;
-  if (!RESEND_KEY || !NOTIFY_EMAILS) return;
-
-  const to = NOTIFY_EMAILS.split(",").map(e => e.trim()).filter(Boolean);
-  if (!to.length) return;
-
-  const catLabels = { feature: "Nueva función", mejora: "Mejora", bug: "Bug", contenido: "Contenido", otro: "Otro" };
-
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${RESEND_KEY}` },
-      body: JSON.stringify({
-        from: "DRU Editorial <onboarding@resend.dev>",
-        to,
-        subject: `[DRU] Nueva sugerencia: ${catLabels[sug.category] || sug.category}`,
-        html: `<div style="font-family:sans-serif;max-width:600px">
-          <h2 style="color:#E8A94A">Nueva sugerencia en DRU Editorial</h2>
-          <p><strong>De:</strong> ${sug.name}</p>
-          <p><strong>Categoría:</strong> ${catLabels[sug.category] || sug.category}</p>
-          <p><strong>Fecha:</strong> ${new Date(sug.date).toLocaleString("es-AR")}</p>
-          <hr style="border:1px solid #eee">
-          <p style="font-size:16px;line-height:1.6">${sug.text.replace(/\n/g, "<br>")}</p>
-          <hr style="border:1px solid #eee">
-          <p style="color:#888;font-size:12px">Enviado desde DRU Editorial — Panel de sugerencias</p>
-        </div>`
-      })
-    });
-  } catch {}
-}
-
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: HEADERS, body: "" };
@@ -56,9 +34,9 @@ exports.handler = async (event) => {
 
   let store;
   try {
-    store = getStore("sugerencias");
+    store = initStore();
   } catch (err) {
-    return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: "Storage not available: " + err.message }) };
+    return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: err.message }) };
   }
 
   if (event.httpMethod === "GET") {
@@ -82,10 +60,9 @@ exports.handler = async (event) => {
       };
       current.push(sug);
       await store.setJSON("all", current);
-      sendEmailNotification(sug);
       return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ ok: true }) };
     } catch (err) {
-      return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: err.message, stack: err.stack }) };
+      return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: err.message }) };
     }
   }
 
