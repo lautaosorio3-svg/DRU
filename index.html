@@ -723,6 +723,13 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
             </select>
           </div>
           <div class="ff" style="margin-bottom:10px"><label class="flbl">Descripción</label><textarea class="fi" id="sug-text" placeholder="Describí tu sugerencia, qué cambiarías, qué agregarías, qué no funciona..." style="min-height:140px"></textarea></div>
+          <div class="ff" style="margin-bottom:10px"><label class="flbl">Notificar por email a</label>
+            <div style="display:flex;flex-direction:column;gap:6px" id="sug-notify">
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--lt);cursor:pointer"><input type="checkbox" value="admin" checked> Administrador (lautaosorio3@gmail.com)</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--lt);cursor:pointer"><input type="checkbox" value="redactor"> Redactor DRU (pereiragmati@gmail.com)</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--lt);cursor:pointer"><input type="checkbox" value="redes"> Community Manager (more.martinezfi@gmail.com)</label>
+            </div>
+          </div>
           <button class="gnbtn" onclick="addSugerencia()">Enviar sugerencia →</button>
         </div>
         <div>
@@ -737,7 +744,8 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
 </div>
 
 <script>
-const USERS={admin:{pass:"dru2024",name:"Administrador",role:"Admin",av:"AD"},redactor:{pass:"redactor123",name:"Redactor DRU",role:"Redacción",av:"RD"},redes:{pass:"redes123",name:"Community",role:"Redes sociales",av:"CM"}};
+const USERS={admin:{pass:"dru2024",name:"Administrador",role:"Admin",av:"AD",email:"lautaosorio3@gmail.com"},redactor:{pass:"redactor123",name:"Redactor DRU",role:"Redacción",av:"RD",email:"pereiragmati@gmail.com"},redes:{pass:"redes123",name:"Community",role:"Redes sociales",av:"CM",email:"more.martinezfi@gmail.com"}};
+let currentUser=null;
 const SK="dru_efem_v7";
 const MES=["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const MESF=["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -781,6 +789,7 @@ function doLogin(){
     document.getElementById("uav").textContent=user.av;
     document.getElementById("unm").textContent=user.name;
     document.getElementById("url2").textContent=user.role;
+    currentUser={username:u,...user};
     initApp();
   } else {document.getElementById("lerr").style.display="block";}
 }
@@ -1494,7 +1503,7 @@ function showPage(id,navEl){
   if(id==="seo"){const now=new Date();document.getElementById("seo-date-label").textContent=now.getDate()+" de "+MESF[now.getMonth()+1]+" de "+now.getFullYear();}
   const titles={efem:"Base de Efemérides",gen:"Generador de Contenido IA",add:"Agregar Efeméride",seo:"SEO del día — Tendencias y Noticias",traspaso:"Traspaso a Redes",desgrab:"Desgrabador de Audio",enfoques:"Enfoques Editoriales — News User Needs",sugerencias:"Sugerencias y Ajustes"};
   document.getElementById("pt").textContent=titles[id]||"";
-  if(id==="sugerencias")renderSugerencias();
+  if(id==="sugerencias"){if(currentUser)document.getElementById("sug-name").value=currentUser.name;renderSugerencias();}
   if(id==="gen")renderGenList();
 }
 
@@ -1581,12 +1590,14 @@ function copyEnf(){
 
 // ══ SUGERENCIAS ══
 async function addSugerencia(){
-  const name=document.getElementById("sug-name").value.trim();
+  const name=document.getElementById("sug-name").value.trim()||currentUser?.name||"Anónimo";
   const cat=document.getElementById("sug-cat").value;
   const text=document.getElementById("sug-text").value.trim();
-  if(!name||!text){showToast("⚠ Completá nombre y descripción");return;}
+  if(!text){showToast("⚠ Escribí una descripción");return;}
+  const notifyChecks=document.querySelectorAll("#sug-notify input:checked");
+  const notify=[...notifyChecks].map(c=>c.value);
   try{
-    const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text})});
+    const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text,notify})});
     const data=await res.json();
     if(data.error){showToast("⚠ Error: "+data.error);return;}
     document.getElementById("sug-name").value="";
