@@ -1580,35 +1580,39 @@ function copyEnf(){
 }
 
 // ══ SUGERENCIAS ══
-const SUG_KEY="dru_sugerencias";
-function getSugerencias(){try{return JSON.parse(localStorage.getItem(SUG_KEY))||[];}catch(e){return[];}}
-function saveSugerencias(arr){localStorage.setItem(SUG_KEY,JSON.stringify(arr));}
-
-function addSugerencia(){
+async function addSugerencia(){
   const name=document.getElementById("sug-name").value.trim();
   const cat=document.getElementById("sug-cat").value;
   const text=document.getElementById("sug-text").value.trim();
   if(!name||!text){showToast("⚠ Completá nombre y descripción");return;}
-  const sugs=getSugerencias();
-  sugs.unshift({name,cat,text,date:new Date().toISOString()});
-  saveSugerencias(sugs);
-  document.getElementById("sug-name").value="";
-  document.getElementById("sug-text").value="";
-  renderSugerencias();
-  showToast("✓ Sugerencia enviada");
+  try{
+    const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text})});
+    const data=await res.json();
+    if(data.error){showToast("⚠ Error: "+data.error);return;}
+    document.getElementById("sug-name").value="";
+    document.getElementById("sug-text").value="";
+    renderSugerencias();
+    showToast("✓ Sugerencia enviada");
+  }catch(e){showToast("⚠ Error de conexión");}
 }
 
-function renderSugerencias(){
-  const sugs=getSugerencias();
-  document.getElementById("sug-count").textContent=sugs.length+" sugerencia"+(sugs.length!==1?"s":"");
+async function renderSugerencias(){
   const list=document.getElementById("sug-list");
+  list.innerHTML=`<div class="lds"><div class="sp"></div>Cargando sugerencias...</div>`;
+  let sugs=[];
+  try{
+    const res=await fetch("/.netlify/functions/sugerencias");
+    sugs=await res.json();
+  }catch(e){}
+  sugs.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById("sug-count").textContent=sugs.length+" sugerencia"+(sugs.length!==1?"s":"");
   if(!sugs.length){list.innerHTML=`<div style="font-size:13px;color:var(--md);padding:2rem;text-align:center">No hay sugerencias todavía.</div>`;return;}
   const catLabels={feature:"Nueva función",mejora:"Mejora",bug:"Bug",contenido:"Contenido",otro:"Otro"};
   const catCls={feature:"st-feature",mejora:"st-mejora",bug:"st-bug",contenido:"st-contenido",otro:"st-otro"};
-  list.innerHTML=sugs.map((s,i)=>{
+  list.innerHTML=sugs.map(s=>{
     const d=new Date(s.date);
     const ds=d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear()+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
-    return `<div class="sug-item"><div class="sug-meta"><span class="sug-author">${s.name}</span><span class="sug-tag ${catCls[s.cat]||"st-otro"}">${catLabels[s.cat]||s.cat}</span><span class="sug-date">${ds}</span></div><div class="sug-body">${s.text.replace(/</g,"&lt;")}</div></div>`;
+    return `<div class="sug-item"><div class="sug-meta"><span class="sug-author">${s.name}</span><span class="sug-tag ${catCls[s.category]||"st-otro"}">${catLabels[s.category]||s.category}</span><span class="sug-date">${ds}</span></div><div class="sug-body">${s.text.replace(/</g,"&lt;")}</div></div>`;
   }).join("");
 }
 

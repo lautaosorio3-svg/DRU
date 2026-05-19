@@ -13,6 +13,8 @@ if (!API_KEY) {
   process.exit(1);
 }
 
+let localSugerencias = [];
+
 const MIME = {
   ".html": "text/html",
   ".css": "text/css",
@@ -126,6 +128,28 @@ const server = http.createServer((req, res) => {
     });
     res.end();
     return;
+  }
+
+  // Sugerencias (local dev - in-memory)
+  if (req.url === "/.netlify/functions/sugerencias") {
+    if (req.method === "GET") {
+      res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+      res.end(JSON.stringify(localSugerencias));
+      return;
+    }
+    if (req.method === "POST") {
+      let body = "";
+      for (const chunk of req) body += chunk;
+      req.on("end", () => {
+        try {
+          const data = JSON.parse(body);
+          localSugerencias.push({ id: Date.now(), name: data.name || "Anónimo", category: data.category || "otro", text: data.text, date: new Date().toISOString() });
+          res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+          res.end(JSON.stringify({ ok: true }));
+        } catch { res.writeHead(400); res.end("Bad request"); }
+      });
+      return;
+    }
   }
 
   // Proxy AI requests
