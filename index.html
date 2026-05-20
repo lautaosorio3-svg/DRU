@@ -421,7 +421,7 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
           <div class="fg">
             <div class="fc selected" data-fmt="carrusel" onclick="selFmt(this)"><div class="fc-i">⬛</div><div class="fc-n">Carrusel</div><div class="fc-s">4 slides + CTA</div></div>
             <div class="fc" data-fmt="reel" onclick="selFmt(this)"><div class="fc-i">▶</div><div class="fc-n">Guión Reel</div><div class="fc-s">45 seg gancho</div></div>
-            <div class="fc" data-fmt="nota" onclick="selFmt(this)"><div class="fc-i">📝</div><div class="fc-n">Nota SEO</div><div class="fc-s">700 palabras</div></div>
+            <div class="fc" data-fmt="nota" onclick="selFmt(this)"><div class="fc-i">📝</div><div class="fc-n">Nota SEO</div><div class="fc-s">320+ palabras</div></div>
             <div class="fc" data-fmt="story" onclick="selFmt(this)"><div class="fc-i">◻</div><div class="fc-n">Story</div><div class="fc-s">4 slides encadenadas</div></div>
           </div>
           <div id="sel-disp" style="background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--mt);min-height:48px;display:flex;align-items:center">Seleccioná una efeméride →</div>
@@ -588,13 +588,13 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
         <div class="ai-panel" style="margin-bottom:1.5rem">
           <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--or),#ffcc55,var(--or));background-size:200% 100%;animation:shimmer 2s linear infinite"></div>
           <div class="asp-h"><div class="asp-t">Paso 1: Transcribir audio</div><span class="aic">Whisper IA</span></div>
-          <p style="font-size:13px;color:var(--mt);line-height:1.6;margin-bottom:1rem">Subí el archivo de audio directamente. Whisper (OpenAI) lo transcribe en español automáticamente. Máx ~4.5 MB por Netlify (5-10 min de MP3). Para audios más largos, usá las alternativas externas.</p>
+          <p style="font-size:13px;color:var(--mt);line-height:1.6;margin-bottom:1rem">Subí el archivo de audio directamente. Whisper (OpenAI) lo transcribe en español automáticamente. Máx 15 MB (~10-15 min de MP3).</p>
 
           <div class="upload-zone" id="dsg-dropzone" onclick="document.getElementById('dsg-audio-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault();this.classList.remove('drag');handleAudioDrop(event)">
             <input type="file" id="dsg-audio-input" accept="audio/*,.mp3,.wav,.m4a,.ogg,.webm,.mp4,.mpeg,.mpga" onchange="handleAudioSelect(event)" style="display:none">
             <div class="uz-icon">🎙</div>
             <div class="uz-title">Arrastrá el audio acá o hacé clic para elegir</div>
-            <div class="uz-sub">MP3, WAV, M4A, OGG, WebM — Máx 4.5 MB</div>
+            <div class="uz-sub">MP3, WAV, M4A, OGG, WebM — Máx 15 MB</div>
           </div>
 
           <div id="dsg-audio-info" style="display:none;background:var(--dk2);border:1px solid var(--bd2);border-radius:var(--r);padding:12px 14px;margin-bottom:10px">
@@ -888,7 +888,7 @@ function quickGen(id,fmt){showPage("gen",document.querySelectorAll(".ni")[1]);se
 async function generateContent(){
   if(!selEfemObj)return;
   const panel=document.getElementById("opanel");const content=document.getElementById("ocontent");const meta=document.getElementById("ometa");const chip=document.getElementById("ofmt-chip");
-  const fmtNames={carrusel:"Carrusel 4 slides",reel:"Guión Reel 45s",nota:"Nota SEO 700 palabras",story:"Story + encuesta"};
+  const fmtNames={carrusel:"Carrusel 4 slides",reel:"Guión Reel 45s",nota:"Nota periodística DRU",story:"Story + encuesta"};
   chip.textContent=fmtNames[selFmtStr];panel.classList.add("visible");
   content.innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Generando con IA...`;meta.innerHTML="";
 
@@ -938,26 +938,34 @@ CRITERIOS EDITORIALES DRU:
 - Incluir keyword geográfica "${e.city}" o "Entre Ríos" en los primeros 5 segundos
 - Audio: voz en off seria + música instrumental de fondo suave. No trending audio.`,
 
-    nota:`Actuá como periodista SEO de Diario Río Uruguay (Concordia, Entre Ríos). Redactá una nota periodística completa de 700 palabras sobre:
+    nota:`Sos un redactor de Diario Río Uruguay (www.diarioriouruguay.com). Redactá una nota periodística sobre:
 
 ${e.title} — ${e.d} de ${MESF[e.m]} de ${e.y} — ${e.city}, Entre Ríos
 
 Descripción base: ${e.desc}
 
-CRITERIOS EDITORIALES DRU — ESTRUCTURA OBLIGATORIA:
-1. META TITLE: keyword geográfica al INICIO ("${e.city}" o "Entre Ríos"), máximo 60 caracteres.
-2. META DESCRIPTION: gancho + dato clave + CTA implícito, máximo 155 caracteres.
-3. H1: titular periodístico con keyword geográfica. Estructura: consecuencia + causa. Sujeto + verbo + complemento. Máximo 65 chars para SEO.
-4. ENTRADILLA: 2-3 oraciones. Las 5W (Quién, Qué, Cuándo, Dónde, Por qué) en las primeras líneas. Keyword "Concordia" o "Entre Ríos" OBLIGATORIA en el primer párrafo.
-5. CUERPO: mínimo 400 palabras. H2 cada aproximadamente 200 palabras.
-   - H2 subtema 1: contexto o desarrollo del hecho
-   - H2 subtema 2: datos, citas o antecedentes
-   - H2 subtema 3: impacto actual o proyección para la región
-6. CITAS: entre comillas dobles, con nombre completo y cargo de la fuente. NUNCA inventar citas.
-7. KEYWORDS: 6 palabras clave relevantes para posicionamiento local.
-8. SLUG: URL con guiones, sin tildes, sin mayúsculas.
+CONDICIONES DE REDACCIÓN — OBLIGATORIAS:
+1. Mínimo 320 palabras. Puede extenderse si la información lo requiere.
+2. ESTRUCTURA:
+   TÍTULO: periodístico, directo, atractivo, basado en el dato más relevante. Sin signos de exclamación, sin frases sensacionalistas ni editorializaciones.
+   COPETE: breve y sintético, máximo 240 caracteres. Resumen del hecho principal, claro y objetivo.
+   CUERPO: formato de noticia tradicional, lenguaje periodístico profesional, objetividad absoluta. Sin opiniones, valoraciones personales, especulaciones ni adjetivaciones innecesarias. Priorizar datos concretos, contexto, antecedentes y declaraciones verificables.
+3. Insertar UN SUBTÍTULO cada TRES párrafos. No escribir "Subtítulo", simplemente colocar el texto como parte natural de la estructura. Los subtítulos deben anticipar el contenido de los siguientes párrafos.
+4. Información presentada de mayor a menor relevancia (pirámide invertida).
+5. Tono informativo, neutral y local/regional. Priorizar precisión de nombres, lugares, horarios, organismos, instituciones.
+6. Sin negritas, cursivas, emojis ni listas dentro de la nota.
+7. NUNCA inventar datos ni citas. Las comillas son sagradas.
 
-TONO: formal-periodístico sin sensacionalismo. Respetuoso con las fuentes. Sin opinión en notas informativas. NUNCA inventar datos. Audiencia: lectores de Concordia y Entre Ríos.`,
+SEO OBLIGATORIO:
+- META TITLE: keyword geográfica ("${e.city}" o "Entre Ríos") al INICIO, máx 60 chars.
+- META DESCRIPTION: dato informativo + CTA implícito, máx 155 chars. Keyword al principio.
+- SLUG: con guiones, sin tildes, sin mayúsculas. Keyword en el slug.
+- Keyword geográfica en el primer párrafo.
+- Oraciones claras y fáciles de leer. Evitar oraciones largas o complejas.
+- Usar voz activa.
+- KEYWORDS: 6 palabras clave con foco local.
+
+Entregá la nota completa con: META TITLE, META DESCRIPTION, SLUG, TÍTULO, COPETE, CUERPO (con subtítulos cada 3 párrafos), KEYWORDS.`,
 
     story:`Actuá como editor de redes de un medio periodístico serio: Diario Río Uruguay (Concordia, Entre Ríos). Generá 4 stories de Instagram encadenadas para esta efeméride:
 
@@ -981,7 +989,7 @@ CRITERIOS EDITORIALES DRU:
     const data=await res.json();
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     content.textContent=text;
-    const metaData={carrusel:[["Formato","Carrusel 4 slides"],["Producción","~20 min Adobe Express"],["Alcance","Alto — guardable"]],reel:[["Duración","45 segundos"],["Edición","Premiere Pro"],["Audio","Voz en off + música"]],nota:[["Palabras","700+"],["SEO","Meta incluida"],["Publicar","Antes del "+e.d+"/"+e.m]],story:[["Stories","4 encadenadas"],["Interacción","Encuesta incluida"],["Guardar en","Destacados ER"]]};
+    const metaData={carrusel:[["Formato","Carrusel 4 slides"],["Producción","~20 min Adobe Express"],["Alcance","Alto — guardable"]],reel:[["Duración","45 segundos"],["Edición","Premiere Pro"],["Audio","Voz en off + música"]],nota:[["Palabras","320+"],["SEO","Meta + slug"],["Subtítulos","Cada 3 párrafos"]],story:[["Stories","4 encadenadas"],["Interacción","Encuesta incluida"],["Guardar en","Destacados ER"]]};
     meta.innerHTML=(metaData[selFmtStr]||[]).map(([k,v])=>`<div class="mc">${k}: <span>${v}</span></div>`).join("");
   }catch(err){content.textContent="Error al conectar con la IA. Intentá de nuevo.";}
 }
@@ -1225,49 +1233,61 @@ async function runAISEO(){
   const content=document.getElementById("ai-seo-content");
   result.style.display="block";
   content.innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Analizando nota completa...`;
-  const prompt=`Actuá como periodista SEO de Diario Río Uruguay (Concordia, Entre Ríos). Analizá esta nota y dá sugerencias CONCRETAS aplicando los criterios editoriales DRU.
+  const wordCount=body.split(/\s+/).length;
+  const prompt=`Sos editor SEO de Diario Río Uruguay (www.diarioriouruguay.com). Analizá esta nota según los criterios editoriales DRU y las recomendaciones SEO.
 
-TITULAR ACTUAL:
-${title}
-
-CUERPO DE LA NOTA:
+TITULAR ACTUAL: ${title}
+CUERPO (${wordCount} palabras):
 ${body.substring(0,3000)}
 
-CRITERIOS EDITORIALES DRU A EVALUAR:
-- Meta title: keyword geográfica al inicio, máx 60 chars
-- Entradilla: 5W en primeras líneas, keyword "Concordia"/"Entre Ríos" en primer párrafo
-- Estructura: H1 + H2 cada ~200 palabras
-- Citas: entre comillas dobles con nombre y cargo. Nunca inventadas.
-- Tono: formal-periodístico sin sensacionalismo
-- Slug: sin tildes, con guiones
+CRITERIOS A EVALUAR:
+- Mínimo 320 palabras (actual: ${wordCount})
+- Título: periodístico, directo, sin exclamaciones ni sensacionalismo
+- Copete: máx 240 chars, claro y objetivo
+- Subtítulo cada 3 párrafos (obligatorio)
+- Información de mayor a menor relevancia (pirámide invertida)
+- Objetividad absoluta. Sin opiniones, valoraciones ni adjetivaciones innecesarias
+- Precisión de nombres, lugares, horarios, organismos
+- Sin negritas, cursivas, emojis ni listas
+- Keyword geográfica al inicio del meta title (máx 60 chars)
+- Keyword geográfica en meta description (máx 155 chars) al principio
+- Keyword geográfica en el slug y en el primer párrafo
+- Oraciones claras y fáciles de leer. Voz activa. Evitar oraciones largas
+- Citas entre comillas dobles con nombre y cargo
 
-Respondé con este formato exacto:
+Respondé con este formato:
+
+ERRORES (lo que está MAL y debe corregirse):
+[lista numerada]
+
+MEJORAS (lo que puede mejorar):
+[lista numerada]
+
+CORRECTO (lo que cumple bien):
+[lista numerada]
 
 SCORE SEO: X/100
 
-META TITLE SUGERIDO (keyword geográfica al inicio, máx 60 chars):
-[tu sugerencia]
+META TITLE SUGERIDO (keyword geo al inicio, máx 60 chars):
+[sugerencia]
 
-META DESCRIPTION SUGERIDA (gancho + dato + CTA implícito, máx 155 chars):
-[tu sugerencia]
+META DESCRIPTION SUGERIDA (keyword al principio, máx 155 chars):
+[sugerencia]
 
-TITULAR ALTERNATIVO 1: [más SEO — consecuencia antes que causa, con keyword geo]
-TITULAR ALTERNATIVO 2: [más redes — "qué se sabe" / "qué pasó" / cifra destacada]
+SLUG SUGERIDO:
+[con guiones, sin tildes, con keyword]
 
-KEYWORDS PRINCIPALES (6 keywords con foco local):
+TITULAR ALTERNATIVO 1: [más SEO]
+TITULAR ALTERNATIVO 2: [más redes]
+
+KEYWORDS (6 con foco local):
 [lista]
 
-MEJORAS SUGERIDAS:
-1. [mejora concreta — incluir/excluir qué y dónde]
-2. [mejora concreta]
-3. [mejora concreta]
-4. [mejora concreta]
+SUBTÍTULOS SUGERIDOS (uno cada 3 párrafos):
+[lista]
 
-H2 SUGERIDOS (uno cada ~200 palabras):
-[subtítulos que mejoren estructura SEO]
-
-ENTRADILLA SUGERIDA (5W en 2-3 oraciones, keyword geográfica en primera oración):
-[tu sugerencia]`;
+COPETE SUGERIDO (máx 240 chars):
+[sugerencia]`;
 
   try{
     const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
@@ -1362,8 +1382,8 @@ function handleAudioDrop(e){
 }
 
 function setAudioFile(file){
-  const maxSize=4.5*1024*1024;
-  if(file.size>maxSize){showToast("⚠ El archivo supera 4.5 MB. Usá las alternativas externas para audios largos.");return;}
+  const maxSize=15*1024*1024;
+  if(file.size>maxSize){showToast("⚠ El archivo supera 15 MB. Comprimí el audio o dividilo en partes.");return;}
   dsgAudioFile=file;
   document.getElementById("dsg-audio-info").style.display="block";
   document.getElementById("dsg-audio-name").textContent=file.name;
@@ -1441,30 +1461,37 @@ async function processTranscription(){
   result.style.display="block";
   document.getElementById("dsg-nota").innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Generando nota periodística...`;
 
-  const prompt=`Actuá como periodista SEO de Diario Río Uruguay (Concordia, Entre Ríos). Procesás esta transcripción de ${tipo} (sección ${seccion})${persona?" con "+persona:""}.
+  const prompt=`Sos un redactor de Diario Río Uruguay (www.diarioriouruguay.com). Procesás esta transcripción de ${tipo} (sección ${seccion})${persona?" con "+persona:""}.
 
 TRANSCRIPCIÓN:
-${text.substring(0,3000)}
+${text.substring(0,4000)}
 
-CRITERIOS EDITORIALES DRU — OBLIGATORIOS:
-- Tono: formal-periodístico sin sensacionalismo. Sin opinión en notas informativas.
-- NUNCA inventar datos ni citas. Las comillas son sagradas — solo transcribir lo que dijo la fuente.
-- Citas textuales: entre comillas dobles, con nombre completo y cargo de la fuente.
-- Keyword geográfica "Concordia" o "Entre Ríos" en el primer párrafo.
+CONDICIONES DE REDACCIÓN — OBLIGATORIAS:
+1. Mínimo 320 palabras.
+2. TÍTULO: periodístico, directo, atractivo, basado en el dato más relevante. Sin signos de exclamación ni frases sensacionalistas.
+3. COPETE: breve y sintético, máximo 240 caracteres. Resumen claro y objetivo del hecho.
+4. CUERPO: formato de noticia tradicional. Lenguaje periodístico profesional. Objetividad absoluta. Sin opiniones, valoraciones personales ni adjetivaciones innecesarias. Información de mayor a menor relevancia.
+5. Insertar UN SUBTÍTULO cada TRES párrafos. Los subtítulos anticipan el contenido siguiente.
+6. Citas textuales: entre comillas dobles, con nombre completo y cargo. NUNCA inventar citas — solo transcribir lo que dijo la fuente.
+7. Priorizar precisión de nombres, lugares, horarios, organismos, instituciones.
+8. Sin negritas, cursivas, emojis ni listas dentro de la nota.
+9. Oraciones claras y fáciles de leer. Voz activa. Evitar oraciones largas.
 
-Generá:
-1. NOTA PERIODÍSTICA (400-600 palabras):
-- META TITLE: keyword geográfica al INICIO, máximo 60 caracteres.
-- META DESCRIPTION: gancho + dato clave, máximo 155 caracteres.
-- H1: titular periodístico. Consecuencia antes que causa. Con keyword geográfica. Máx 65 chars.
-- ENTRADILLA: 2-3 oraciones con las 5W (Quién, Qué, Cuándo, Dónde, Por qué). Keyword geo en primera oración.
-- CUERPO: H2 cada ~200 palabras. Citas textuales entre comillas con nombre y cargo. Sin inventar datos.
-- SLUG: sin tildes, con guiones, sin mayúsculas.
+SEO:
+- META TITLE: keyword geográfica al INICIO, máx 60 chars.
+- META DESCRIPTION: dato informativo, máx 155 chars. Keyword al principio.
+- SLUG: con guiones, sin tildes, keyword incluida.
+- Keyword "Concordia" o "Entre Ríos" en el primer párrafo.
+- KEYWORDS: 6 palabras clave con foco local.
 
-2. COPY REDES (separado con "---REDES---"):
-- FACEBOOK: primera línea informativa autónoma (bajada periodística, no gancho emocional) + párrafo con dato concreto y consecuencia local + "Leé más en diarioriouruguay.com" + #Concordia #EntreRíos + 2-3 hashtags temáticos. Sin emojis decorativos.
-- INSTAGRAM: titular informativo máx 12 palabras por línea — redactado como placa de diario, no como copy publicitario. Caption con contexto verificable + CTA al link de la bio.
-- THREADS: 2-3 líneas informativas directas. Tono serio.`;
+Entregá: META TITLE, META DESCRIPTION, SLUG, TÍTULO, COPETE, CUERPO (con subtítulos cada 3 párrafos), KEYWORDS.
+
+---REDES---
+
+2. COPY REDES:
+- FACEBOOK: primera línea informativa autónoma + párrafo con dato concreto + "Leé más en diarioriouruguay.com" + #Concordia #EntreRíos + 2-3 hashtags. Sin emojis.
+- INSTAGRAM: titular informativo máx 12 palabras. Caption con contexto + CTA link en bio.
+- THREADS: 2-3 líneas informativas directas.`;
 
   try{
     const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
@@ -1551,27 +1578,32 @@ async function genEnfoque(){
   content.innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Aplicando enfoque "${selEnf_val}"...`;
   document.getElementById("enf-sel-label").textContent=selEnf_val;
 
-  const prompt=`Actuá como editor periodístico de Diario Río Uruguay (Concordia, Entre Ríos).
+  const prompt=`Sos redactor de Diario Río Uruguay (www.diarioriouruguay.com).
 
 ${ENF_PROMPTS[selEnf_val]}
 
-CRITERIOS EDITORIALES DRU:
-- Tono formal-periodístico. Sin sensacionalismo. Sin muletillas de redes.
+CONDICIONES DE REDACCIÓN DRU — OBLIGATORIAS:
+- Mínimo 320 palabras.
+- Título: periodístico, directo, atractivo. Sin exclamaciones ni sensacionalismo.
+- Copete: máx 240 chars, claro y objetivo.
+- Subtítulo cada 3 párrafos (obligatorio, no escribir la palabra "Subtítulo").
+- Objetividad absoluta. Sin opiniones ni adjetivaciones innecesarias.
+- Información de mayor a menor relevancia.
 - NUNCA inventar datos ni citas. Solo usar información del texto provisto.
-- Keyword geográfica obligatoria: "Concordia" o "Entre Ríos" donde sea natural.
-- Anti-clickbait: el titular debe cumplir lo que promete.
-- Calidad sobre clics: informar bien es más importante que atraer tráfico.
+- Oraciones claras y fáciles de leer. Voz activa.
+- Sin negritas, cursivas, emojis ni listas dentro de la nota.
+- Keyword geográfica "Concordia" o "Entre Ríos" en el primer párrafo.
 
 TITULAR ORIGINAL: ${title}
 TEXTO BASE:
 ${body.substring(0,2500)}
 
 Generá:
-1. TITULAR NUEVO (adaptado al enfoque "${selEnf_val}", máx 70 chars)
-2. BAJADA (1-2 oraciones)
-3. NOTA REESCRITA (mínimo 300 palabras, adaptada al enfoque)
-4. COPY FACEBOOK (3 párrafos + CTA + hashtags)
-5. COPY INSTAGRAM (hook + caption)`;
+1. TÍTULO (adaptado al enfoque "${selEnf_val}", máx 70 chars)
+2. COPETE (máx 240 chars)
+3. NOTA REESCRITA (mín 320 palabras, con subtítulo cada 3 párrafos)
+4. COPY FACEBOOK (primera línea informativa autónoma + dato concreto + CTA + hashtags)
+5. COPY INSTAGRAM (hook máx 12 palabras + caption informativo)`;
 
   try{
     const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
