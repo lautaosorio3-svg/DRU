@@ -421,7 +421,7 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
           <div class="fg">
             <div class="fc selected" data-fmt="carrusel" onclick="selFmt(this)"><div class="fc-i">⬛</div><div class="fc-n">Carrusel</div><div class="fc-s">4 slides + CTA</div></div>
             <div class="fc" data-fmt="reel" onclick="selFmt(this)"><div class="fc-i">▶</div><div class="fc-n">Guión Reel</div><div class="fc-s">45 seg gancho</div></div>
-            <div class="fc" data-fmt="nota" onclick="selFmt(this)"><div class="fc-i">📝</div><div class="fc-n">Nota SEO</div><div class="fc-s">320+ palabras</div></div>
+            <div class="fc" data-fmt="nota" onclick="selFmt(this)"><div class="fc-i">📝</div><div class="fc-n">Nota SEO</div><div class="fc-s">600+ palabras</div></div>
             <div class="fc" data-fmt="story" onclick="selFmt(this)"><div class="fc-i">◻</div><div class="fc-n">Story</div><div class="fc-s">4 slides encadenadas</div></div>
           </div>
           <div id="sel-disp" style="background:var(--dk2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--mt);min-height:48px;display:flex;align-items:center">Seleccioná una efeméride →</div>
@@ -957,7 +957,7 @@ ENTRADILLA:
 - El lector debe entender QUÉ pasó en la primera oración.
 
 CUERPO:
-- Mínimo 320 palabras (400+ para notas de noticias).
+- Mínimo 600 palabras. Google posiciona mejor notas locales de 600-700 palabras.
 - Pirámide invertida: información de mayor a menor relevancia.
 - Insertar UN SUBTÍTULO (H2) cada TRES párrafos. Los subtítulos deben contener keywords temáticas (ej: "Cómo cobrar el premio", "Qué dijo el intendente"). No escribir la palabra "Subtítulo".
 - Tono informativo, neutral, local/regional.
@@ -998,11 +998,11 @@ CRITERIOS EDITORIALES DRU:
   };
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:1000,messages:[{role:"user",content:prompts[selFmtStr]}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:2500,messages:[{role:"user",content:prompts[selFmtStr]}]})});
     const data=await res.json();
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     content.textContent=text;
-    const metaData={carrusel:[["Formato","Carrusel 4 slides"],["Producción","~20 min Adobe Express"],["Alcance","Alto — guardable"]],reel:[["Duración","45 segundos"],["Edición","Premiere Pro"],["Audio","Voz en off + música"]],nota:[["Palabras","320+"],["SEO","Meta + slug"],["Subtítulos","Cada 3 párrafos"]],story:[["Stories","4 encadenadas"],["Interacción","Encuesta incluida"],["Guardar en","Destacados ER"]]};
+    const metaData={carrusel:[["Formato","Carrusel 4 slides"],["Producción","~20 min Adobe Express"],["Alcance","Alto — guardable"]],reel:[["Duración","45 segundos"],["Edición","Premiere Pro"],["Audio","Voz en off + música"]],nota:[["Palabras","600+"],["SEO","Meta + slug"],["Subtítulos","Cada 3 párrafos"]],story:[["Stories","4 encadenadas"],["Interacción","Encuesta incluida"],["Guardar en","Destacados ER"]]};
     meta.innerHTML=(metaData[selFmtStr]||[]).map(([k,v])=>`<div class="mc">${k}: <span>${v}</span></div>`).join("");
   }catch(err){content.textContent="Error al conectar con la IA. Intentá de nuevo.";}
 }
@@ -1269,7 +1269,7 @@ ENTRADILLA:
 - El lector entiende QUÉ pasó en la primera oración.
 
 ESTRUCTURA:
-- Mínimo 320 palabras (actual: ${wordCount}). 400+ para notas de noticias.
+- Mínimo 600 palabras (actual: ${wordCount}). Google posiciona mejor notas locales de 600-700 palabras.
 - Subtítulo (H2) obligatorio cada 3 párrafos con keywords temáticas.
 - Pirámide invertida.
 
@@ -1511,7 +1511,7 @@ ENTRADILLA:
 - El lector entiende QUÉ pasó en la primera oración.
 
 CUERPO:
-- Mínimo 320 palabras (400+ para notas de noticias).
+- Mínimo 600 palabras. Google posiciona mejor notas locales de 600-700 palabras.
 - Pirámide invertida.
 - UN SUBTÍTULO (H2) cada TRES párrafos con keywords temáticas (ej: "Cómo se enteró", "Qué dijo el funcionario"). No escribir la palabra "Subtítulo".
 - Objetividad absoluta. Sin opiniones ni adjetivaciones innecesarias.
@@ -1540,7 +1540,7 @@ Entregá: META TITLE, META DESCRIPTION, SLUG, TÍTULO, COPETE, CUERPO (con subt�
 - THREADS: 2-3 líneas informativas directas.`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2500,messages:[{role:"user",content:prompt}]})});
     const raw=await res.text();
     let data;try{data=JSON.parse(raw);}catch(e){document.getElementById("dsg-nota").textContent="Error al procesar. Intentá de nuevo.";btn.textContent="Generar nota periodística →";btn.disabled=false;return;}
     if(data.error){document.getElementById("dsg-nota").textContent="Error: "+data.error;btn.textContent="Generar nota periodística →";btn.disabled=false;return;}
@@ -1640,7 +1640,7 @@ COPETE: máx 240 chars. No repetir el titular.
 ENTRADILLA: 5W en las primeras 3 oraciones. Keyword geo en el primer párrafo.
 
 CUERPO:
-- Mínimo 320 palabras. Pirámide invertida.
+- Mínimo 600 palabras. Pirámide invertida.
 - Subtítulo (H2) cada 3 párrafos con keywords temáticas. No escribir la palabra "Subtítulo".
 - Objetividad absoluta. Oraciones claras y cortas. Voz activa.
 - Sin negritas, cursivas, emojis ni listas.
@@ -1654,12 +1654,12 @@ ${body.substring(0,2500)}
 Generá:
 1. TÍTULO (adaptado al enfoque "${selEnf_val}", máx 65 chars, keyword geo en posición 1-2, verbo activo)
 2. COPETE (máx 240 chars, no repetir titular)
-3. NOTA REESCRITA (mín 320 palabras, con subtítulo H2 cada 3 párrafos con keywords temáticas)
+3. NOTA REESCRITA (mín 600 palabras, con subtítulo H2 cada 3 párrafos con keywords temáticas)
 4. COPY FACEBOOK (primera línea informativa autónoma que informe sin hacer clic + dato concreto + CTA + hashtags)
 5. COPY INSTAGRAM (hook máx 12 palabras + caption informativo)`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2500,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     content.textContent=text;
