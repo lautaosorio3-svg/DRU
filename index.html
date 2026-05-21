@@ -938,25 +938,45 @@ ${e.title} — ${e.d} de ${MESF[e.m]} de ${e.y} — ${e.city}, Entre Ríos
 Descripción base: ${e.desc}
 
 CONDICIONES DE REDACCIÓN — OBLIGATORIAS:
-1. Mínimo 320 palabras. Puede extenderse si la información lo requiere.
-2. ESTRUCTURA:
-   TÍTULO: periodístico, directo, atractivo, basado en el dato más relevante. Sin signos de exclamación, sin frases sensacionalistas ni editorializaciones.
-   COPETE: breve y sintético, máximo 240 caracteres. Resumen del hecho principal, claro y objetivo.
-   CUERPO: formato de noticia tradicional, lenguaje periodístico profesional, objetividad absoluta. Sin opiniones, valoraciones personales, especulaciones ni adjetivaciones innecesarias. Priorizar datos concretos, contexto, antecedentes y declaraciones verificables.
-3. Insertar UN SUBTÍTULO cada TRES párrafos. No escribir "Subtítulo", simplemente colocar el texto como parte natural de la estructura. Los subtítulos deben anticipar el contenido de los siguientes párrafos.
-4. Información presentada de mayor a menor relevancia (pirámide invertida).
-5. Tono informativo, neutral y local/regional. Priorizar precisión de nombres, lugares, horarios, organismos, instituciones.
-6. Sin negritas, cursivas, emojis ni listas dentro de la nota.
-7. NUNCA inventar datos ni citas. Las comillas son sagradas.
+
+TITULAR:
+- Máximo 65 caracteres (Google corta en ~65 en el SERP).
+- Keyword geográfica ("${e.city}" o "Entre Ríos") en posición 1 o 2 del titular.
+- Nombre COMPLETO de eventos/productos/instituciones (ej: "Quini 6" no "Quini", "Ruta Nacional 14" no "la ruta").
+- Verbo activo obligatorio (ej: "vendió", "inauguró", "anunció"). No usar voz pasiva.
+- Sin relleno al final. Si no aporta información, no va.
+- Sin signos de exclamación, sin frases sensacionalistas.
+
+COPETE:
+- Máximo 240 caracteres. Resumen claro del hecho. No repetir el titular.
+
+ENTRADILLA:
+- Las 5W (Quién, Qué, Dónde, Cuándo, Cómo/Por qué) en las primeras 3 oraciones.
+- Keyword geográfica en el primer párrafo.
+- No repetir información que ya está en el titular.
+- El lector debe entender QUÉ pasó en la primera oración.
+
+CUERPO:
+- Mínimo 320 palabras (400+ para notas de noticias).
+- Pirámide invertida: información de mayor a menor relevancia.
+- Insertar UN SUBTÍTULO (H2) cada TRES párrafos. Los subtítulos deben contener keywords temáticas (ej: "Cómo cobrar el premio", "Qué dijo el intendente"). No escribir la palabra "Subtítulo".
+- Tono informativo, neutral, local/regional.
+- Precisión de nombres completos, lugares, horarios, organismos, instituciones.
+- Sin negritas, cursivas, emojis ni listas dentro de la nota.
+- Oraciones claras y cortas. Voz activa. Evitar subordinadas largas.
+
+CITAS TEXTUALES:
+- Una cita = una idea. Si la fuente dijo tres cosas, son tres citas separadas.
+- Contexto ANTES de la cita (quién habló, en qué circunstancia).
+- Atribución DESPUÉS de la cita (nombre completo + cargo/rol).
+- NUNCA mezclar múltiples declaraciones en una sola cita larga.
+- NUNCA inventar citas. Las comillas son sagradas.
 
 SEO OBLIGATORIO:
-- META TITLE: keyword geográfica ("${e.city}" o "Entre Ríos") al INICIO, máx 60 chars.
-- META DESCRIPTION: dato informativo + CTA implícito, máx 155 chars. Keyword al principio.
-- SLUG: con guiones, sin tildes, sin mayúsculas. Keyword en el slug.
-- Keyword geográfica en el primer párrafo.
-- Oraciones claras y fáciles de leer. Evitar oraciones largas o complejas.
-- Usar voz activa.
-- KEYWORDS: 6 palabras clave con foco local.
+- META TITLE: keyword geográfica en posición 1 o 2, máx 65 chars.
+- META DESCRIPTION: 140-155 chars. Keyword al principio. No repetir el titular. Incluir gancho de interés.
+- SLUG: con guiones, sin tildes, sin mayúsculas. Keyword incluida.
+- KEYWORDS: 6 palabras clave con foco local y búsqueda real.
 
 Entregá la nota completa con: META TITLE, META DESCRIPTION, SLUG, TÍTULO, COPETE, CUERPO (con subtítulos cada 3 párrafos), KEYWORDS.`,
 
@@ -1227,31 +1247,45 @@ async function runAISEO(){
   result.style.display="block";
   content.innerHTML=`<div class="dots"><span></span><span></span><span></span></div> Analizando nota completa...`;
   const wordCount=body.split(/\s+/).length;
-  const prompt=`Sos editor SEO de Diario Río Uruguay (www.diarioriouruguay.com). Analizá esta nota según los criterios editoriales DRU y las recomendaciones SEO.
+  const prompt=`Sos editor SEO de Diario Río Uruguay (www.diarioriouruguay.com). Analizá esta nota según los criterios editoriales DRU.
 
 TITULAR ACTUAL: ${title}
 CUERPO (${wordCount} palabras):
 ${body.substring(0,3000)}
 
 CRITERIOS A EVALUAR:
-- Mínimo 320 palabras (actual: ${wordCount})
-- Título: periodístico, directo, sin exclamaciones ni sensacionalismo
-- Copete: máx 240 chars, claro y objetivo
-- Subtítulo cada 3 párrafos (obligatorio)
-- Información de mayor a menor relevancia (pirámide invertida)
-- Objetividad absoluta. Sin opiniones, valoraciones ni adjetivaciones innecesarias
-- Precisión de nombres, lugares, horarios, organismos
-- Sin negritas, cursivas, emojis ni listas
-- Keyword geográfica al inicio del meta title (máx 60 chars)
-- Keyword geográfica en meta description (máx 155 chars) al principio
-- Keyword geográfica en el slug y en el primer párrafo
-- Oraciones claras y fáciles de leer. Voz activa. Evitar oraciones largas
-- Citas entre comillas dobles con nombre y cargo
+
+TITULAR:
+- Máximo 65 caracteres (Google corta en ~65 en el SERP). Contar los caracteres del titular actual e informar.
+- Keyword geográfica (Concordia/Entre Ríos/Salto Grande) en posición 1 o 2 del titular.
+- Nombre COMPLETO del evento/producto/institución (ej: "Quini 6" no "Quini", "Ruta Nacional 14" no "la ruta").
+- Verbo activo obligatorio (no pasivo).
+- Sin relleno al final (frases que no aportan información = relleno).
+
+ENTRADILLA:
+- Las 5W (Quién, Qué, Dónde, Cuándo, Cómo) respondidas en las primeras 3 oraciones.
+- Keyword geográfica en el primer párrafo.
+- No repetir información del titular.
+- El lector entiende QUÉ pasó en la primera oración.
+
+ESTRUCTURA:
+- Mínimo 320 palabras (actual: ${wordCount}). 400+ para notas de noticias.
+- Subtítulo (H2) obligatorio cada 3 párrafos con keywords temáticas.
+- Pirámide invertida.
+
+CITAS:
+- Una cita = una idea. No mezclar declaraciones en una sola cita larga.
+- Contexto ANTES de la cita, atribución DESPUÉS (nombre + cargo).
+
+FORMATO:
+- Objetividad absoluta. Sin opiniones ni adjetivaciones innecesarias.
+- Oraciones claras y cortas. Voz activa.
+- Sin negritas, cursivas, emojis ni listas.
 
 Respondé con este formato:
 
 ERRORES (lo que está MAL y debe corregirse):
-[lista numerada]
+[lista numerada — ser específico: indicar el problema y cómo corregirlo]
 
 MEJORAS (lo que puede mejorar):
 [lista numerada]
@@ -1261,17 +1295,17 @@ CORRECTO (lo que cumple bien):
 
 SCORE SEO: X/100
 
-META TITLE SUGERIDO (keyword geo al inicio, máx 60 chars):
-[sugerencia]
+META TITLE SUGERIDO (keyword geo en posición 1-2, máx 65 chars):
+[sugerencia con cantidad de caracteres]
 
-META DESCRIPTION SUGERIDA (keyword al principio, máx 155 chars):
-[sugerencia]
+META DESCRIPTION SUGERIDA (140-155 chars, keyword al principio, no repetir titular, gancho de interés):
+[sugerencia con cantidad de caracteres]
 
 SLUG SUGERIDO:
 [con guiones, sin tildes, con keyword]
 
-TITULAR ALTERNATIVO 1: [más SEO]
-TITULAR ALTERNATIVO 2: [más redes]
+TITULAR ALTERNATIVO 1: [más SEO, máx 65 chars]
+TITULAR ALTERNATIVO 2: [más redes]`
 
 KEYWORDS (6 con foco local):
 [lista]
@@ -1460,29 +1494,48 @@ TRANSCRIPCIÓN:
 ${text.substring(0,4000)}
 
 CONDICIONES DE REDACCIÓN — OBLIGATORIAS:
-1. Mínimo 320 palabras.
-2. TÍTULO: periodístico, directo, atractivo, basado en el dato más relevante. Sin signos de exclamación ni frases sensacionalistas.
-3. COPETE: breve y sintético, máximo 240 caracteres. Resumen claro y objetivo del hecho.
-4. CUERPO: formato de noticia tradicional. Lenguaje periodístico profesional. Objetividad absoluta. Sin opiniones, valoraciones personales ni adjetivaciones innecesarias. Información de mayor a menor relevancia.
-5. Insertar UN SUBTÍTULO cada TRES párrafos. Los subtítulos anticipan el contenido siguiente.
-6. Citas textuales: entre comillas dobles, con nombre completo y cargo. NUNCA inventar citas — solo transcribir lo que dijo la fuente.
-7. Priorizar precisión de nombres, lugares, horarios, organismos, instituciones.
-8. Sin negritas, cursivas, emojis ni listas dentro de la nota.
-9. Oraciones claras y fáciles de leer. Voz activa. Evitar oraciones largas.
+
+TITULAR:
+- Máximo 65 caracteres (Google corta en ~65).
+- Keyword geográfica ("Concordia" o "Entre Ríos") en posición 1 o 2.
+- Nombre COMPLETO de eventos/productos/instituciones (no abreviar ni genericizar).
+- Verbo activo obligatorio. Sin voz pasiva.
+- Sin relleno al final. Sin exclamaciones ni sensacionalismo.
+
+COPETE:
+- Máximo 240 caracteres. No repetir el titular.
+
+ENTRADILLA:
+- Las 5W en las primeras 3 oraciones.
+- Keyword geográfica en el primer párrafo.
+- El lector entiende QUÉ pasó en la primera oración.
+
+CUERPO:
+- Mínimo 320 palabras (400+ para notas de noticias).
+- Pirámide invertida.
+- UN SUBTÍTULO (H2) cada TRES párrafos con keywords temáticas (ej: "Cómo se enteró", "Qué dijo el funcionario"). No escribir la palabra "Subtítulo".
+- Objetividad absoluta. Sin opiniones ni adjetivaciones innecesarias.
+- Precisión de nombres completos, lugares, horarios, organismos.
+- Sin negritas, cursivas, emojis ni listas.
+- Oraciones claras y cortas. Voz activa.
+
+CITAS TEXTUALES (CRÍTICO):
+- Una cita = una idea. No mezclar declaraciones en una cita larga.
+- Contexto ANTES de la cita. Atribución DESPUÉS (nombre completo + cargo).
+- Solo transcribir lo que la fuente dijo. NUNCA inventar citas.
 
 SEO:
-- META TITLE: keyword geográfica al INICIO, máx 60 chars.
-- META DESCRIPTION: dato informativo, máx 155 chars. Keyword al principio.
+- META TITLE: keyword geográfica en posición 1 o 2, máx 65 chars.
+- META DESCRIPTION: 140-155 chars. Keyword al principio. No repetir titular. Gancho de interés.
 - SLUG: con guiones, sin tildes, keyword incluida.
-- Keyword "Concordia" o "Entre Ríos" en el primer párrafo.
-- KEYWORDS: 6 palabras clave con foco local.
+- KEYWORDS: 6 palabras clave con foco local y búsqueda real.
 
 Entregá: META TITLE, META DESCRIPTION, SLUG, TÍTULO, COPETE, CUERPO (con subtítulos cada 3 párrafos), KEYWORDS.
 
 ---REDES---
 
 2. COPY REDES:
-- FACEBOOK: primera línea informativa autónoma + párrafo con dato concreto + "Leé más en diarioriouruguay.com" + #Concordia #EntreRíos + 2-3 hashtags. Sin emojis.
+- FACEBOOK: primera línea informativa autónoma (que informe sin hacer clic) + párrafo con dato concreto + "Leé más en diarioriouruguay.com" + #Concordia #EntreRíos + 2-3 hashtags. Sin emojis.
 - INSTAGRAM: titular informativo máx 12 palabras. Caption con contexto + CTA link en bio.
 - THREADS: 2-3 líneas informativas directas.`;
 
@@ -1576,26 +1629,33 @@ async function genEnfoque(){
 ${ENF_PROMPTS[selEnf_val]}
 
 CONDICIONES DE REDACCIÓN DRU — OBLIGATORIAS:
-- Mínimo 320 palabras.
-- Título: periodístico, directo, atractivo. Sin exclamaciones ni sensacionalismo.
-- Copete: máx 240 chars, claro y objetivo.
-- Subtítulo cada 3 párrafos (obligatorio, no escribir la palabra "Subtítulo").
-- Objetividad absoluta. Sin opiniones ni adjetivaciones innecesarias.
-- Información de mayor a menor relevancia.
-- NUNCA inventar datos ni citas. Solo usar información del texto provisto.
-- Oraciones claras y fáciles de leer. Voz activa.
-- Sin negritas, cursivas, emojis ni listas dentro de la nota.
-- Keyword geográfica "Concordia" o "Entre Ríos" en el primer párrafo.
+
+TITULAR:
+- Máximo 65 caracteres. Keyword geográfica en posición 1 o 2.
+- Nombre COMPLETO de eventos/productos/instituciones.
+- Verbo activo. Sin relleno al final. Sin exclamaciones ni sensacionalismo.
+
+COPETE: máx 240 chars. No repetir el titular.
+
+ENTRADILLA: 5W en las primeras 3 oraciones. Keyword geo en el primer párrafo.
+
+CUERPO:
+- Mínimo 320 palabras. Pirámide invertida.
+- Subtítulo (H2) cada 3 párrafos con keywords temáticas. No escribir la palabra "Subtítulo".
+- Objetividad absoluta. Oraciones claras y cortas. Voz activa.
+- Sin negritas, cursivas, emojis ni listas.
+
+CITAS: una cita = una idea. Contexto antes, atribución después. NUNCA inventar ni mezclar declaraciones.
 
 TITULAR ORIGINAL: ${title}
 TEXTO BASE:
 ${body.substring(0,2500)}
 
 Generá:
-1. TÍTULO (adaptado al enfoque "${selEnf_val}", máx 70 chars)
-2. COPETE (máx 240 chars)
-3. NOTA REESCRITA (mín 320 palabras, con subtítulo cada 3 párrafos)
-4. COPY FACEBOOK (primera línea informativa autónoma + dato concreto + CTA + hashtags)
+1. TÍTULO (adaptado al enfoque "${selEnf_val}", máx 65 chars, keyword geo en posición 1-2, verbo activo)
+2. COPETE (máx 240 chars, no repetir titular)
+3. NOTA REESCRITA (mín 320 palabras, con subtítulo H2 cada 3 párrafos con keywords temáticas)
+4. COPY FACEBOOK (primera línea informativa autónoma que informe sin hacer clic + dato concreto + CTA + hashtags)
 5. COPY INSTAGRAM (hook máx 12 palabras + caption informativo)`;
 
   try{
