@@ -723,13 +723,6 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
             </select>
           </div>
           <div class="ff" style="margin-bottom:10px"><label class="flbl">Descripción</label><textarea class="fi" id="sug-text" placeholder="Describí tu sugerencia, qué cambiarías, qué agregarías, qué no funciona..." style="min-height:140px"></textarea></div>
-          <div class="ff" style="margin-bottom:10px"><label class="flbl">Notificar por email a</label>
-            <div style="display:flex;flex-direction:column;gap:6px" id="sug-notify">
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--lt);cursor:pointer"><input type="checkbox" value="admin" checked> Administrador (lautaosorio3@gmail.com)</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--lt);cursor:pointer"><input type="checkbox" value="redactor"> Redactor DRU (pereiragmati@gmail.com)</label>
-              <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--lt);cursor:pointer"><input type="checkbox" value="redes"> Community Manager (more.martinezfi@gmail.com)</label>
-            </div>
-          </div>
           <button class="gnbtn" onclick="addSugerencia()">Enviar sugerencia →</button>
         </div>
         <div>
@@ -744,7 +737,7 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
 </div>
 
 <script>
-const USERS={admin:{pass:"dru2024",name:"Administrador",role:"Admin",av:"AD",email:"lautaosorio3@gmail.com"},redactor:{pass:"redactor123",name:"Redactor DRU",role:"Redacción",av:"RD",email:"pereiragmati@gmail.com"},redes:{pass:"redes123",name:"Community",role:"Redes sociales",av:"CM",email:"more.martinezfi@gmail.com"}};
+const USERS={more:{pass:"dru2026",name:"More",role:"Redes sociales",av:"MO"},mati:{pass:"dru2026",name:"Mati",role:"Redacción",av:"MA"},laura:{pass:"dru2026",name:"Laura",role:"Redacción",av:"LA"},horacio:{pass:"dru2026",name:"Horacio",role:"Dirección",av:"HO"},mateo:{pass:"dru2026",name:"Mateo",role:"Redacción",av:"MT"},lautaro:{pass:"dru2026",name:"Lautaro",role:"Admin",av:"LT"}};
 let currentUser=null;
 const SK="dru_efem_v7";
 const MES=["","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
@@ -1626,10 +1619,8 @@ async function addSugerencia(){
   const cat=document.getElementById("sug-cat").value;
   const text=document.getElementById("sug-text").value.trim();
   if(!text){showToast("⚠ Escribí una descripción");return;}
-  const notifyChecks=document.querySelectorAll("#sug-notify input:checked");
-  const notify=[...notifyChecks].map(c=>c.value);
   try{
-    const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text,notify})});
+    const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text})});
     const data=await res.json();
     if(data.error){showToast("⚠ Error: "+data.error);return;}
     document.getElementById("sug-name").value="";
