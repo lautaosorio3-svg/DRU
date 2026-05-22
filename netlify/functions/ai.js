@@ -16,7 +16,7 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body);
     const requestBody = {
       // Use the model the frontend requests, or default to haiku (fastest)
-      model: body.model || "claude-haiku-4-5-20250514",
+      model: body.model || "claude-haiku-4-5-20251001",
       max_tokens: body.max_tokens || 1000,
       messages: body.messages || []
     };
