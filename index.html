@@ -998,7 +998,7 @@ CRITERIOS EDITORIALES DRU:
   };
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:2500,messages:[{role:"user",content:prompts[selFmtStr]}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2000,messages:[{role:"user",content:prompts[selFmtStr]}]})});
     const data=await res.json();
     if(data.error){content.textContent="Error API: "+JSON.stringify(data.error);btn.textContent="Generar con IA →";btn.disabled=false;return;}
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
@@ -1541,7 +1541,7 @@ Entregá: META TITLE, META DESCRIPTION, SLUG, TÍTULO, COPETE, CUERPO (con subt�
 - THREADS: 2-3 líneas informativas directas.`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2500,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const raw=await res.text();
     let data;try{data=JSON.parse(raw);}catch(e){document.getElementById("dsg-nota").textContent="Error al procesar. Intentá de nuevo.";btn.textContent="Generar nota periodística →";btn.disabled=false;return;}
     if(data.error){document.getElementById("dsg-nota").textContent="Error: "+data.error;btn.textContent="Generar nota periodística →";btn.disabled=false;return;}
@@ -1660,7 +1660,7 @@ Generá:
 5. COPY INSTAGRAM (hook máx 12 palabras + caption informativo)`;
 
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2500,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     content.textContent=text;
