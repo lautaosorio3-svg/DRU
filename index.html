@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DRU Editorial v7</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
-:root{--or:#F5A623;--orl:rgba(245,166,35,0.12);--orb:rgba(245,166,35,0.3);--bk:#0f0f0f;--dk:#1a1a1a;--dk2:#242424;--dk3:#2e2e2e;--md:#444;--mt:#888;--lt:#c8c8c8;--wh:#f5f3ef;--bg:#111;--cd:#191919;--cd2:#202020;--bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.13);--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--r:10px;--rl:14px}
+:root{--or:#F5A623;--orl:rgba(245,166,35,0.12);--orb:rgba(245,166,35,0.3);--bk:#0f0f0f;--dk:#1a1a1a;--dk2:#242424;--dk3:#2e2e2e;--md:#444;--mt:#888;--lt:#c8c8c8;--wh:#f5f3ef;--bg:#111;--cd:#191919;--cd2:#202020;--bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.13);--fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fs:'Playfair Display',Georgia,serif;--r:10px;--rl:14px}
+[data-theme="light"]{--or:#D4871A;--orl:rgba(212,135,26,0.08);--orb:rgba(212,135,26,0.25);--bk:#f8f7f4;--dk:#f0efec;--dk2:#e8e7e4;--dk3:#dddcda;--md:#bbb;--mt:#777;--lt:#444;--wh:#1a1a1a;--bg:#f8f7f4;--cd:#ffffff;--cd2:#fafaf9;--bd:rgba(0,0,0,0.06);--bd2:rgba(0,0,0,0.1)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--fb);background:var(--bg);color:var(--wh);min-height:100vh;-webkit-font-smoothing:antialiased}
 button{font-family:var(--fb);cursor:pointer}input,select,textarea{font-family:var(--fb)}
@@ -312,6 +313,34 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
 
 .empty-s{text-align:center;padding:3rem 1rem;color:var(--mt)}
 
+/* THEME TOGGLE */
+.theme-toggle{background:none;border:1px solid var(--bd2);border-radius:var(--r);padding:5px 10px;font-size:16px;cursor:pointer;color:var(--mt);transition:all .15s;display:flex;align-items:center;gap:5px}
+.theme-toggle:hover{color:var(--wh);background:var(--dk3)}
+.theme-toggle .t-label{font-size:11px;font-weight:500}
+
+/* EDITORIAL TYPOGRAPHY */
+.sec-t,.gp-t,.tp-title,.seo-sec,.op-t,.asp-t{font-family:var(--fs);letter-spacing:-0.01em}
+.sec-t{font-size:24px;font-weight:600}
+.tb-t{font-family:var(--fs);font-size:18px;font-weight:600;letter-spacing:-0.01em}
+
+/* CLEANER CARDS */
+.ec,.seo-card,.sug-item,.tp-card,.gp,.ai-panel,.dsg-result,.af{border-radius:var(--rl);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+[data-theme="light"] .ec,[data-theme="light"] .seo-card,[data-theme="light"] .sug-item,[data-theme="light"] .tp-card,[data-theme="light"] .gp,[data-theme="light"] .ai-panel,[data-theme="light"] .dsg-result,[data-theme="light"] .af{box-shadow:0 1px 4px rgba(0,0,0,.06);border-color:rgba(0,0,0,.06)}
+[data-theme="light"] .topbar{background:rgba(248,247,244,.95);border-bottom-color:rgba(0,0,0,.06)}
+[data-theme="light"] .sidebar{background:#fff;border-right-color:rgba(0,0,0,.06)}
+[data-theme="light"] .lbox{background:#fff;border-color:rgba(0,0,0,.08)}
+[data-theme="light"] .li,[data-theme="light"] .fi,[data-theme="light"] .si,[data-theme="light"] .fsel{background:#f8f7f4;border-color:rgba(0,0,0,.1);color:#1a1a1a}
+[data-theme="light"] .oc{background:#f8f7f4;border-color:rgba(0,0,0,.06)}
+[data-theme="light"] .gnbtn,.lbtn{color:#fff}
+[data-theme="light"] ::-webkit-scrollbar-track{background:#f0efec}
+[data-theme="light"] ::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px}
+[data-theme="light"] .toast{background:#fff;border-color:rgba(0,0,0,.1);box-shadow:0 4px 24px rgba(0,0,0,.1)}
+
+/* MORE BREATHING ROOM */
+.page{padding:2.5rem}
+.eg{gap:10px}
+.ec{padding:18px 20px;gap:16px}
+
 @media(max-width:900px){
   .sidebar{width:60px}
   .sl-n,.ni span:not(.ni-icon),.ni-badge,.ni-new,.u-nm,.u-rl,.lo-btn{display:none}
@@ -369,6 +398,7 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
     <div class="topbar">
       <div class="tb-t" id="pt">Base de Efemérides</div>
       <div class="tc" id="tchip">📅 cargando...</div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema"><span id="theme-icon">☀️</span></button>
       <div class="tb-d" id="tdate"></div>
     </div>
 
@@ -737,6 +767,11 @@ textarea.fi{resize:vertical;min-height:80px;line-height:1.5}
 </div>
 
 <script>
+// THEME
+function toggleTheme(){const h=document.documentElement;const cur=h.getAttribute("data-theme");const next=cur==="light"?"dark":"light";h.setAttribute("data-theme",next);localStorage.setItem("dru_theme",next);document.getElementById("theme-icon").textContent=next==="light"?"🌙":"☀️";}
+(function(){const t=localStorage.getItem("dru_theme")||"dark";if(t==="light"){document.documentElement.setAttribute("data-theme","light");}})();
+document.addEventListener("DOMContentLoaded",()=>{const t=localStorage.getItem("dru_theme")||"dark";const icon=document.getElementById("theme-icon");if(icon)icon.textContent=t==="light"?"🌙":"☀️";});
+
 const USERS={more:{pass:"dru2026",name:"More",role:"Redes sociales",av:"MO"},mati:{pass:"dru2026",name:"Mati",role:"Redacción",av:"MA"},laura:{pass:"dru2026",name:"Laura",role:"Redacción",av:"LA"},horacio:{pass:"dru2026",name:"Horacio",role:"Dirección",av:"HO"},mateo:{pass:"dru2026",name:"Mateo",role:"Redacción",av:"MT"},lautaro:{pass:"dru2026",name:"Lautaro",role:"Admin",av:"LT"}};
 let currentUser=null;
 const SK="dru_efem_v7";
