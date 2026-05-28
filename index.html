@@ -1474,26 +1474,32 @@ async function transcribeAudio(){
   status.textContent="Leyendo archivo de audio...";
 
   try{
-    const reader=new FileReader();
-    const base64=await new Promise((resolve,reject)=>{
-      reader.onload=()=>resolve(reader.result.split(",")[1]);
-      reader.onerror=reject;
-      reader.readAsDataURL(dsgAudioFile);
-    });
+    status.textContent="Preparando envío...";
 
-    status.textContent=`Enviando ${(dsgAudioFile.size/1024/1024).toFixed(1)} MB a Whisper... Esto puede tardar unos segundos.`;
+    // Pide la key al backend y llama directo a OpenAI (evita límite 6MB de Netlify)
+    const keyRes=await fetch("/.netlify/functions/transcribe");
+    const keyData=await keyRes.json();
+    if(keyData.error){throw new Error(keyData.error);}
 
-    const res=await fetch("/.netlify/functions/transcribe",{
+    status.textContent=`Enviando ${(dsgAudioFile.size/1024/1024).toFixed(1)} MB a Whisper... Esto puede tardar hasta un minuto.`;
+
+    const formData=new FormData();
+    formData.append("file",dsgAudioFile);
+    formData.append("model","whisper-1");
+    formData.append("language","es");
+    formData.append("response_format","verbose_json");
+
+    const res=await fetch("https://api.openai.com/v1/audio/transcriptions",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({audio:base64,filename:dsgAudioFile.name,model:"whisper-1"})
+      headers:{"Authorization":`Bearer ${keyData.k}`},
+      body:formData
     });
 
     const data=await res.json();
 
     if(data.error){
       status.textContent="";progress.style.display="none";
-      showToast("⚠ Error: "+data.error);
+      showToast("⚠ Error: "+(data.error.message||JSON.stringify(data.error)));
       btn.textContent="Transcribir audio con Whisper →";btn.disabled=false;
       return;
     }
