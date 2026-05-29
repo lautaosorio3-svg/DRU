@@ -1,0 +1,273 @@
+/* ===== DRU · Editorial · Visual System ===== */
+/* Inspired by elgatoylacaja.com — magazine/index/editorial language */
+
+:root {
+  /* Type */
+  --serif: "Newsreader", "Tiempos Headline", "Cormorant Garamond", Georgia, serif;
+  --serif-display: "Instrument Serif", "Newsreader", Georgia, serif;
+  --mono: "JetBrains Mono", "DM Mono", ui-monospace, SFMono-Regular, monospace;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+
+  /* Color palette — Durazno primary + Azul + Rosa (2-3 colores) */
+  --peach: #E89B6C;
+  --peach-deep: #D87742;
+  --peach-pale: #F4D4B8;
+  --peach-tint: #FAEEDF;
+
+  --sky: #B9D2EC;
+  --sky-deep: #5C8FC8;
+  --sky-pale: #E2EBF6;
+
+  --rose: #F3B5B5;
+  --rose-deep: #C45A5A;
+  --rose-pale: #FAE0E0;
+
+  /* Backward-compat aliases — mint/lilac/butter map onto the 3-color palette */
+  --mint: var(--sky);
+  --mint-deep: var(--sky-deep);
+  --lilac: var(--rose);
+  --lilac-deep: var(--rose-deep);
+  --butter: var(--peach-pale);
+  --butter-deep: var(--peach-deep);
+
+  /* DRU brand (intense orange from logo) — used sparingly */
+  --dru: #F5A623;
+
+  /* Light theme (default) — cream editorial */
+  --bg: #F6F4EF;
+  --bg-alt: #ECE8DF;
+  --surface: #FDFCF9;
+  --surface-alt: #F0EDE5;
+  --ink: #1A1814;
+  --ink-2: #3A3530;
+  --ink-3: #6B6660;
+  --ink-4: #A09A92;
+  --line: #1A1814;
+  --line-soft: rgba(26, 24, 20, 0.22);
+  --line-hair: rgba(26, 24, 20, 0.14);
+  --accent: var(--peach-deep);
+  --accent-soft: var(--peach-tint);
+
+  --r-sm: 4px;
+  --r: 8px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  --shadow-soft: 0 1px 0 var(--line-hair);
+  --shadow-card: 0 1px 2px rgba(26,24,20,.04), 0 8px 24px -12px rgba(26,24,20,.06);
+}
+
+[data-theme="dark"] {
+  --bg: #14110D;
+  --bg-alt: #1C1814;
+  --surface: #1F1B16;
+  --surface-alt: #28241E;
+  --ink: #F4EFE6;
+  --ink-2: #D8D2C5;
+  --ink-3: #A09A8E;
+  --ink-4: #6B665C;
+  --line: #F4EFE6;
+  --line-soft: rgba(244, 239, 230, 0.24);
+  --line-hair: rgba(244, 239, 230, 0.14);
+  --accent: var(--peach);
+  --accent-soft: rgba(232, 155, 108, 0.16);
+
+  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+}
+
+/* ===== Base ===== */
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+a { color: inherit; text-decoration: none; }
+
+::selection {
+  background: var(--peach-pale);
+  color: var(--ink);
+}
+
+/* ===== Typography utilities ===== */
+.font-serif { font-family: var(--serif); }
+.font-display { font-family: var(--serif-display); letter-spacing: -0.015em; }
+.font-mono { font-family: var(--mono); font-feature-settings: "ss02"; }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* ===== Scrollbars ===== */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--line-soft);
+  border-radius: 999px;
+  border: 3px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+
+/* ===== Tags (the "EN PROD" pill from reference) ===== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.tag--mint { background: var(--mint); }
+.tag--peach { background: var(--peach-pale); }
+.tag--lilac { background: var(--lilac); }
+.tag--rose { background: var(--rose); }
+.tag--butter { background: var(--butter); }
+.tag--sky { background: var(--sky); }
+.tag--ghost {
+  background: transparent;
+  border: 1px solid var(--line-soft);
+  color: var(--ink-3);
+}
+
+.tag-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ===== Inputs ===== */
+.fi {
+  width: 100%;
+  height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  padding: 0 14px;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s ease;
+}
+.fi:focus {
+  border-color: var(--ink);
+}
+textarea.fi {
+  height: auto;
+  padding: 12px 14px;
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.55;
+  font-family: var(--sans);
+}
+.fi--mono { font-family: var(--mono); font-size: 13px; }
+
+.flbl {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--ink); color: var(--bg); }
+.btn--primary {
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+}
+.btn--primary:hover { background: var(--peach-deep); border-color: var(--peach-deep); color: #fff; }
+.btn--peach {
+  background: var(--peach-deep);
+  border-color: var(--peach-deep);
+  color: #fff;
+  font-weight: 700;
+}
+.btn--peach:hover { background: var(--ink); border-color: var(--ink); }
+.btn--ghost { border-color: var(--line-soft); color: var(--ink-2); font-weight: 500; }
+.btn--ghost:hover { border-color: var(--line); color: var(--ink); background: transparent; }
+.btn--sm { height: 32px; padding: 0 12px; font-size: 10px; }
+.btn--icon { width: 36px; padding: 0; }
+
+.btn[disabled] { opacity: .35; cursor: not-allowed; }
+.btn[disabled]:hover { background: transparent; color: var(--ink); }
+
+/* ===== Card primitives ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+}
+
+.divider {
+  height: 1px;
+  background: var(--line-soft);
+  border: 0;
+  margin: 1.5rem 0;
+}
+.divider--ink { background: var(--line); }
+
+/* ===== Scrollbar hidden helper ===== */
+.hide-sb::-webkit-scrollbar { display: none; }
+.hide-sb { scrollbar-width: none; }
