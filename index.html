@@ -427,6 +427,14 @@
                   <button class="btn btn--ghost btn--sm" onclick="copyAISEO()">Copiar sugerencias</button>
                   <button class="btn btn--primary btn--sm" onclick="applyAISuggestions()">Aplicar titular sugerido</button>
                 </div>
+                <div id="tp-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
+                  <div class="flbl" style="margin-bottom:8px">Corregir o ajustar el análisis</div>
+                  <div id="tp-chat-msgs" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+                  <div style="display:flex;gap:6px">
+                    <input class="fi" id="tp-chat-input" placeholder="Ej: Sugerí un titular más corto, agregá más keywords…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')sendTpChat()">
+                    <button class="btn btn--primary btn--sm" onclick="sendTpChat()">Enviar</button>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="step">
@@ -522,6 +530,14 @@
                 <button class="btn btn--ghost btn--sm" onclick="processTranscription()">Regenerar</button>
                 <button class="btn btn--primary btn--sm" onclick="copyDsg()">Copiar texto</button>
               </div>
+              <div id="dsg-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
+                <div class="flbl" style="margin-bottom:8px">Corregir o ajustar la nota</div>
+                <div id="dsg-chat-msgs" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+                <div style="display:flex;gap:6px">
+                  <input class="fi" id="dsg-chat-input" placeholder="Ej: Acortá el segundo párrafo, cambiá el titular…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')sendDsgChat()">
+                  <button class="btn btn--primary btn--sm" onclick="sendDsgChat()">Enviar</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -591,6 +607,14 @@
                 <div style="display:flex;gap:8px;margin-top:12px">
                   <button class="btn btn--ghost btn--sm" onclick="genEnfoque()">Regenerar</button>
                   <button class="btn btn--primary btn--sm" onclick="copyEnf()">Copiar texto</button>
+                </div>
+                <div id="enf-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
+                  <div class="flbl" style="margin-bottom:8px">Corregir o ajustar el enfoque</div>
+                  <div id="enf-chat-msgs" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+                  <div style="display:flex;gap:6px">
+                    <input class="fi" id="enf-chat-input" placeholder="Ej: Hacelo más corto, cambiá el tono, agregá una cita…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')sendEnfChat()">
+                    <button class="btn btn--primary btn--sm" onclick="sendEnfChat()">Enviar</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1011,10 +1035,32 @@ async function runAISEO(){
     const tpMod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
     const res=await fetch(tpApi,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:tpMod,max_tokens:1200,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
-    if(tpModelStr==="gpt"){content.textContent=(data.choices||[]).map(c=>c.message?.content||"").join("")||JSON.stringify(data);}
-    else{content.textContent=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");}
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");content.textContent=text;
+    tpChatMsgs=[{role:"user",content:prompt},{role:"assistant",content:text}];
+    document.getElementById("tp-chat").style.display="block";
   }catch(e){content.textContent="Error al conectar con la IA.";}
   btn.innerHTML=`Analizar con IA y sugerir mejoras <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
+}
+let tpChatMsgs=[];
+async function sendTpChat(){
+  const input=document.getElementById("tp-chat-input");const msg=input.value.trim();if(!msg)return;
+  const msgsDiv=document.getElementById("tp-chat-msgs");
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  input.value="";
+  tpChatMsgs.push({role:"user",content:msg});
+  msgsDiv.innerHTML+=`<div id="tp-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
+  msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  try{
+    const api=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:1200,messages:tpChatMsgs})});
+    const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    tpChatMsgs.push({role:"assistant",content:text});
+    document.getElementById("ai-seo-content").textContent=text;
+    const ld=document.getElementById("tp-chat-loading");if(ld)ld.remove();
+    msgsDiv.innerHTML+=`<div style="background:var(--peach-pale);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>IA:</b> Análisis actualizado ✓</div>`;
+    msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  }catch(e){const ld=document.getElementById("tp-chat-loading");if(ld)ld.textContent="Error de conexión.";}
 }
 function copyAISEO(){navigator.clipboard&&navigator.clipboard.writeText(document.getElementById("ai-seo-content").textContent);showToast("✓ Sugerencias copiadas");}
 function applyAISuggestions(){const text=document.getElementById("ai-seo-content").textContent;const match=text.match(/META TITLE SUGERIDO[^:]*:\s*(.+)/i);if(match&&match[1]){document.getElementById("tp-title").value=match[1].trim();localSEOCheck();showToast("✓ Titular sugerido aplicado");}else showToast("⚠ No se encontró título sugerido");}
@@ -1033,8 +1079,7 @@ async function genSocialFromNote(){
     const tpMod2=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
     const res=await fetch(tpApi2,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:tpMod2,max_tokens:800,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
-    if(tpModelStr==="gpt"){content.textContent=(data.choices||[]).map(c=>c.message?.content||"").join("")||JSON.stringify(data);}
-    else{content.textContent=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");}
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");content.textContent=text;
   }catch(e){content.textContent="Error al conectar con la IA.";}
   btn.innerHTML=`Generar copy para redes <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
 }
@@ -1087,10 +1132,12 @@ async function processTranscription(){
     const res=await fetch(dsgApi,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:dsgMod,max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const raw=await res.text();let data;try{data=JSON.parse(raw);}catch(e){document.getElementById("dsg-nota").textContent="Error. Intentá de nuevo.";btn.innerHTML=`Generar nota periodística <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;return;}
     if(data.error){document.getElementById("dsg-nota").textContent="Error: "+data.error;btn.innerHTML=`Generar nota periodística <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;return;}
-    const fullText=dsgModelStr==="gpt"?(data.choices||[]).map(c=>c.message?.content||"").join(""):(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    const fullText=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     const parts=fullText.split(/---REDES---|COPY REDES|2\.\s*COPY/i);
     document.getElementById("dsg-nota").textContent=parts[0]||fullText;
     document.getElementById("dsg-social").textContent=parts[1]||"Generá el copy desde la nota.";
+    dsgChatMsgs=[{role:"user",content:prompt},{role:"assistant",content:fullText}];
+    document.getElementById("dsg-chat").style.display="block";
   }catch(e){document.getElementById("dsg-nota").textContent="Error de conexión.";}
   btn.innerHTML=`Generar nota periodística <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
 }
@@ -1100,6 +1147,29 @@ function showDsgTab(tab,el){
   document.getElementById("dsg-social").style.display=tab==="social"?"block":"none";
 }
 function copyDsg(){navigator.clipboard&&navigator.clipboard.writeText(document.getElementById("dsg-"+dsgActiveTab).textContent);showToast("✓ Texto copiado");}
+let dsgChatMsgs=[];
+async function sendDsgChat(){
+  const input=document.getElementById("dsg-chat-input");const msg=input.value.trim();if(!msg)return;
+  const msgsDiv=document.getElementById("dsg-chat-msgs");
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  input.value="";
+  dsgChatMsgs.push({role:"user",content:msg});
+  msgsDiv.innerHTML+=`<div id="dsg-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
+  msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  try{
+    const api=dsgModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=dsgModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:dsgChatMsgs})});
+    const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    dsgChatMsgs.push({role:"assistant",content:text});
+    const parts=text.split(/---REDES---|COPY REDES|2\.\s*COPY/i);
+    document.getElementById("dsg-nota").textContent=parts[0]||text;
+    if(parts[1])document.getElementById("dsg-social").textContent=parts[1];
+    const ld=document.getElementById("dsg-chat-loading");if(ld)ld.remove();
+    msgsDiv.innerHTML+=`<div style="background:var(--peach-pale);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>IA:</b> Texto actualizado ✓</div>`;
+    msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  }catch(e){const ld=document.getElementById("dsg-chat-loading");if(ld)ld.textContent="Error de conexión.";}
+}
 
 // ══ NAV ══
 const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Traspaso a redes",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",sugerencias:"Sugerencias y ajustes"};
@@ -1145,12 +1215,34 @@ async function genEnfoque(){
     const enfMod=enfModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
     const res=await fetch(enfApi,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:enfMod,max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
-    if(enfModelStr==="gpt"){content.textContent=(data.choices||[]).map(c=>c.message?.content||"").join("")||JSON.stringify(data);}
-    else{content.textContent=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");}
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");content.textContent=text;
+    enfChatMsgs=[{role:"user",content:prompt},{role:"assistant",content:text}];
+    document.getElementById("enf-chat").style.display="block";
   }catch(e){content.textContent="Error al conectar con la IA.";}
   btn.innerHTML=`Generar enfoque IA <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
 }
 function copyEnf(){navigator.clipboard&&navigator.clipboard.writeText(document.getElementById("enf-content").textContent);showToast("✓ Enfoque copiado");}
+let enfChatMsgs=[];
+async function sendEnfChat(){
+  const input=document.getElementById("enf-chat-input");const msg=input.value.trim();if(!msg)return;
+  const msgsDiv=document.getElementById("enf-chat-msgs");
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  input.value="";
+  enfChatMsgs.push({role:"user",content:msg});
+  msgsDiv.innerHTML+=`<div id="enf-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
+  msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  try{
+    const api=enfModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=enfModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:enfChatMsgs})});
+    const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    enfChatMsgs.push({role:"assistant",content:text});
+    document.getElementById("enf-content").textContent=text;
+    const ld=document.getElementById("enf-chat-loading");if(ld)ld.remove();
+    msgsDiv.innerHTML+=`<div style="background:var(--peach-pale);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>IA:</b> Texto actualizado ✓</div>`;
+    msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  }catch(e){const ld=document.getElementById("enf-chat-loading");if(ld)ld.textContent="Error de conexión.";}
+}
 
 // ══ SUGERENCIAS ══
 async function addSugerencia(){
