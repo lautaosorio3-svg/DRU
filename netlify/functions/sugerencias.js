@@ -14,14 +14,12 @@ const USER_EMAILS = {
 };
 
 function initStore() {
-  try {
-    return getStore("sugerencias");
-  } catch {
-    const siteID = process.env.SITE_ID;
-    const token = process.env.NETLIFY_PAT;
-    if (!siteID || !token) throw new Error("Configurá NETLIFY_PAT en las variables de entorno de Netlify");
+  const siteID = process.env.SITE_ID;
+  const token = process.env.NETLIFY_PAT;
+  if (siteID && token) {
     return getStore({ name: "sugerencias", siteID, token });
   }
+  return getStore("sugerencias");
 }
 
 async function getAll(store) {
