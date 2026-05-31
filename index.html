@@ -438,15 +438,32 @@
               </div>
             </div>
             <div class="step">
-              <div class="step-head"><span class="step-num">5</span><div class="step-title">Destino · redes</div><div class="step-tag-row"><span class="tag tag--peach">IA</span></div></div>
-              <div class="fgrid" style="margin-bottom:14px">
-                <div class="ff ff--3"><label class="flbl">Instagram</label><select class="fi" id="tp-ig"><option value="no">No publicar</option><option value="post">Post estático</option><option value="carrusel">Carrusel</option><option value="reel">Reel</option><option value="story">Story</option></select></div>
-                <div class="ff ff--3"><label class="flbl">Facebook</label><select class="fi" id="tp-fb"><option value="si">Sí — normal</option><option value="destacada">Sí — destacar</option><option value="no">No publicar</option></select></div>
+              <div class="step-head"><span class="step-num">5</span><div class="step-title">Formato para redes</div><div class="step-tag-row"><span class="tag tag--peach">IA</span></div></div>
+              <div class="step-help">Elegí el formato de salida para Instagram. Facebook se genera junto.</div>
+              <div class="fmt-grid" style="margin-bottom:14px">
+                <div class="fmt-card selected" data-tpfmt="carrusel" onclick="selTpFmt(this)"><div class="fmt-card-i">▦</div><div class="fmt-card-n">Carrusel</div><div class="fmt-card-s">4 slides + CTA</div></div>
+                <div class="fmt-card" data-tpfmt="placa" onclick="selTpFmt(this)"><div class="fmt-card-i">◼</div><div class="fmt-card-n">Placa + Copy</div><div class="fmt-card-s">Título fuerte + caption</div></div>
+                <div class="fmt-card" data-tpfmt="reel" onclick="selTpFmt(this)"><div class="fmt-card-i">▶</div><div class="fmt-card-n">Guión Reel</div><div class="fmt-card-s">45 seg · gancho</div></div>
+                <div class="fmt-card" data-tpfmt="nota" onclick="selTpFmt(this)"><div class="fmt-card-i">¶</div><div class="fmt-card-n">Nota SEO</div><div class="fmt-card-s">600+ palabras</div></div>
               </div>
-              <button class="btn btn--peach" id="tp-social-btn" onclick="genSocialFromNote()" disabled style="width:100%">Generar copy para redes <span class="font-mono" style="font-size:11px">→</span></button>
+              <div class="fgrid" style="margin-bottom:14px">
+                <div class="ff ff--3"><label class="flbl">Facebook</label><select class="fi" id="tp-fb"><option value="si">Sí — incluir</option><option value="destacada">Sí — destacar</option><option value="no">No incluir</option></select></div>
+              </div>
+              <button class="btn btn--peach" id="tp-social-btn" onclick="genSocialFromNote()" disabled style="width:100%">Generar contenido para redes <span class="font-mono" style="font-size:11px">→</span></button>
               <div id="social-result" style="display:none;margin-top:12px">
                 <div class="out-box" id="social-content"></div>
-                <button class="btn btn--primary btn--sm" style="margin-top:10px" onclick="copySocial()">Copiar copy</button>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button class="btn btn--ghost btn--sm" onclick="genSocialFromNote()">Regenerar</button>
+                  <button class="btn btn--primary btn--sm" onclick="copySocial()">Copiar copy</button>
+                </div>
+                <div id="tp-social-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
+                  <div class="flbl" style="margin-bottom:8px">Corregir o ajustar</div>
+                  <div id="tp-social-chat-msgs" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+                  <div style="display:flex;gap:6px">
+                    <input class="fi" id="tp-social-chat-input" placeholder="Ej: Hacé el carrusel más corto, cambiá el hook…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')sendTpSocialChat()">
+                    <button class="btn btn--primary btn--sm" onclick="sendTpSocialChat()">Enviar</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -695,6 +712,7 @@ let selFmtStr="carrusel";
 let selModelStr="claude";
 let dsgModelStr="claude";
 let tpModelStr="claude";
+let tpFmtStr="carrusel";
 let enfModelStr="claude";
 let genChatHistory=[];
 let selUN_val="";
@@ -858,6 +876,7 @@ function selFmt(el){document.querySelectorAll(".fmt-card").forEach(c=>c.classLis
 function selModel(m){selModelStr=m;document.getElementById("model-claude").classList.toggle("active",m==="claude");document.getElementById("model-gpt").classList.toggle("active",m==="gpt");}
 function selDsgModel(m){dsgModelStr=m;document.getElementById("dsg-model-claude").classList.toggle("active",m==="claude");document.getElementById("dsg-model-gpt").classList.toggle("active",m==="gpt");}
 function selTpModel(m){tpModelStr=m;document.getElementById("tp-model-claude").classList.toggle("active",m==="claude");document.getElementById("tp-model-gpt").classList.toggle("active",m==="gpt");}
+function selTpFmt(el){document.querySelectorAll("[data-tpfmt]").forEach(c=>c.classList.remove("selected"));el.classList.add("selected");tpFmtStr=el.dataset.tpfmt;}
 function selEnfModel(m){enfModelStr=m;document.getElementById("enf-model-claude").classList.toggle("active",m==="claude");document.getElementById("enf-model-gpt").classList.toggle("active",m==="gpt");}
 function goGen(id){showPage("gen",document.querySelectorAll(".sb-item")[1]);setTimeout(()=>pickEfem(id),100);}
 function quickGen(id,fmt){showPage("gen",document.querySelectorAll(".sb-item")[1]);selFmtStr=fmt;document.querySelectorAll(".fmt-card").forEach(c=>{c.classList.toggle("selected",c.dataset.fmt===fmt);});setTimeout(()=>{pickEfem(id);setTimeout(generateContent,200);},100);}
@@ -1065,23 +1084,53 @@ async function sendTpChat(){
 function copyAISEO(){navigator.clipboard&&navigator.clipboard.writeText(document.getElementById("ai-seo-content").textContent);showToast("✓ Sugerencias copiadas");}
 function applyAISuggestions(){const text=document.getElementById("ai-seo-content").textContent;const match=text.match(/META TITLE SUGERIDO[^:]*:\s*(.+)/i);if(match&&match[1]){document.getElementById("tp-title").value=match[1].trim();localSEOCheck();showToast("✓ Titular sugerido aplicado");}else showToast("⚠ No se encontró título sugerido");}
 
+let tpSocialChatMsgs=[];
 async function genSocialFromNote(){
   const title=document.getElementById("tp-title").value.trim();const body=document.getElementById("tp-body").value.trim();
-  const ig=document.getElementById("tp-ig").value;const un=selUN_val||"Update me";
+  const un=selUN_val||"Update me";const fb=document.getElementById("tp-fb").value;
   if(!title||body.length<50)return;
-  const btn=document.getElementById("tp-social-btn");btn.innerHTML=`Redactando<span class="dots"><span></span><span></span><span></span></span>`;btn.disabled=true;
+  const btn=document.getElementById("tp-social-btn");btn.innerHTML=`Generando<span class="dots"><span></span><span></span><span></span></span>`;btn.disabled=true;
   const result=document.getElementById("social-result");const content=document.getElementById("social-content");
-  result.style.display="block";content.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> Generando copy...`;
-  const igFmt={no:"",post:"post estático",carrusel:"carrusel de 4 slides",reel:"guión Reel 45s",story:"4 stories encadenadas"}[ig]||"";
-  const prompt=`Actuá como editor de redes de Diario Río Uruguay (Concordia, 56K IG / 103K FB). Necesidad: "${un}".\n\nCRITERIOS DRU: periodístico, anti-clickbait, keyword geo obligatoria, NUNCA inventar.\n\nTITULAR: ${title}\nNOTA: ${body.substring(0,2000)}\n\nFACEBOOK: línea informativa + dato duro + CTA + hashtags.\n${ig!=="no"?`INSTAGRAM (${igFmt}): hook máx 12 palabras + caption.\n`:""}THREADS: 2-3 líneas.\nHASHTAGS: #Concordia #EntreRíos + temáticos.`;
+  result.style.display="block";content.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> Generando ${tpFmtStr}...`;
+  const fbBlock=fb!=="no"?`\n\nFACEBOOK${fb==="destacada"?" (DESTACAR)":""}:\n- Primera línea: gancho informativo autónomo + dato duro.\n- 2-3 párrafos de contexto.\n- CTA: "Nota completa en diarioriouruguay.com"\n- 3-5 hashtags: #Concordia #EntreRíos + temáticos.`:"";
+  const fmtPrompts={
+    carrusel:`Actuá como editor de redes de Diario Río Uruguay (Concordia, Entre Ríos · 56K IG / 103K FB). Necesidad de usuario: "${un}".\n\nGenerá un CARRUSEL DE INSTAGRAM de 4 slides a partir de esta nota:\n\nTITULAR: ${title}\nNOTA: ${body.substring(0,2500)}\n\nCRITERIOS DRU: periodístico, anti-clickbait, keyword geo obligatoria, NUNCA inventar.\n- Máximo 12 palabras por slide.\n- SLIDE 1: titular informativo — NO repetir caption. Dato más fuerte.\n- SLIDE 2: dato clave, cifra o cita textual.\n- SLIDE 3: contexto o consecuencia.\n- SLIDE 4: CTA — "Leé la nota completa en diarioriouruguay.com" — FONDO NARANJA.\n- CAPTION: bajada periodística + 📍 Concordia, Entre Ríos + hashtags.${fbBlock}\n\nRespondé: SLIDE 1, SLIDE 2, SLIDE 3, SLIDE 4, CAPTION IG, HASHTAGS${fb!=="no"?", FACEBOOK":""}`,
+    placa:`Actuá como editor de redes de Diario Río Uruguay (Concordia, Entre Ríos · 56K IG / 103K FB). Necesidad: "${un}".\n\nGenerá una PLACA ESTÁTICA para Instagram + COPY (caption) a partir de esta nota:\n\nTITULAR: ${title}\nNOTA: ${body.substring(0,2500)}\n\nCRITERIOS DRU: periodístico, anti-clickbait, keyword geo obligatoria, NUNCA inventar.\n\nPLACA:\n- TÍTULO DE PLACA: frase impactante, informativa, máx 10-12 palabras. Dato duro + contexto mínimo. Estilo Infobae/Clarín.\n- SUBTÍTULO (opcional): 1 línea, máx 8 palabras.\n- FUENTE: "Diario Río Uruguay · Concordia"\n\nCOPY / CAPTION:\n- Primera línea: gancho autónomo que informe sin la imagen.\n- 2-3 párrafos cortos con contexto y datos.\n- 1 pregunta abierta para generar comentarios.\n- CTA + 📍 Concordia, Entre Ríos + hashtags.\n- Copy entre 150-300 palabras.${fbBlock}\n\nRespondé: TÍTULO DE PLACA, SUBTÍTULO, COPY IG, HASHTAGS${fb!=="no"?", FACEBOOK":""}`,
+    reel:`Actuá como editor audiovisual de Diario Río Uruguay (Concordia, Entre Ríos · 56K IG / 103K FB). Necesidad: "${un}".\n\nGenerá un GUIÓN DE REEL de 45 segundos a partir de esta nota:\n\nTITULAR: ${title}\nNOTA: ${body.substring(0,2500)}\n\nCRITERIOS DRU: periodístico, anti-clickbait, NUNCA inventar.\n- GANCHO 0-3s: dato periodístico más fuerte, máx 8 palabras en pantalla.\n- DESARROLLO 3-35s: texto en pantalla + voz en off, 3-4 bloques.\n- CIERRE 35-42s: por qué importa hoy.\n- CTA 42-45s: "Nota completa en diarioriouruguay.com"\n- CAPTION: bajada + hashtags.${fbBlock}\n\nRespondé: GANCHO, DESARROLLO (bloques), CIERRE, CTA, CAPTION, HASHTAGS${fb!=="no"?", FACEBOOK":""}`,
+    nota:`Actuá como redactor de Diario Río Uruguay. Necesidad: "${un}".\n\nReescribí esta nota con criterios editoriales DRU:\n\nTITULAR: ${title}\nNOTA: ${body.substring(0,2500)}\n\nCondiciones: mín 600 palabras. TÍTULO (máx 65 chars, keyword geo), COPETE, CUERPO. 5W en primeras 3 oraciones. Citas textuales. Subtítulo cada 3 párrafos. NUNCA inventar.\n\nSEO: META TITLE, META DESCRIPTION, SLUG, KEYWORDS.${fbBlock}`
+  };
+  const prompt=fmtPrompts[tpFmtStr]||fmtPrompts.carrusel;
   try{
-    const tpApi2=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const tpMod2=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
-    const res=await fetch(tpApi2,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:tpMod2,max_tokens:800,messages:[{role:"user",content:prompt}]})});
+    const api=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");content.textContent=text;
+    tpSocialChatMsgs=[{role:"user",content:prompt},{role:"assistant",content:text}];
+    document.getElementById("tp-social-chat").style.display="block";
+    document.getElementById("tp-social-chat-msgs").innerHTML="";
   }catch(e){content.textContent="Error al conectar con la IA.";}
-  btn.innerHTML=`Generar copy para redes <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
+  btn.innerHTML=`Generar contenido para redes <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
+}
+async function sendTpSocialChat(){
+  const input=document.getElementById("tp-social-chat-input");const msg=input.value.trim();if(!msg)return;
+  const msgsDiv=document.getElementById("tp-social-chat-msgs");
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  input.value="";
+  tpSocialChatMsgs.push({role:"user",content:msg});
+  msgsDiv.innerHTML+=`<div id="tp-social-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
+  msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  try{
+    const api=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:tpSocialChatMsgs})});
+    const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    tpSocialChatMsgs.push({role:"assistant",content:text});
+    document.getElementById("social-content").textContent=text;
+    const ld=document.getElementById("tp-social-loading");if(ld)ld.remove();
+    msgsDiv.innerHTML+=`<div style="background:var(--peach-pale);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>IA:</b> Contenido actualizado ✓</div>`;
+    msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  }catch(e){const ld=document.getElementById("tp-social-loading");if(ld)ld.textContent="Error de conexión.";}
 }
 function copySocial(){navigator.clipboard&&navigator.clipboard.writeText(document.getElementById("social-content").textContent);showToast("✓ Copy copiado");}
 
