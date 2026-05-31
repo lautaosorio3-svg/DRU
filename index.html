@@ -1250,7 +1250,7 @@ async function addSugerencia(){
   const cat=document.getElementById("sug-cat").value;const text=document.getElementById("sug-text").value.trim();
   if(!text){showToast("⚠ Escribí una descripción");return;}
   try{
-    const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text})});
+    const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text,notify:["admin"]})});
     const data=await res.json();if(data.error){showToast("⚠ Error: "+data.error);return;}
     document.getElementById("sug-text").value="";renderSugerencias();showToast("✓ Sugerencia enviada");
   }catch(e){showToast("⚠ Error de conexión");}
