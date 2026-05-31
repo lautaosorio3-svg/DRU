@@ -14,7 +14,7 @@ const USER_EMAILS = {
 };
 
 function initStore() {
-  const siteID = process.env.SITE_ID;
+  const siteID = process.env.SITE_ID || process.env.SITE;
   const token = process.env.NETLIFY_PAT;
   if (siteID && token) {
     return getStore({ name: "sugerencias", siteID, token });
