@@ -1298,17 +1298,27 @@ async function addSugerencia(){
   const name=document.getElementById("sug-name").value.trim()||currentUser?.name||"Anónimo";
   const cat=document.getElementById("sug-cat").value;const text=document.getElementById("sug-text").value.trim();
   if(!text){showToast("⚠ Escribí una descripción");return;}
+  const sug={id:Date.now(),name,category:cat,text,date:new Date().toISOString()};
+  // Guardar en localStorage siempre
+  try{const arr=JSON.parse(localStorage.getItem("dru_sugerencias")||"[]");arr.push(sug);localStorage.setItem("dru_sugerencias",JSON.stringify(arr));}catch(e){}
+  // Enviar al servidor (mail + intento de Blobs)
   try{
     const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text,notify:["admin"]})});
-    const data=await res.json();if(data.error){showToast("⚠ Error: "+data.error);return;}
-    document.getElementById("sug-text").value="";renderSugerencias();showToast("✓ Sugerencia enviada");
-  }catch(e){showToast("⚠ Error de conexión");}
+    const data=await res.json();
+    if(data.email)showToast("✓ Sugerencia enviada · mail notificado");
+    else showToast("✓ Sugerencia guardada");
+  }catch(e){showToast("✓ Sugerencia guardada localmente");}
+  document.getElementById("sug-text").value="";renderSugerencias();
 }
 
 async function renderSugerencias(){
   const list=document.getElementById("sug-list");
   list.innerHTML=`<div style="font-style:italic;color:var(--ink-3);font-family:var(--serif);padding:1rem">Cargando...</div>`;
-  let sugs=[];try{const res=await fetch("/.netlify/functions/sugerencias");sugs=await res.json();}catch(e){}
+  // Combinar server + localStorage
+  let serverSugs=[];try{const res=await fetch("/.netlify/functions/sugerencias");serverSugs=await res.json();if(!Array.isArray(serverSugs))serverSugs=[];}catch(e){}
+  let localSugs=[];try{localSugs=JSON.parse(localStorage.getItem("dru_sugerencias")||"[]");}catch(e){}
+  const ids=new Set(serverSugs.map(s=>s.id));
+  const sugs=[...serverSugs,...localSugs.filter(s=>!ids.has(s.id))];
   sugs.sort((a,b)=>new Date(b.date)-new Date(a.date));
   document.getElementById("sug-count").textContent=sugs.length+" en total";
   if(!sugs.length){list.innerHTML=`<div class="empty">No hay sugerencias todavía.</div>`;return;}

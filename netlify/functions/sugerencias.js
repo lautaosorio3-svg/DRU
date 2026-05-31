@@ -14,15 +14,20 @@ const USER_EMAILS = {
 };
 
 function initStore() {
-  const siteID = process.env.SITE_ID || process.env.SITE;
-  const token = process.env.NETLIFY_PAT;
-  if (siteID && token) {
-    return getStore({ name: "sugerencias", siteID, token });
+  try {
+    const siteID = process.env.SITE_ID || process.env.SITE;
+    const token = process.env.NETLIFY_PAT;
+    if (siteID && token) {
+      return getStore({ name: "sugerencias", siteID, token });
+    }
+    return getStore("sugerencias");
+  } catch {
+    return null;
   }
-  return getStore("sugerencias");
 }
 
 async function getAll(store) {
+  if (!store) return [];
   try {
     const data = await store.get("all", { type: "json" });
     return Array.isArray(data) ? data : [];
@@ -31,22 +36,29 @@ async function getAll(store) {
   }
 }
 
-async function sendEmails(sug, notifyUsers) {
-  const RESEND_KEY = process.env.RESEND_API_KEY;
-  if (!RESEND_KEY || !notifyUsers || !notifyUsers.length) return;
+async function saveAll(store, data) {
+  if (!store) return false;
+  try {
+    await store.setJSON("all", data);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-  const to = notifyUsers.map(u => USER_EMAILS[u]).filter(Boolean);
-  if (!to.length) return;
+async function sendEmail(sug) {
+  const RESEND_KEY = process.env.RESEND_API_KEY;
+  if (!RESEND_KEY) return { sent: false, reason: "No RESEND_API_KEY" };
 
   const catLabels = { feature: "Nueva función", mejora: "Mejora", bug: "Bug", contenido: "Contenido", otro: "Otro" };
 
   try {
-    await fetch("https://api.resend.com/emails", {
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${RESEND_KEY}` },
       body: JSON.stringify({
         from: "DRU Editorial <onboarding@resend.dev>",
-        to,
+        to: "lautaosorio3@gmail.com",
         subject: `[DRU Sugerencia] ${catLabels[sug.category] || sug.category} — ${sug.name}`,
         html: `<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto">
           <div style="background:#1a1a1a;padding:20px 24px;border-radius:12px 12px 0 0">
@@ -66,7 +78,11 @@ async function sendEmails(sug, notifyUsers) {
         </div>`
       })
     });
-  } catch {}
+    const data = await res.json();
+    return { sent: res.ok, status: res.status, data };
+  } catch (err) {
+    return { sent: false, reason: err.message };
+  }
 }
 
 exports.handler = async (event) => {
@@ -74,12 +90,7 @@ exports.handler = async (event) => {
     return { statusCode: 200, headers: HEADERS, body: "" };
   }
 
-  let store;
-  try {
-    store = initStore();
-  } catch (err) {
-    return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: err.message }) };
-  }
+  const store = initStore();
 
   if (event.httpMethod === "GET") {
     const data = await getAll(store);
@@ -92,7 +103,6 @@ exports.handler = async (event) => {
       if (!body.text) {
         return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: "text is required" }) };
       }
-      const current = await getAll(store);
       const sug = {
         id: Date.now(),
         name: body.name || "Anónimo",
@@ -100,10 +110,20 @@ exports.handler = async (event) => {
         text: body.text,
         date: new Date().toISOString()
       };
+
+      // Intentar guardar en Blobs (no bloquea si falla)
+      const current = await getAll(store);
       current.push(sug);
-      await store.setJSON("all", current);
-      sendEmails(sug, body.notify);
-      return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ ok: true }) };
+      const saved = await saveAll(store, current);
+
+      // Siempre enviar email, independiente de Blobs
+      const emailResult = await sendEmail(sug);
+
+      return {
+        statusCode: 200,
+        headers: HEADERS,
+        body: JSON.stringify({ ok: true, stored: saved, email: emailResult.sent, sug })
+      };
     } catch (err) {
       return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: err.message }) };
     }
@@ -114,7 +134,7 @@ exports.handler = async (event) => {
       const body = JSON.parse(event.body);
       let current = await getAll(store);
       current = current.filter(s => s.id !== body.id);
-      await store.setJSON("all", current);
+      await saveAll(store, current);
       return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ ok: true }) };
     } catch (err) {
       return { statusCode: 500, headers: HEADERS, body: JSON.stringify({ error: err.message }) };
