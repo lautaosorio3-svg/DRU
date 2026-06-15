@@ -87,7 +87,7 @@
         <span class="sb-item-badge">HOY</span><span class="sb-item-arrow">→</span>
       </div>
       <div class="sb-item" onclick="showPage('traspaso',this)">
-        <span class="sb-item-num">05</span><span class="sb-item-name">Traspaso a redes</span>
+        <span class="sb-item-num">05</span><span class="sb-item-name">Análisis de notas</span>
         <span class="sb-item-badge">NEW</span><span class="sb-item-arrow">→</span>
       </div>
       <div class="sb-item" onclick="showPage('desgrab',this)">
@@ -380,7 +380,7 @@
           <div class="hero-rule"></div>
           <div class="hero-num">Antes de apretar publicar</div>
         </div>
-        <h1 class="hero-title">Análisis <span class="accent">y traspaso</span> a redes</h1>
+        <h1 class="hero-title">Análisis <span class="accent">de notas</span></h1>
         <div class="hero-sub">Pegá la nota lista para publicar. La IA chequea SEO, sugiere mejoras y arma el copy para redes.</div>
         <div class="hero-gradient"></div>
       </div>
@@ -396,7 +396,7 @@
             </div>
             <div class="step">
               <div class="step-head"><span class="step-num step-num--peach">2</span><div class="step-title">Necesidad de usuario</div><div class="step-tag-row"><span class="tag tag--ghost">Modelo Shishkin</span></div></div>
-              <div class="step-help">Qué motivación querés servir con este traspaso a redes.</div>
+              <div class="step-help">Qué motivación querés servir con este análisis.</div>
               <div class="opt-list" id="un-sel">
                 <div class="opt" data-un="Update me" onclick="selUN(this)"><span class="opt-dot"></span><div class="opt-body"><div class="opt-name">Update me</div><div class="opt-desc">Noticia de última hora o actualización.</div></div></div>
                 <div class="opt" data-un="Educate me" onclick="selUN(this)"><span class="opt-dot"></span><div class="opt-body"><div class="opt-name">Educate me</div><div class="opt-desc">Contexto profundo, explicación.</div></div></div>
@@ -1268,7 +1268,7 @@ async function sendDsgChat(){
 }
 
 // ══ NAV ══
-const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Traspaso a redes",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
+const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
 function showPage(id,navEl){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -1348,14 +1348,14 @@ function saveDrafts(arr){localStorage.setItem(SK_DRAFTS,JSON.stringify(arr));upd
 function updateDraftsBadge(){const c=loadDrafts().length;document.getElementById("drafts-cnt").textContent=c;}
 
 function saveDraft(section){
-  const secLabels={gen:"Generador",traspaso:"Traspaso",desgrab:"Desgrabador",enfoques:"Enfoques"};
+  const secLabels={gen:"Generador",traspaso:"Análisis",desgrab:"Desgrabador",enfoques:"Enfoques"};
   let content="",title="",format="";
   if(section==="gen"){
     content=document.getElementById("ocontent").textContent;
     title=selEfemObj?selEfemObj.title:"Nota generada";format=selFmtStr;
   }else if(section==="traspaso"){
     content=document.getElementById("social-content").textContent;
-    title=document.getElementById("tp-title").value.trim()||"Traspaso a redes";format=tpFmtStr;
+    title=document.getElementById("tp-title").value.trim()||"Análisis de nota";format=tpFmtStr;
   }else if(section==="desgrab"){
     content=document.getElementById("dsg-nota").textContent;
     const social=document.getElementById("dsg-social").textContent;
