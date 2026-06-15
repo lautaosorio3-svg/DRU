@@ -101,9 +101,13 @@
     </div>
 
     <div class="sb-section">
-      <div class="sb-section-label"><span>/ Feedback</span><span class="sb-section-num">03</span></div>
+      <div class="sb-section-label"><span>/ Workspace</span><span class="sb-section-num">03</span></div>
+      <div class="sb-item" onclick="showPage('borradores',this)">
+        <span class="sb-item-num">08</span><span class="sb-item-name">Borradores</span>
+        <span class="sb-item-badge is-count" id="drafts-cnt">0</span><span class="sb-item-arrow">→</span>
+      </div>
       <div class="sb-item" onclick="showPage('sugerencias',this)">
-        <span class="sb-item-num">08</span><span class="sb-item-name">Sugerencias</span>
+        <span class="sb-item-num">09</span><span class="sb-item-name">Sugerencias</span>
         <span class="sb-item-arrow">→</span>
       </div>
     </div>
@@ -252,6 +256,7 @@
           <div id="gen-actions" style="display:none;gap:8px;margin-top:14px">
             <button class="btn btn--ghost btn--sm" onclick="generateContent()">Regenerar</button>
             <button class="btn btn--primary btn--sm" onclick="copyOut()">Copiar texto</button>
+            <button class="btn btn--ghost btn--sm" onclick="saveDraft('gen')">💾 Guardar borrador</button>
           </div>
           <div id="gen-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
             <div class="flbl" style="margin-bottom:8px">Corregir o ajustar la nota</div>
@@ -455,6 +460,7 @@
                 <div style="display:flex;gap:8px;margin-top:10px">
                   <button class="btn btn--ghost btn--sm" onclick="genSocialFromNote()">Regenerar</button>
                   <button class="btn btn--primary btn--sm" onclick="copySocial()">Copiar copy</button>
+                  <button class="btn btn--ghost btn--sm" onclick="saveDraft('traspaso')">💾 Guardar borrador</button>
                 </div>
                 <div id="tp-social-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
                   <div class="flbl" style="margin-bottom:8px">Corregir o ajustar</div>
@@ -546,6 +552,7 @@
               <div style="display:flex;gap:8px;margin-top:12px">
                 <button class="btn btn--ghost btn--sm" onclick="processTranscription()">Regenerar</button>
                 <button class="btn btn--primary btn--sm" onclick="copyDsg()">Copiar texto</button>
+                <button class="btn btn--ghost btn--sm" onclick="saveDraft('desgrab')">💾 Guardar borrador</button>
               </div>
               <div id="dsg-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
                 <div class="flbl" style="margin-bottom:8px">Corregir o ajustar la nota</div>
@@ -624,6 +631,7 @@
                 <div style="display:flex;gap:8px;margin-top:12px">
                   <button class="btn btn--ghost btn--sm" onclick="genEnfoque()">Regenerar</button>
                   <button class="btn btn--primary btn--sm" onclick="copyEnf()">Copiar texto</button>
+                  <button class="btn btn--ghost btn--sm" onclick="saveDraft('enfoques')">💾 Guardar borrador</button>
                 </div>
                 <div id="enf-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
                   <div class="flbl" style="margin-bottom:8px">Corregir o ajustar el enfoque</div>
@@ -637,6 +645,23 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ═══ BORRADORES ═══ -->
+    <div class="page" id="page-borradores">
+      <div class="hero">
+        <div class="hero-row">
+          <div class="hero-num">№ 08 · Workspace</div>
+          <div class="hero-rule"></div>
+          <div class="hero-num">Notas en progreso</div>
+        </div>
+        <h1 class="hero-title">Tus <span class="accent">borradores</span></h1>
+        <div class="hero-sub">Guardá notas en progreso y retomá donde dejaste. Se almacenan en tu navegador.</div>
+        <div class="hero-gradient"></div>
+      </div>
+      <div class="section">
+        <div id="drafts-list" class="wflow" style="gap:12px"></div>
       </div>
     </div>
 
@@ -739,14 +764,35 @@ function doLogin(){
     document.getElementById("unm").textContent=user.name;
     document.getElementById("url2").textContent=user.role;
     currentUser={username:u,...user};
+    // Persistir sesión 4 horas
+    localStorage.setItem("dru_session",JSON.stringify({user:u,exp:Date.now()+4*60*60*1000}));
     initApp();
   }else{document.getElementById("lerr").style.display="block";}
 }
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.getElementById("ls").style.display!=="none")doLogin();});
-function doLogout(){document.getElementById("ls").style.display="grid";document.getElementById("app").style.display="none";}
+function doLogout(){localStorage.removeItem("dru_session");document.getElementById("ls").style.display="grid";document.getElementById("app").style.display="none";}
+// Auto-restore sesión
+(function(){
+  try{
+    const s=JSON.parse(localStorage.getItem("dru_session"));
+    if(s&&s.user&&s.exp>Date.now()){
+      const user=USERS[s.user];
+      if(user){
+        document.getElementById("ls").style.display="none";
+        document.getElementById("app").style.display="grid";
+        document.getElementById("uav").textContent=user.av;
+        document.getElementById("unm").textContent=user.name;
+        document.getElementById("url2").textContent=user.role;
+        currentUser={username:s.user,...user};
+        setTimeout(()=>initApp(),100);
+      }
+    }
+  }catch(e){}
+})();
 
 // ══ INIT ══
 async function initApp(){
+  updateDraftsBadge();
   if(!ARCHIVO_EFEM.length){try{const r=await fetch("efemerides.json");if(r.ok)ARCHIVO_EFEM=await r.json();}catch(e){}}
   DB=loadDB();
   const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
@@ -900,7 +946,7 @@ async function generateContent(){
   try{
     const apiUrl=selModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
     const model=selModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
-    const res=await fetch(apiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model,max_tokens:2000,messages:[{role:"user",content:prompts[selFmtStr]}]})});
+    const res=await fetch(apiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model,max_tokens:2000,messages:[{role:"user",content:prompts[selFmtStr]+getCorrectionsContext()}]})});
     const data=await res.json();
     if(data.error){content.textContent="Error API: "+JSON.stringify(data.error);return;}
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
@@ -922,6 +968,7 @@ async function sendChatCorrection(){
   msgs.innerHTML+=`<div style="font-size:11px;color:var(--ink-3);margin-bottom:8px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgs.scrollTop=msgs.scrollHeight;
   genChatHistory.push({role:"user",content:msg});
+  saveCorrection(msg);
   const apiUrl=selModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
   const model=selModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
   const systemMsg={role:"user",content:"Sos redactor de Diario Río Uruguay. Aplicá los cambios y devolvé la nota completa corregida."};
@@ -1066,7 +1113,7 @@ async function sendTpChat(){
   const msgsDiv=document.getElementById("tp-chat-msgs");
   msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
   input.value="";
-  tpChatMsgs.push({role:"user",content:msg});
+  tpChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
   msgsDiv.innerHTML+=`<div id="tp-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1099,7 +1146,7 @@ async function genSocialFromNote(){
     reel:`Actuá como editor audiovisual de Diario Río Uruguay (Concordia, Entre Ríos · 56K IG / 103K FB). Necesidad: "${un}".\n\nGenerá un GUIÓN DE REEL de 45 segundos a partir de esta nota:\n\nTITULAR: ${title}\nNOTA: ${body.substring(0,2500)}\n\nCRITERIOS DRU: periodístico, anti-clickbait, NUNCA inventar.\n- GANCHO 0-3s: dato periodístico más fuerte, máx 8 palabras en pantalla.\n- DESARROLLO 3-35s: texto en pantalla + voz en off, 3-4 bloques.\n- CIERRE 35-42s: por qué importa hoy.\n- CTA 42-45s: "Nota completa en diarioriouruguay.com"\n- CAPTION: bajada + hashtags.${fbBlock}\n\nRespondé: GANCHO, DESARROLLO (bloques), CIERRE, CTA, CAPTION, HASHTAGS${fb!=="no"?", FACEBOOK":""}`,
     nota:`Actuá como redactor de Diario Río Uruguay. Necesidad: "${un}".\n\nReescribí esta nota con criterios editoriales DRU:\n\nTITULAR: ${title}\nNOTA: ${body.substring(0,2500)}\n\nCondiciones: mín 600 palabras. TÍTULO (máx 65 chars, keyword geo), COPETE, CUERPO. 5W en primeras 3 oraciones. Citas textuales. Subtítulo cada 3 párrafos. NUNCA inventar.\n\nSEO: META TITLE, META DESCRIPTION, SLUG, KEYWORDS.${fbBlock}`
   };
-  const prompt=fmtPrompts[tpFmtStr]||fmtPrompts.carrusel;
+  const prompt=(fmtPrompts[tpFmtStr]||fmtPrompts.carrusel)+getCorrectionsContext();
   try{
     const api=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
     const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
@@ -1117,7 +1164,7 @@ async function sendTpSocialChat(){
   const msgsDiv=document.getElementById("tp-social-chat-msgs");
   msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
   input.value="";
-  tpSocialChatMsgs.push({role:"user",content:msg});
+  tpSocialChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
   msgsDiv.innerHTML+=`<div id="tp-social-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1174,7 +1221,7 @@ async function processTranscription(){
   const btn=document.getElementById("dsg-btn");btn.innerHTML=`Redactando nota<span class="dots"><span></span><span></span><span></span></span>`;btn.disabled=true;
   const result=document.getElementById("dsg-result");result.style.display="block";
   document.getElementById("dsg-nota").innerHTML=`<span class="dots"><span></span><span></span><span></span></span> Generando nota periodística...`;
-  const prompt=`Sos redactor de Diario Río Uruguay. Procesás transcripción de ${tipo} (sección ${seccion})${persona?" con "+persona:""}.\n\nTRANSCRIPCIÓN:\n${text.substring(0,4000)}\n\nCondiciones: mín 600 palabras. TÍTULO (máx 65 chars, keyword geo), COPETE, CUERPO. Citas textuales, atribución en pasado. Subtítulo cada 3 párrafos. NUNCA inventar.\n\nSEO: META TITLE, META DESCRIPTION, SLUG, KEYWORDS.\n\n---REDES---\n\nCOPY REDES: FACEBOOK + INSTAGRAM + THREADS.`;
+  const prompt=`Sos redactor de Diario Río Uruguay. Procesás transcripción de ${tipo} (sección ${seccion})${persona?" con "+persona:""}.\n\nTRANSCRIPCIÓN:\n${text.substring(0,4000)}\n\nCondiciones: mín 600 palabras. TÍTULO (máx 65 chars, keyword geo), COPETE, CUERPO. Citas textuales, atribución en pasado. Subtítulo cada 3 párrafos. NUNCA inventar.\n\nSEO: META TITLE, META DESCRIPTION, SLUG, KEYWORDS.\n\n---REDES---\n\nCOPY REDES: FACEBOOK + INSTAGRAM + THREADS.`+getCorrectionsContext();
   try{
     const dsgApi=dsgModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
     const dsgMod=dsgModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
@@ -1202,7 +1249,7 @@ async function sendDsgChat(){
   const msgsDiv=document.getElementById("dsg-chat-msgs");
   msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
   input.value="";
-  dsgChatMsgs.push({role:"user",content:msg});
+  dsgChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
   msgsDiv.innerHTML+=`<div id="dsg-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1221,7 +1268,7 @@ async function sendDsgChat(){
 }
 
 // ══ NAV ══
-const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Traspaso a redes",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",sugerencias:"Sugerencias y ajustes"};
+const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Traspaso a redes",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
 function showPage(id,navEl){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -1229,6 +1276,7 @@ function showPage(id,navEl){
   if(navEl)navEl.classList.add("active");
   document.getElementById("pt").innerHTML=`Panel <span style="margin:0 8px;color:var(--ink-4)">/</span> <b>${PAGE_TITLE[id]||""}</b>`;
   if(id==="seo"){const now=new Date();document.getElementById("seo-date-label").textContent=now.getDate()+" de "+MESF[now.getMonth()+1]+" de "+now.getFullYear();}
+  if(id==="borradores")renderDrafts();
   if(id==="sugerencias"){if(currentUser)document.getElementById("sug-name").value=currentUser.name;renderSugerencias();}
   if(id==="gen")renderGenList();
 }
@@ -1258,7 +1306,7 @@ async function genEnfoque(){
   const result=document.getElementById("enf-result");const content=document.getElementById("enf-content");
   result.style.display="block";content.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> Aplicando enfoque "${selEnf_val}"...`;
   document.getElementById("enf-sel-label").textContent=selEnf_val;
-  const prompt=`Sos redactor de Diario Río Uruguay.\n\n${ENF_PROMPTS[selEnf_val]}\n\nCondiciones DRU: TÍTULO máx 65 chars con keyword geo, COPETE máx 240 chars, mín 600 palabras, subtítulos cada 3 párrafos, NUNCA inventar.\n\nTITULAR: ${title}\nTEXTO:\n${body.substring(0,2500)}\n\nGenerá: 1. TÍTULO 2. COPETE 3. NOTA REESCRITA 4. COPY FACEBOOK 5. COPY INSTAGRAM`;
+  const prompt=`Sos redactor de Diario Río Uruguay.\n\n${ENF_PROMPTS[selEnf_val]}\n\nCondiciones DRU: TÍTULO máx 65 chars con keyword geo, COPETE máx 240 chars, mín 600 palabras, subtítulos cada 3 párrafos, NUNCA inventar.\n\nTITULAR: ${title}\nTEXTO:\n${body.substring(0,2500)}\n\nGenerá: 1. TÍTULO 2. COPETE 3. NOTA REESCRITA 4. COPY FACEBOOK 5. COPY INSTAGRAM`+getCorrectionsContext();
   try{
     const enfApi=enfModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
     const enfMod=enfModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
@@ -1277,7 +1325,7 @@ async function sendEnfChat(){
   const msgsDiv=document.getElementById("enf-chat-msgs");
   msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
   input.value="";
-  enfChatMsgs.push({role:"user",content:msg});
+  enfChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
   msgsDiv.innerHTML+=`<div id="enf-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1291,6 +1339,104 @@ async function sendEnfChat(){
     msgsDiv.innerHTML+=`<div style="background:var(--peach-pale);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>IA:</b> Texto actualizado ✓</div>`;
     msgsDiv.scrollTop=msgsDiv.scrollHeight;
   }catch(e){const ld=document.getElementById("enf-chat-loading");if(ld)ld.textContent="Error de conexión.";}
+}
+
+// ══ BORRADORES ══
+const SK_DRAFTS="dru_borradores";
+function loadDrafts(){try{return JSON.parse(localStorage.getItem(SK_DRAFTS)||"[]");}catch(e){return[];}}
+function saveDrafts(arr){localStorage.setItem(SK_DRAFTS,JSON.stringify(arr));updateDraftsBadge();}
+function updateDraftsBadge(){const c=loadDrafts().length;document.getElementById("drafts-cnt").textContent=c;}
+
+function saveDraft(section){
+  const secLabels={gen:"Generador",traspaso:"Traspaso",desgrab:"Desgrabador",enfoques:"Enfoques"};
+  let content="",title="",format="";
+  if(section==="gen"){
+    content=document.getElementById("ocontent").textContent;
+    title=selEfemObj?selEfemObj.title:"Nota generada";format=selFmtStr;
+  }else if(section==="traspaso"){
+    content=document.getElementById("social-content").textContent;
+    title=document.getElementById("tp-title").value.trim()||"Traspaso a redes";format=tpFmtStr;
+  }else if(section==="desgrab"){
+    content=document.getElementById("dsg-nota").textContent;
+    const social=document.getElementById("dsg-social").textContent;
+    if(social&&social!=="Generá el copy desde la nota.")content+="\n\n---REDES---\n"+social;
+    title="Desgrabación";format="nota";
+  }else if(section==="enfoques"){
+    content=document.getElementById("enf-content").textContent;
+    title=document.getElementById("enf-title").value.trim()||"Enfoque editorial";format=selEnf_val;
+  }
+  if(!content||content.length<20){showToast("⚠ No hay contenido para guardar");return;}
+  const drafts=loadDrafts();
+  drafts.unshift({id:Date.now(),section,label:secLabels[section],title:title.substring(0,80),format,content,date:new Date().toISOString()});
+  saveDrafts(drafts);
+  showToast("✓ Borrador guardado");
+}
+
+function renderDrafts(){
+  const list=document.getElementById("drafts-list");
+  const drafts=loadDrafts();
+  updateDraftsBadge();
+  if(!drafts.length){list.innerHTML=`<div class="empty" style="text-align:center;padding:3rem;color:var(--ink-3);font-family:var(--serif)">No hay borradores guardados.<br><span style="font-size:13px;color:var(--ink-4)">Generá contenido y hacé clic en "Guardar borrador" para verlo acá.</span></div>`;return;}
+  const fmtLabels={carrusel:"Carrusel",placa:"Placa",reel:"Reel",nota:"Nota SEO","Update me":"Update me","Keep me engaged":"Keep me engaged","Educate me":"Educate me","Give me perspective":"Perspective","Inspire me":"Inspire me","Divert me":"Divert me","Help me":"Help me","Connect me":"Connect me"};
+  list.innerHTML=drafts.map(d=>{
+    const dt=new Date(d.date);const ds=dt.getDate()+"/"+(dt.getMonth()+1)+"/"+dt.getFullYear()+" "+dt.getHours()+":"+String(dt.getMinutes()).padStart(2,"0");
+    const preview=d.content.substring(0,150).replace(/</g,"&lt;")+"…";
+    return`<div class="step" style="margin-bottom:0">
+      <div class="step-head" style="align-items:flex-start">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+            <span class="tag tag--peach">${d.label||d.section}</span>
+            <span class="tag tag--sky">${fmtLabels[d.format]||d.format||""}</span>
+            <span style="font-size:11px;color:var(--ink-4);font-family:var(--mono)">${ds}</span>
+          </div>
+          <div style="font-weight:600;font-size:15px;margin-bottom:6px">${d.title.replace(/</g,"&lt;")}</div>
+          <div style="font-size:13px;color:var(--ink-3);line-height:1.5">${preview}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn--primary btn--sm" onclick="loadDraft(${d.id})">Cargar borrador</button>
+        <button class="btn btn--ghost btn--sm" onclick="copyDraftText(${d.id})">Copiar texto</button>
+        <button class="btn btn--ghost btn--sm" style="color:var(--rose-deep)" onclick="deleteDraft(${d.id})">Eliminar</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function loadDraft(id){
+  const draft=loadDrafts().find(d=>d.id===id);if(!draft)return;
+  if(draft.section==="gen"){
+    showPage("gen",document.querySelectorAll(".sb-item")[1]);
+    setTimeout(()=>{document.getElementById("ocontent").textContent=draft.content;document.getElementById("ocontent").style.color="";document.getElementById("ocontent").style.fontStyle="";document.getElementById("gen-actions").style.display="flex";genChatHistory=[{role:"assistant",content:draft.content}];},100);
+  }else if(draft.section==="traspaso"){
+    showPage("traspaso",document.querySelectorAll(".sb-item")[4]);
+    setTimeout(()=>{document.getElementById("social-content").textContent=draft.content;document.getElementById("social-result").style.display="block";tpSocialChatMsgs=[{role:"assistant",content:draft.content}];document.getElementById("tp-social-chat").style.display="block";},100);
+  }else if(draft.section==="desgrab"){
+    showPage("desgrab",document.querySelectorAll(".sb-item")[5]);
+    setTimeout(()=>{const parts=draft.content.split(/---REDES---/);document.getElementById("dsg-nota").textContent=parts[0];if(parts[1])document.getElementById("dsg-social").textContent=parts[1];document.getElementById("dsg-result").style.display="block";dsgChatMsgs=[{role:"assistant",content:draft.content}];document.getElementById("dsg-chat").style.display="block";},100);
+  }else if(draft.section==="enfoques"){
+    showPage("enfoques",document.querySelectorAll(".sb-item")[6]);
+    setTimeout(()=>{document.getElementById("enf-content").textContent=draft.content;document.getElementById("enf-result").style.display="block";enfChatMsgs=[{role:"assistant",content:draft.content}];document.getElementById("enf-chat").style.display="block";},100);
+  }
+  showToast("✓ Borrador cargado");
+}
+function copyDraftText(id){const d=loadDrafts().find(x=>x.id===id);if(d)navigator.clipboard&&navigator.clipboard.writeText(d.content);showToast("✓ Texto copiado");}
+function deleteDraft(id){const drafts=loadDrafts().filter(d=>d.id!==id);saveDrafts(drafts);renderDrafts();showToast("✓ Borrador eliminado");}
+
+// ══ CORRECCIONES EN PROMPTS ══
+const SK_CORRECTIONS="dru_corrections";
+function loadCorrections(){try{return JSON.parse(localStorage.getItem(SK_CORRECTIONS)||"[]");}catch(e){return[];}}
+function saveCorrection(msg){
+  const arr=loadCorrections();
+  arr.push({text:msg,date:new Date().toISOString()});
+  // Mantener últimas 20 correcciones
+  if(arr.length>20)arr.splice(0,arr.length-20);
+  localStorage.setItem(SK_CORRECTIONS,JSON.stringify(arr));
+}
+function getCorrectionsContext(){
+  const arr=loadCorrections();
+  if(!arr.length)return"";
+  const recent=arr.slice(-10).map(c=>c.text);
+  return"\n\nNOTA: El redactor ha dado estas correcciones anteriormente. Tené en cuenta su estilo y preferencias:\n- "+recent.join("\n- ");
 }
 
 // ══ SUGERENCIAS ══
