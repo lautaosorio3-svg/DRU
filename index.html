@@ -101,13 +101,21 @@
     </div>
 
     <div class="sb-section">
-      <div class="sb-section-label"><span>/ Workspace</span><span class="sb-section-num">03</span></div>
+      <div class="sb-section-label"><span>/ Métricas</span><span class="sb-section-num">03</span></div>
+      <div class="sb-item" onclick="showPage('metastats',this)">
+        <span class="sb-item-num">08</span><span class="sb-item-name">Estadísticas</span>
+        <span class="sb-item-badge">META</span><span class="sb-item-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-label"><span>/ Workspace</span><span class="sb-section-num">04</span></div>
       <div class="sb-item" onclick="showPage('borradores',this)">
-        <span class="sb-item-num">08</span><span class="sb-item-name">Borradores</span>
+        <span class="sb-item-num">09</span><span class="sb-item-name">Borradores</span>
         <span class="sb-item-badge is-count" id="drafts-cnt">0</span><span class="sb-item-arrow">→</span>
       </div>
       <div class="sb-item" onclick="showPage('sugerencias',this)">
-        <span class="sb-item-num">09</span><span class="sb-item-name">Sugerencias</span>
+        <span class="sb-item-num">10</span><span class="sb-item-name">Sugerencias</span>
         <span class="sb-item-arrow">→</span>
       </div>
     </div>
@@ -644,6 +652,94 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ESTADÍSTICAS META ═══ -->
+    <div class="page" id="page-metastats">
+      <div class="hero">
+        <div class="hero-row">
+          <div class="hero-num">№ 08 · Métricas</div>
+          <div class="hero-rule"></div>
+          <div class="hero-num">Instagram · Facebook</div>
+        </div>
+        <h1 class="hero-title">Estadísticas <span class="accent">Meta</span></h1>
+        <div class="hero-sub">Métricas de la última semana · Análisis IA para mejorar el contenido.</div>
+        <div class="hero-gradient"></div>
+      </div>
+
+      <div class="section" id="meta-not-configured" style="display:none">
+        <div class="step">
+          <div class="step-head"><span class="step-num step-num--peach">!</span><div class="step-title">Configuración requerida</div></div>
+          <div class="step-help" style="line-height:1.8">
+            Para conectar las estadísticas necesitás configurar 3 variables de entorno en Netlify:<br>
+            <code style="background:var(--surface-alt);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">META_ACCESS_TOKEN</code> — Token de acceso de Meta (desde <a href="https://developers.facebook.com/tools/explorer/" target="_blank" style="color:var(--peach-deep)">Graph API Explorer</a>)<br>
+            <code style="background:var(--surface-alt);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">META_FB_PAGE_ID</code> — ID de la página de Facebook<br>
+            <code style="background:var(--surface-alt);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">META_IG_USER_ID</code> — ID de la cuenta de Instagram profesional<br><br>
+            <b>Permisos necesarios:</b> pages_show_list, pages_read_engagement, instagram_basic, instagram_manage_insights, read_insights
+          </div>
+        </div>
+      </div>
+
+      <div id="meta-loading" style="display:none;text-align:center;padding:3rem;color:var(--ink-3);font-family:var(--serif)">
+        <span class="dots"><span></span><span></span><span></span></span> Cargando estadísticas de Meta...
+      </div>
+
+      <div class="section" id="meta-dashboard" style="display:none">
+        <!-- Overview cards -->
+        <div class="stats" id="meta-overview-cards"></div>
+
+        <!-- Instagram posts -->
+        <div class="wflow" style="margin-top:1.5rem">
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num step-num--peach">📸</span><div class="step-title">Últimos posts de Instagram</div></div>
+              <div id="meta-ig-posts" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>
+            </div>
+          </div>
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num step-num--sky">📘</span><div class="step-title">Últimos posts de Facebook</div></div>
+              <div id="meta-fb-posts" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Analysis -->
+        <div style="margin-top:1.5rem">
+          <div class="step">
+            <div class="step-head"><span class="step-num step-num--peach">🤖</span><div class="step-title">Análisis IA semanal</div></div>
+            <div class="step-help">La IA analiza tus últimos posts y sugiere mejoras de títulos, copy, horarios y estrategia.</div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+              <button class="btn btn--primary" id="meta-ai-btn" onclick="runMetaAIAnalysis()">Analizar posts y sugerir mejoras <span class="font-mono" style="font-size:11px">→</span></button>
+              <div class="mc" style="gap:0">
+                <button class="opt active" id="meta-model-claude" onclick="selMetaModel('claude')">Claude</button>
+                <button class="opt" id="meta-model-gpt" onclick="selMetaModel('gpt')">GPT</button>
+              </div>
+            </div>
+            <div id="meta-ai-result" style="display:none;margin-top:16px">
+              <div class="out-box" id="meta-ai-content"></div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button class="btn btn--ghost btn--sm" onclick="copyMetaAI()">Copiar análisis</button>
+                <button class="btn btn--ghost btn--sm" onclick="saveDraft('metastats')">💾 Guardar borrador</button>
+              </div>
+              <div id="meta-ai-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
+                <div class="flbl" style="margin-bottom:8px">Profundizar en el análisis</div>
+                <div id="meta-ai-chat-msgs" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+                <div style="display:flex;gap:6px">
+                  <input class="fi" id="meta-ai-chat-input" placeholder="Ej: Analizá más los horarios de publicación, qué hashtags funcionan mejor…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')sendMetaChat()">
+                  <button class="btn btn--primary btn--sm" onclick="sendMetaChat()">Enviar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Refresh -->
+        <div style="margin-top:1rem;text-align:right">
+          <button class="btn btn--ghost btn--sm" onclick="loadMetaStats()">↻ Actualizar datos</button>
+          <span class="font-mono" style="font-size:10px;color:var(--ink-4);margin-left:8px" id="meta-last-update"></span>
         </div>
       </div>
     </div>
@@ -1268,7 +1364,7 @@ async function sendDsgChat(){
 }
 
 // ══ NAV ══
-const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
+const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",metastats:"Estadísticas Meta",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
 function showPage(id,navEl){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -1276,6 +1372,7 @@ function showPage(id,navEl){
   if(navEl)navEl.classList.add("active");
   document.getElementById("pt").innerHTML=`Panel <span style="margin:0 8px;color:var(--ink-4)">/</span> <b>${PAGE_TITLE[id]||""}</b>`;
   if(id==="seo"){const now=new Date();document.getElementById("seo-date-label").textContent=now.getDate()+" de "+MESF[now.getMonth()+1]+" de "+now.getFullYear();}
+  if(id==="metastats")loadMetaStats();
   if(id==="borradores")renderDrafts();
   if(id==="sugerencias"){if(currentUser)document.getElementById("sug-name").value=currentUser.name;renderSugerencias();}
   if(id==="gen")renderGenList();
@@ -1341,6 +1438,177 @@ async function sendEnfChat(){
   }catch(e){const ld=document.getElementById("enf-chat-loading");if(ld)ld.textContent="Error de conexión.";}
 }
 
+// ══ META STATS ══
+let metaData=null;
+let metaModelStr="claude";
+let metaChatMsgs=[];
+function selMetaModel(m){metaModelStr=m;document.getElementById("meta-model-claude").classList.toggle("active",m==="claude");document.getElementById("meta-model-gpt").classList.toggle("active",m==="gpt");}
+
+async function loadMetaStats(){
+  document.getElementById("meta-loading").style.display="block";
+  document.getElementById("meta-dashboard").style.display="none";
+  document.getElementById("meta-not-configured").style.display="none";
+  try{
+    const res=await fetch("/.netlify/functions/meta-stats?action=overview");
+    const data=await res.json();
+    if(!data.configured){document.getElementById("meta-not-configured").style.display="block";document.getElementById("meta-loading").style.display="none";return;}
+    metaData=data;
+    renderMetaDashboard(data);
+    document.getElementById("meta-loading").style.display="none";
+    document.getElementById("meta-dashboard").style.display="block";
+    document.getElementById("meta-last-update").textContent="Última actualización: "+new Date().toLocaleTimeString("es-AR");
+  }catch(e){
+    document.getElementById("meta-loading").style.display="none";
+    document.getElementById("meta-not-configured").style.display="block";
+  }
+}
+
+function renderMetaDashboard(data){
+  const cards=document.getElementById("meta-overview-cards");
+  let html="";
+  if(data.ig&&data.ig.profile){
+    const p=data.ig.profile;
+    const reachTotal=data.ig.insights.find(i=>i.name==="reach");
+    const impTotal=data.ig.insights.find(i=>i.name==="impressions");
+    const reachSum=reachTotal?reachTotal.values.reduce((s,v)=>s+v.value,0):0;
+    const impSum=impTotal?impTotal.values.reduce((s,v)=>s+v.value,0):0;
+    html+=`<div class="stat"><div class="stat-num">${formatNum(p.followers_count||0)}</div><div class="stat-label">Seguidores IG</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;
+    html+=`<div class="stat"><div class="stat-num">${formatNum(reachSum)}</div><div class="stat-label">Alcance 7d IG</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
+    html+=`<div class="stat"><div class="stat-num">${formatNum(impSum)}</div><div class="stat-label">Impresiones 7d IG</div><span class="stat-dot" style="background:var(--rose-deep)"></span></div>`;
+    html+=`<div class="stat"><div class="stat-num">${p.media_count||0}</div><div class="stat-label">Posts totales IG</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;
+  }
+  if(data.fb&&data.fb.page){
+    const fp=data.fb.page;
+    html+=`<div class="stat"><div class="stat-num">${formatNum(fp.followers_count||fp.fan_count||0)}</div><div class="stat-label">Seguidores FB</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
+    const fbReach=data.fb.insights.find(i=>i.name==="page_impressions");
+    const fbEng=data.fb.insights.find(i=>i.name==="page_post_engagements");
+    if(fbReach){const s=fbReach.values.reduce((a,v)=>a+v.value,0);html+=`<div class="stat"><div class="stat-num">${formatNum(s)}</div><div class="stat-label">Alcance 7d FB</div><span class="stat-dot" style="background:var(--rose-deep)"></span></div>`;}
+    if(fbEng){const s=fbEng.values.reduce((a,v)=>a+v.value,0);html+=`<div class="stat"><div class="stat-num">${formatNum(s)}</div><div class="stat-label">Engagement 7d FB</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;}
+  }
+  cards.innerHTML=html||`<div class="stat"><div class="stat-label">Sin datos disponibles</div></div>`;
+
+  // IG posts
+  const igDiv=document.getElementById("meta-ig-posts");
+  if(data.ig&&data.ig.media&&data.ig.media.length){
+    igDiv.innerHTML=data.ig.media.map(m=>{
+      const d=new Date(m.timestamp);const ds=d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
+      const typeIcon=m.media_type==="VIDEO"?"🎬":m.media_type==="CAROUSEL_ALBUM"?"📑":"📷";
+      const engRate=m.reach>0?((m.engagement/m.reach)*100).toFixed(1):0;
+      return`<div style="background:var(--surface-alt);border-radius:10px;padding:12px;font-size:13px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span>${typeIcon} <span style="color:var(--ink-4);font-family:var(--mono);font-size:11px">${ds}</span></span>
+          <a href="${m.permalink}" target="_blank" style="color:var(--peach-deep);font-size:11px;font-family:var(--mono)">ver →</a>
+        </div>
+        <div style="color:var(--ink-2);line-height:1.4;margin-bottom:8px">${m.caption?m.caption.replace(/</g,"&lt;"):"(sin caption)"}</div>
+        <div style="display:flex;gap:12px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">
+          <span>❤️ ${m.likes}</span><span>💬 ${m.comments}</span><span>👁 ${formatNum(m.reach)}</span><span>📊 ${engRate}%</span><span>🔖 ${m.saved}</span>
+        </div>
+      </div>`;
+    }).join("");
+  }else{igDiv.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin datos de Instagram</div>`;}
+
+  // FB posts
+  const fbDiv=document.getElementById("meta-fb-posts");
+  if(data.fb&&data.fb.posts&&data.fb.posts.length){
+    fbDiv.innerHTML=data.fb.posts.map(p=>{
+      const d=new Date(p.created_time);const ds=d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
+      return`<div style="background:var(--surface-alt);border-radius:10px;padding:12px;font-size:13px">
+        <div style="color:var(--ink-4);font-family:var(--mono);font-size:11px;margin-bottom:6px">${ds}</div>
+        <div style="color:var(--ink-2);line-height:1.4;margin-bottom:8px">${p.message?p.message.replace(/</g,"&lt;"):"(sin texto)"}</div>
+        <div style="display:flex;gap:12px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">
+          <span>👍 ${p.likes}</span><span>💬 ${p.comments}</span><span>↗️ ${p.shares}</span><span>👁 ${formatNum(p.impressions)}</span>
+        </div>
+      </div>`;
+    }).join("");
+  }else{fbDiv.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin datos de Facebook</div>`;}
+}
+
+function formatNum(n){if(n>=1000000)return(n/1000000).toFixed(1)+"M";if(n>=1000)return(n/1000).toFixed(1)+"K";return n.toString();}
+
+async function runMetaAIAnalysis(){
+  if(!metaData){showToast("⚠ Cargá las estadísticas primero");return;}
+  const btn=document.getElementById("meta-ai-btn");btn.innerHTML=`Analizando<span class="dots"><span></span><span></span><span></span></span>`;btn.disabled=true;
+  const result=document.getElementById("meta-ai-result");const content=document.getElementById("meta-ai-content");
+  result.style.display="block";content.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> Analizando estadísticas y posts...`;
+
+  let postsContext="";
+  if(metaData.ig&&metaData.ig.media){
+    postsContext+="\n\nÚLTIMOS POSTS INSTAGRAM:\n"+metaData.ig.media.map((m,i)=>{
+      const engRate=m.reach>0?((m.engagement/m.reach)*100).toFixed(1):0;
+      return`${i+1}. [${m.media_type}] "${m.caption||"sin caption"}" — ❤️${m.likes} 💬${m.comments} 👁${m.reach} alcance, ${engRate}% engagement, 🔖${m.saved} guardados`;
+    }).join("\n");
+    if(metaData.ig.profile)postsContext+=`\n\nPERFIL IG: ${metaData.ig.profile.followers_count} seguidores, ${metaData.ig.profile.media_count} posts, bio: "${metaData.ig.profile.biography||""}"`;
+  }
+  if(metaData.fb&&metaData.fb.posts){
+    postsContext+="\n\nÚLTIMOS POSTS FACEBOOK:\n"+metaData.fb.posts.map((p,i)=>{
+      return`${i+1}. "${p.message||"sin texto"}" — 👍${p.likes} 💬${p.comments} ↗️${p.shares} compartidos, 👁${p.impressions} impresiones`;
+    }).join("\n");
+    if(metaData.fb.page)postsContext+=`\n\nPÁGINA FB: ${metaData.fb.page.followers_count||metaData.fb.page.fan_count} seguidores`;
+  }
+
+  const prompt=`Sos analista de redes sociales de Diario Río Uruguay (Concordia, Entre Ríos · 56K IG / 103K FB). Medio periodístico regional serio, anti-clickbait.
+
+Analizá las estadísticas de la última semana y los últimos posts:
+${postsContext}
+
+CRITERIOS DRU: calidad editorial sobre métricas de corto plazo, anti-clickbait absoluto, bidireccionalidad, comunidad activa.
+
+Generá un INFORME SEMANAL con:
+
+1. **RESUMEN EJECUTIVO** — 3-4 líneas, tendencia general, dato más relevante.
+
+2. **TOP 3 POSTS** — Los de mejor rendimiento. Por qué funcionaron.
+
+3. **POSTS CON BAJO RENDIMIENTO** — Cuáles no funcionaron y posibles causas.
+
+4. **TÍTULOS ALTERNATIVOS** — Para los 3 posts con peor engagement, sugerí 2 títulos/captions alternativos que podrían haber funcionado mejor (sin caer en clickbait).
+
+5. **CRÍTICA DE CONTENIDO** — Análisis de los captions: longitud, uso de hashtags, CTAs, preguntas abiertas, keywords geográficas. Qué falta.
+
+6. **HORARIOS Y FRECUENCIA** — Análisis de cuándo se publicó vs. cuándo conviene publicar para medios regionales argentinos.
+
+7. **SUGERENCIAS PARA LA PRÓXIMA SEMANA** — 5 acciones concretas y accionables.
+
+8. **META TAGS Y SEO SOCIAL** — Sugerencias de hashtags, keywords, y meta tags para mejorar el descubrimiento.
+
+Sé directo, sin rodeos. Datos y recomendaciones accionables.`+getCorrectionsContext();
+
+  try{
+    const api=metaModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=metaModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:3000,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    content.textContent=text;
+    metaChatMsgs=[{role:"user",content:prompt},{role:"assistant",content:text}];
+    document.getElementById("meta-ai-chat").style.display="block";
+    document.getElementById("meta-ai-chat-msgs").innerHTML="";
+  }catch(e){content.textContent="Error al conectar con la IA.";}
+  btn.innerHTML=`Analizar posts y sugerir mejoras <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
+}
+
+async function sendMetaChat(){
+  const input=document.getElementById("meta-ai-chat-input");const msg=input.value.trim();if(!msg)return;
+  const msgsDiv=document.getElementById("meta-ai-chat-msgs");
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  input.value="";
+  metaChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
+  msgsDiv.innerHTML+=`<div id="meta-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Analizando...</div>`;
+  msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  try{
+    const api=metaModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=metaModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:metaChatMsgs})});
+    const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    metaChatMsgs.push({role:"assistant",content:text});
+    document.getElementById("meta-ai-content").textContent=text;
+    const ld=document.getElementById("meta-chat-loading");if(ld)ld.remove();
+    msgsDiv.innerHTML+=`<div style="background:var(--peach-pale);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>IA:</b> Análisis actualizado ✓</div>`;
+    msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  }catch(e){const ld=document.getElementById("meta-chat-loading");if(ld)ld.textContent="Error de conexión.";}
+}
+function copyMetaAI(){navigator.clipboard&&navigator.clipboard.writeText(document.getElementById("meta-ai-content").textContent);showToast("✓ Análisis copiado");}
+
 // ══ BORRADORES ══
 const SK_DRAFTS="dru_borradores";
 function loadDrafts(){try{return JSON.parse(localStorage.getItem(SK_DRAFTS)||"[]");}catch(e){return[];}}
@@ -1348,7 +1616,7 @@ function saveDrafts(arr){localStorage.setItem(SK_DRAFTS,JSON.stringify(arr));upd
 function updateDraftsBadge(){const c=loadDrafts().length;document.getElementById("drafts-cnt").textContent=c;}
 
 function saveDraft(section){
-  const secLabels={gen:"Generador",traspaso:"Análisis",desgrab:"Desgrabador",enfoques:"Enfoques"};
+  const secLabels={gen:"Generador",traspaso:"Análisis",desgrab:"Desgrabador",enfoques:"Enfoques",metastats:"Estadísticas"};
   let content="",title="",format="";
   if(section==="gen"){
     content=document.getElementById("ocontent").textContent;
@@ -1364,6 +1632,9 @@ function saveDraft(section){
   }else if(section==="enfoques"){
     content=document.getElementById("enf-content").textContent;
     title=document.getElementById("enf-title").value.trim()||"Enfoque editorial";format=selEnf_val;
+  }else if(section==="metastats"){
+    content=document.getElementById("meta-ai-content").textContent;
+    title="Análisis Meta semanal";format="análisis";
   }
   if(!content||content.length<20){showToast("⚠ No hay contenido para guardar");return;}
   const drafts=loadDrafts();
