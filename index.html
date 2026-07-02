@@ -66,7 +66,7 @@
 
     <div class="sb-section">
       <div class="sb-section-label"><span>/ Contenido</span><span class="sb-section-num">01</span></div>
-      <div class="sb-item active" onclick="showPage('efem',this)">
+      <div class="sb-item" onclick="showPage('efem',this)">
         <span class="sb-item-num">01</span><span class="sb-item-name">Efemérides</span>
         <span class="sb-item-badge is-count" id="nb-cnt">0</span><span class="sb-item-arrow">→</span>
       </div>
@@ -102,7 +102,7 @@
 
     <div class="sb-section">
       <div class="sb-section-label"><span>/ Métricas</span><span class="sb-section-num">03</span></div>
-      <div class="sb-item" onclick="showPage('metastats',this)">
+      <div class="sb-item active" onclick="showPage('metastats',this)">
         <span class="sb-item-num">08</span><span class="sb-item-name">Estadísticas</span>
         <span class="sb-item-badge">META</span><span class="sb-item-arrow">→</span>
       </div>
@@ -136,7 +136,7 @@
   <main>
     <!-- TOPBAR -->
     <div class="topbar">
-      <div class="tb-crumb" id="pt">Panel <span style="margin:0 8px;color:var(--ink-4)">/</span> <b>Base de efemérides</b></div>
+      <div class="tb-crumb" id="pt">Panel <span style="margin:0 8px;color:var(--ink-4)">/</span> <b>Estadísticas Meta</b></div>
       <div class="tb-chip" id="tchip"><span class="tb-chip-dot"></span>cargando...</div>
       <div class="tb-spacer"></div>
       <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema"><span id="theme-icon">☾</span></button>
@@ -144,7 +144,7 @@
     </div>
 
     <!-- ═══ EFEMÉRIDES ═══ -->
-    <div class="page active" id="page-efem">
+    <div class="page" id="page-efem">
       <div class="hero">
         <div class="hero-row">
           <div class="hero-num">№ 01 · Pieza editorial diaria</div>
@@ -657,7 +657,7 @@
     </div>
 
     <!-- ═══ ESTADÍSTICAS META ═══ -->
-    <div class="page" id="page-metastats">
+    <div class="page active" id="page-metastats">
       <div class="hero">
         <div class="hero-row">
           <div class="hero-num">№ 08 · Métricas</div>
@@ -889,6 +889,7 @@ function doLogout(){localStorage.removeItem("dru_session");document.getElementBy
 // ══ INIT ══
 async function initApp(){
   updateDraftsBadge();
+  loadMetaStats();
   if(!ARCHIVO_EFEM.length){try{const r=await fetch("efemerides.json");if(r.ok)ARCHIVO_EFEM=await r.json();}catch(e){}}
   DB=loadDB();
   const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
@@ -1467,23 +1468,16 @@ function renderMetaDashboard(data){
   const cards=document.getElementById("meta-overview-cards");
   let html="";
   if(data.ig&&data.ig.profile){
-    const p=data.ig.profile;
-    const reachTotal=data.ig.insights.find(i=>i.name==="reach");
-    const impTotal=data.ig.insights.find(i=>i.name==="impressions");
-    const reachSum=reachTotal?reachTotal.values.reduce((s,v)=>s+v.value,0):0;
-    const impSum=impTotal?impTotal.values.reduce((s,v)=>s+v.value,0):0;
+    const p=data.ig.profile;const ins=data.ig.insights||{};
     html+=`<div class="stat"><div class="stat-num">${formatNum(p.followers_count||0)}</div><div class="stat-label">Seguidores IG</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;
-    html+=`<div class="stat"><div class="stat-num">${formatNum(reachSum)}</div><div class="stat-label">Alcance 7d IG</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
-    html+=`<div class="stat"><div class="stat-num">${formatNum(impSum)}</div><div class="stat-label">Impresiones 7d IG</div><span class="stat-dot" style="background:var(--rose-deep)"></span></div>`;
-    html+=`<div class="stat"><div class="stat-num">${p.media_count||0}</div><div class="stat-label">Posts totales IG</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;
+    html+=`<div class="stat"><div class="stat-num">${formatNum(ins.reach||0)}</div><div class="stat-label">Alcance 7d IG</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
+    html+=`<div class="stat"><div class="stat-num">${formatNum(ins.accounts_engaged||0)}</div><div class="stat-label">Cuentas interacción 7d</div><span class="stat-dot" style="background:var(--rose-deep)"></span></div>`;
+    html+=`<div class="stat"><div class="stat-num">${formatNum(ins.total_interactions||0)}</div><div class="stat-label">Interacciones 7d</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;
+    html+=`<div class="stat"><div class="stat-num">${formatNum(ins.profile_views||0)}</div><div class="stat-label">Visitas perfil 7d</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
   }
   if(data.fb&&data.fb.page){
     const fp=data.fb.page;
     html+=`<div class="stat"><div class="stat-num">${formatNum(fp.followers_count||fp.fan_count||0)}</div><div class="stat-label">Seguidores FB</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
-    const fbReach=data.fb.insights.find(i=>i.name==="page_impressions");
-    const fbEng=data.fb.insights.find(i=>i.name==="page_post_engagements");
-    if(fbReach){const s=fbReach.values.reduce((a,v)=>a+v.value,0);html+=`<div class="stat"><div class="stat-num">${formatNum(s)}</div><div class="stat-label">Alcance 7d FB</div><span class="stat-dot" style="background:var(--rose-deep)"></span></div>`;}
-    if(fbEng){const s=fbEng.values.reduce((a,v)=>a+v.value,0);html+=`<div class="stat"><div class="stat-num">${formatNum(s)}</div><div class="stat-label">Engagement 7d FB</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;}
   }
   cards.innerHTML=html||`<div class="stat"><div class="stat-label">Sin datos disponibles</div></div>`;
 
@@ -1493,15 +1487,15 @@ function renderMetaDashboard(data){
     igDiv.innerHTML=data.ig.media.map(m=>{
       const d=new Date(m.timestamp);const ds=d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
       const typeIcon=m.media_type==="VIDEO"?"🎬":m.media_type==="CAROUSEL_ALBUM"?"📑":"📷";
-      const engRate=m.reach>0?((m.engagement/m.reach)*100).toFixed(1):0;
+      const engRate=m.reach>0?((m.interactions/m.reach)*100).toFixed(1):0;
       return`<div style="background:var(--surface-alt);border-radius:10px;padding:12px;font-size:13px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <span>${typeIcon} <span style="color:var(--ink-4);font-family:var(--mono);font-size:11px">${ds}</span></span>
           <a href="${m.permalink}" target="_blank" style="color:var(--peach-deep);font-size:11px;font-family:var(--mono)">ver →</a>
         </div>
         <div style="color:var(--ink-2);line-height:1.4;margin-bottom:8px">${m.caption?m.caption.replace(/</g,"&lt;"):"(sin caption)"}</div>
-        <div style="display:flex;gap:12px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">
-          <span>❤️ ${m.likes}</span><span>💬 ${m.comments}</span><span>👁 ${formatNum(m.reach)}</span><span>📊 ${engRate}%</span><span>🔖 ${m.saved}</span>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--ink-3)">
+          <span>❤️ ${m.likes}</span><span>💬 ${m.comments}</span><span>↗️ ${m.shares}</span><span>👁 ${formatNum(m.reach)}</span><span>📊 ${engRate}%</span><span>🔖 ${m.saved}</span>
         </div>
       </div>`;
     }).join("");
@@ -1516,7 +1510,7 @@ function renderMetaDashboard(data){
         <div style="color:var(--ink-4);font-family:var(--mono);font-size:11px;margin-bottom:6px">${ds}</div>
         <div style="color:var(--ink-2);line-height:1.4;margin-bottom:8px">${p.message?p.message.replace(/</g,"&lt;"):"(sin texto)"}</div>
         <div style="display:flex;gap:12px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">
-          <span>👍 ${p.likes}</span><span>💬 ${p.comments}</span><span>↗️ ${p.shares}</span><span>👁 ${formatNum(p.impressions)}</span>
+          <span>👍 ${p.likes}</span><span>💬 ${p.comments}</span><span>↗️ ${p.shares}</span>
         </div>
       </div>`;
     }).join("");
@@ -1534,14 +1528,16 @@ async function runMetaAIAnalysis(){
   let postsContext="";
   if(metaData.ig&&metaData.ig.media){
     postsContext+="\n\nÚLTIMOS POSTS INSTAGRAM:\n"+metaData.ig.media.map((m,i)=>{
-      const engRate=m.reach>0?((m.engagement/m.reach)*100).toFixed(1):0;
-      return`${i+1}. [${m.media_type}] "${m.caption||"sin caption"}" — ❤️${m.likes} 💬${m.comments} 👁${m.reach} alcance, ${engRate}% engagement, 🔖${m.saved} guardados`;
+      const engRate=m.reach>0?((m.interactions/m.reach)*100).toFixed(1):0;
+      return`${i+1}. [${m.media_type}] "${m.caption||"sin caption"}" — ❤️${m.likes} 💬${m.comments} ↗️${m.shares} compartidos, 👁${m.reach} alcance, ${engRate}% engagement, 🔖${m.saved} guardados`;
     }).join("\n");
     if(metaData.ig.profile)postsContext+=`\n\nPERFIL IG: ${metaData.ig.profile.followers_count} seguidores, ${metaData.ig.profile.media_count} posts, bio: "${metaData.ig.profile.biography||""}"`;
+    const ins=metaData.ig.insights||{};
+    if(ins.reach)postsContext+=`\nMÉTRICAS 7 DÍAS: alcance ${ins.reach}, cuentas interacción ${ins.accounts_engaged||0}, interacciones totales ${ins.total_interactions||0}, visitas perfil ${ins.profile_views||0}`;
   }
   if(metaData.fb&&metaData.fb.posts){
     postsContext+="\n\nÚLTIMOS POSTS FACEBOOK:\n"+metaData.fb.posts.map((p,i)=>{
-      return`${i+1}. "${p.message||"sin texto"}" — 👍${p.likes} 💬${p.comments} ↗️${p.shares} compartidos, 👁${p.impressions} impresiones`;
+      return`${i+1}. "${p.message||"sin texto"}" — 👍${p.likes} 💬${p.comments} ↗️${p.shares} compartidos`;
     }).join("\n");
     if(metaData.fb.page)postsContext+=`\n\nPÁGINA FB: ${metaData.fb.page.followers_count||metaData.fb.page.fan_count} seguidores`;
   }
