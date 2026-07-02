@@ -687,11 +687,19 @@
       </div>
 
       <div class="section" id="meta-dashboard" style="display:none">
-        <div class="meta-tabs">
-          <button class="meta-tab active" id="meta-tab-general" onclick="selMetaTab('general')">🌐 General</button>
-          <button class="meta-tab" id="meta-tab-ig" onclick="selMetaTab('ig')">📸 Instagram</button>
-          <button class="meta-tab" id="meta-tab-fb" onclick="selMetaTab('fb')">📘 Facebook</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:0">
+          <div class="meta-tabs" style="margin-bottom:0;border-bottom:none;flex:1">
+            <button class="meta-tab active" id="meta-tab-general" onclick="selMetaTab('general')">🌐 General</button>
+            <button class="meta-tab" id="meta-tab-ig" onclick="selMetaTab('ig')">📸 Instagram</button>
+            <button class="meta-tab" id="meta-tab-fb" onclick="selMetaTab('fb')">📘 Facebook</button>
+          </div>
+          <div class="meta-period-sel" id="meta-period-sel">
+            <button class="meta-period-btn active" data-period="7" onclick="selMetaPeriod(7)">7 días</button>
+            <button class="meta-period-btn" data-period="28" onclick="selMetaPeriod(28)">28 días</button>
+            <button class="meta-period-btn" data-period="90" onclick="selMetaPeriod(90)">90 días</button>
+          </div>
         </div>
+        <div style="border-bottom:1.5px solid var(--line-hair);margin-bottom:1.5rem"></div>
 
         <div class="meta-panel" id="meta-panel-general">
           <div id="meta-general-section"></div>
@@ -1446,14 +1454,21 @@ async function sendEnfChat(){
 let metaData=null;
 let metaModelStr="claude";
 let metaChatMsgs=[];
+let metaPeriodDays=7;
 function selMetaModel(m){metaModelStr=m;document.getElementById("meta-model-claude").classList.toggle("active",m==="claude");document.getElementById("meta-model-gpt").classList.toggle("active",m==="gpt");}
+
+function selMetaPeriod(days){
+  metaPeriodDays=days;
+  document.querySelectorAll(".meta-period-btn").forEach(b=>b.classList.toggle("active",parseInt(b.dataset.period,10)===days));
+  loadMetaStats();
+}
 
 async function loadMetaStats(){
   document.getElementById("meta-loading").style.display="block";
   document.getElementById("meta-dashboard").style.display="none";
   document.getElementById("meta-not-configured").style.display="none";
   try{
-    const res=await fetch("/.netlify/functions/meta-stats?action=overview");
+    const res=await fetch("/.netlify/functions/meta-stats?action=overview&period="+metaPeriodDays);
     const data=await res.json();
     if(!data.configured){document.getElementById("meta-not-configured").style.display="block";document.getElementById("meta-loading").style.display="none";return;}
     metaData=data;
@@ -1535,7 +1550,7 @@ function renderGeneralPanel(data){
   }
 
   let html=`
-    <div class="meta-section-head">🌐 Resumen combinado <span class="meta-period">Últimos 7 días · IG + FB</span></div>
+    <div class="meta-section-head">🌐 Resumen combinado <span class="meta-period">Últimos ${metaPeriodDays} días · IG + FB</span></div>
     <div class="meta-cards">
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--purple">👥</div><div class="meta-card-num">${formatNum(totalFollowers)}</div><div class="meta-card-label">Audiencia total</div></div>
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👁</div><div class="meta-card-num">${formatNum(totalReach)}</div><div class="meta-card-label">Alcance combinado</div></div>
@@ -1577,7 +1592,7 @@ function renderIGPanel(data){
 
   const p=data.ig.profile,ins=data.ig.insights||{};
   igSec.innerHTML=`
-    <div class="meta-section-head">${SVG_IG} Instagram — Datos globales <span class="meta-period">Últimos 7 días</span></div>
+    <div class="meta-section-head">${SVG_IG} Instagram — Datos globales <span class="meta-period">Últimos ${metaPeriodDays} días</span></div>
     <div class="meta-cards">
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--purple">👥</div><div class="meta-card-num">${formatNum(p.followers_count||0)}</div><div class="meta-card-label">Seguidores</div></div>
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👁</div><div class="meta-card-num">${formatNum(ins.reach||0)}</div><div class="meta-card-label">Alcance</div></div>
@@ -1636,7 +1651,7 @@ function renderFBPanel(data){
 
   const fp=data.fb.page,fins=data.fb.insights||{};
   fbSec.innerHTML=`
-    <div class="meta-section-head">${SVG_FB} Facebook — Página <span class="meta-period">${fp.name||"Diario Río Uruguay"} · Últimos 7 días</span></div>
+    <div class="meta-section-head">${SVG_FB} Facebook — Página <span class="meta-period">${fp.name||"Diario Río Uruguay"} · Últimos ${metaPeriodDays} días</span></div>
     <div class="meta-cards">
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👥</div><div class="meta-card-num">${formatNum(fp.followers_count||fp.fan_count||0)}</div><div class="meta-card-label">Seguidores</div></div>
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--purple">👁</div><div class="meta-card-num">${formatNum(fins.page_impressions_unique||0)}</div><div class="meta-card-label">Alcance</div></div>
@@ -1699,7 +1714,7 @@ async function runMetaAIAnalysis(){
     }).join("\n");
     if(metaData.ig.profile)postsContext+=`\n\nPERFIL IG: ${metaData.ig.profile.followers_count} seguidores, ${metaData.ig.profile.media_count} posts, bio: "${metaData.ig.profile.biography||""}"`;
     const ins=metaData.ig.insights||{};
-    if(ins.reach)postsContext+=`\nMÉTRICAS 7 DÍAS: alcance ${ins.reach}, cuentas interacción ${ins.accounts_engaged||0}, interacciones totales ${ins.total_interactions||0}, visitas perfil ${ins.profile_views||0}`;
+    if(ins.reach)postsContext+=`\nMÉTRICAS ${metaPeriodDays} DÍAS: alcance ${ins.reach}, cuentas interacción ${ins.accounts_engaged||0}, interacciones totales ${ins.total_interactions||0}, visitas perfil ${ins.profile_views||0}`;
   }
   if(metaData.fb&&metaData.fb.posts){
     postsContext+="\n\nÚLTIMOS POSTS FACEBOOK:\n"+metaData.fb.posts.map((p,i)=>{
@@ -1707,17 +1722,17 @@ async function runMetaAIAnalysis(){
     }).join("\n");
     if(metaData.fb.page)postsContext+=`\n\nPÁGINA FB: ${metaData.fb.page.followers_count||metaData.fb.page.fan_count} seguidores`;
     const fins=metaData.fb.insights||{};
-    if(fins.page_impressions_unique)postsContext+=`\nMÉTRICAS 7 DÍAS FB: alcance ${fins.page_impressions_unique}, usuarios interacción ${fins.page_engaged_users||0}, interacciones con posts ${fins.page_post_engagements||0}, visitas página ${fins.page_views_total||0}`;
+    if(fins.page_impressions_unique)postsContext+=`\nMÉTRICAS ${metaPeriodDays} DÍAS FB: alcance ${fins.page_impressions_unique}, usuarios interacción ${fins.page_engaged_users||0}, interacciones con posts ${fins.page_post_engagements||0}, visitas página ${fins.page_views_total||0}`;
   }
 
   const prompt=`Sos analista de redes sociales de Diario Río Uruguay (Concordia, Entre Ríos · 56K IG / 103K FB). Medio periodístico regional serio, anti-clickbait.
 
-Analizá las estadísticas de la última semana y los últimos posts:
+Analizá las estadísticas de los últimos ${metaPeriodDays} días y los últimos posts:
 ${postsContext}
 
 CRITERIOS DRU: calidad editorial sobre métricas de corto plazo, anti-clickbait absoluto, bidireccionalidad, comunidad activa.
 
-Generá un INFORME SEMANAL con:
+Generá un INFORME de los últimos ${metaPeriodDays} días con:
 
 1. **RESUMEN EJECUTIVO** — 3-4 líneas, tendencia general, dato más relevante.
 
