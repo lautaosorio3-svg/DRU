@@ -687,23 +687,26 @@
       </div>
 
       <div class="section" id="meta-dashboard" style="display:none">
-        <!-- Overview cards -->
-        <div class="stats" id="meta-overview-cards"></div>
+        <div class="meta-tabs">
+          <button class="meta-tab active" id="meta-tab-general" onclick="selMetaTab('general')">🌐 General</button>
+          <button class="meta-tab" id="meta-tab-ig" onclick="selMetaTab('ig')">📸 Instagram</button>
+          <button class="meta-tab" id="meta-tab-fb" onclick="selMetaTab('fb')">📘 Facebook</button>
+        </div>
 
-        <!-- Instagram posts -->
-        <div class="wflow" style="margin-top:1.5rem">
-          <div class="wcol">
-            <div class="step">
-              <div class="step-head"><span class="step-num step-num--peach">📸</span><div class="step-title">Últimos posts de Instagram</div></div>
-              <div id="meta-ig-posts" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>
-            </div>
-          </div>
-          <div class="wcol">
-            <div class="step">
-              <div class="step-head"><span class="step-num step-num--sky">📘</span><div class="step-title">Últimos posts de Facebook</div></div>
-              <div id="meta-fb-posts" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>
-            </div>
-          </div>
+        <div class="meta-panel" id="meta-panel-general">
+          <div id="meta-general-section"></div>
+        </div>
+
+        <div class="meta-panel" id="meta-panel-ig" style="display:none">
+          <div id="meta-ig-section"></div>
+          <div id="meta-ig-charts"></div>
+          <div id="meta-ig-posts-section"></div>
+        </div>
+
+        <div class="meta-panel" id="meta-panel-fb" style="display:none">
+          <div id="meta-fb-section"></div>
+          <div id="meta-fb-charts"></div>
+          <div id="meta-fb-posts-section"></div>
         </div>
 
         <!-- AI Analysis -->
@@ -1464,57 +1467,220 @@ async function loadMetaStats(){
   }
 }
 
-function renderMetaDashboard(data){
-  const cards=document.getElementById("meta-overview-cards");
-  let html="";
-  if(data.ig&&data.ig.profile){
-    const p=data.ig.profile;const ins=data.ig.insights||{};
-    html+=`<div class="stat"><div class="stat-num">${formatNum(p.followers_count||0)}</div><div class="stat-label">Seguidores IG</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;
-    html+=`<div class="stat"><div class="stat-num">${formatNum(ins.reach||0)}</div><div class="stat-label">Alcance 7d IG</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
-    html+=`<div class="stat"><div class="stat-num">${formatNum(ins.accounts_engaged||0)}</div><div class="stat-label">Cuentas interacción 7d</div><span class="stat-dot" style="background:var(--rose-deep)"></span></div>`;
-    html+=`<div class="stat"><div class="stat-num">${formatNum(ins.total_interactions||0)}</div><div class="stat-label">Interacciones 7d</div><span class="stat-dot" style="background:var(--peach-deep)"></span></div>`;
-    html+=`<div class="stat"><div class="stat-num">${formatNum(ins.profile_views||0)}</div><div class="stat-label">Visitas perfil 7d</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
-  }
-  if(data.fb&&data.fb.page){
-    const fp=data.fb.page;
-    html+=`<div class="stat"><div class="stat-num">${formatNum(fp.followers_count||fp.fan_count||0)}</div><div class="stat-label">Seguidores FB</div><span class="stat-dot" style="background:var(--sky-deep)"></span></div>`;
-  }
-  cards.innerHTML=html||`<div class="stat"><div class="stat-label">Sin datos disponibles</div></div>`;
+const SVG_IG=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="ig-gr" x1="0" y1="24" x2="24" y2="0"><stop stop-color="#FD5"/><stop offset=".5" stop-color="#FF543E"/><stop offset="1" stop-color="#C837AB"/></linearGradient></defs><rect width="24" height="24" rx="6" fill="url(#ig-gr)"/><rect x="4.5" y="4.5" width="15" height="15" rx="4.5" stroke="#fff" stroke-width="1.8" fill="none"/><circle cx="12" cy="12" r="3.8" stroke="#fff" stroke-width="1.8" fill="none"/><circle cx="17" cy="7" r="1.2" fill="#fff"/></svg>`;
+const SVG_FB=`<svg width="22" height="22" viewBox="0 0 24 24"><rect width="24" height="24" rx="6" fill="#1877F2"/><path d="M16.5 12.5h-2.25V18h-3v-5.5H9.5V10h1.75V8.3c0-1.74 1.04-2.7 2.62-2.7.76 0 1.55.14 1.55.14v1.71h-.87c-.86 0-1.13.53-1.13 1.08V10h1.93l-.31 2.5z" fill="#fff"/></svg>`;
+let metaActiveTab="general";
 
-  // IG posts
-  const igDiv=document.getElementById("meta-ig-posts");
+function selMetaTab(tab){
+  metaActiveTab=tab;
+  ["general","ig","fb"].forEach(t=>{
+    document.getElementById("meta-tab-"+t).classList.toggle("active",t===tab);
+    document.getElementById("meta-panel-"+t).style.display=t===tab?"block":"none";
+  });
+}
+
+function pieChartSVG(pieData,total){
+  let slices="",startAngle=-90;
+  pieData.forEach(d=>{
+    const angle=(d.val/total)*360;
+    const endAngle=startAngle+angle;
+    const large=angle>180?1:0;
+    const r=70,cx=90,cy=90;
+    const x1=cx+r*Math.cos(startAngle*Math.PI/180),y1=cy+r*Math.sin(startAngle*Math.PI/180);
+    const x2=cx+r*Math.cos(endAngle*Math.PI/180),y2=cy+r*Math.sin(endAngle*Math.PI/180);
+    if(angle>=360){slices+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${d.color}"/>`;}
+    else{slices+=`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${d.color}"/>`;}
+    startAngle=endAngle;
+  });
+  const legend=pieData.map(d=>`<div class="meta-pie-legend-item"><div class="meta-pie-legend-dot" style="background:${d.color}"></div>${d.label}<span class="meta-pie-legend-val">${d.val} (${Math.round(d.val/total*100)}%)</span></div>`).join("");
+  return`<div style="display:flex;align-items:center;gap:24px"><svg viewBox="0 0 180 180" width="140" height="140">${slices}</svg><div class="meta-pie-legend">${legend}</div></div>`;
+}
+
+function barChartHTML(items,valueFn,labelFn,colorFn,fmtFn){
+  const max=Math.max(...items.map(i=>valueFn(i)||1));
+  return items.map((it,i)=>{
+    const val=valueFn(it)||0;
+    const pct=Math.round((val/max)*100);
+    return`<div class="meta-bar"><div class="meta-bar-label" title="${(labelFn(it)||"").replace(/"/g,'&quot;')}">${(labelFn(it)||"Post "+(i+1)).substring(0,18)}${labelFn(it)&&labelFn(it).length>18?"…":""}</div><div class="meta-bar-track"><div class="meta-bar-fill" style="width:${pct}%;background:${colorFn(i)}"></div></div><div class="meta-bar-val">${fmtFn(val)}</div></div>`;
+  }).join("");
+}
+
+function renderMetaDashboard(data){
+  renderGeneralPanel(data);
+  renderIGPanel(data);
+  renderFBPanel(data);
+}
+
+function renderGeneralPanel(data){
+  const sec=document.getElementById("meta-general-section");
+  const igIns=(data.ig&&data.ig.insights)||{};
+  const igProfile=(data.ig&&data.ig.profile)||{};
+  const fbIns=(data.fb&&data.fb.insights)||{};
+  const fbPage=(data.fb&&data.fb.page)||{};
+  const totalFollowers=(igProfile.followers_count||0)+(fbPage.followers_count||fbPage.fan_count||0);
+  const totalReach=(igIns.reach||0)+(fbIns.page_impressions_unique||0);
+  const totalInteractions=(igIns.total_interactions||0)+(fbIns.page_post_engagements||0);
+
+  // Best post overall (IG vs FB) by engagement
+  let bestPost=null,bestPlatform="";
   if(data.ig&&data.ig.media&&data.ig.media.length){
-    igDiv.innerHTML=data.ig.media.map(m=>{
+    const top=[...data.ig.media].sort((a,b)=>(b.interactions||0)-(a.interactions||0))[0];
+    bestPost=top;bestPlatform="ig";
+  }
+  if(data.fb&&data.fb.posts&&data.fb.posts.length){
+    const topFb=[...data.fb.posts].sort((a,b)=>((b.likes||0)+(b.comments||0)+(b.shares||0))-((a.likes||0)+(a.comments||0)+(a.shares||0)))[0];
+    const fbScore=(topFb.likes||0)+(topFb.comments||0)+(topFb.shares||0);
+    const igScore=bestPost?(bestPost.interactions||0):-1;
+    if(fbScore>igScore){bestPost=topFb;bestPlatform="fb";}
+  }
+
+  let html=`
+    <div class="meta-section-head">🌐 Resumen combinado <span class="meta-period">Últimos 7 días · IG + FB</span></div>
+    <div class="meta-cards">
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--purple">👥</div><div class="meta-card-num">${formatNum(totalFollowers)}</div><div class="meta-card-label">Audiencia total</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👁</div><div class="meta-card-num">${formatNum(totalReach)}</div><div class="meta-card-label">Alcance combinado</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--red">❤️</div><div class="meta-card-num">${formatNum(totalInteractions)}</div><div class="meta-card-label">Interacciones combinadas</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--orange">🔥</div><div class="meta-card-num">${formatNum((data.ig&&data.ig.media?data.ig.media.length:0)+(data.fb&&data.fb.posts?data.fb.posts.length:0))}</div><div class="meta-card-label">Posts analizados</div></div>
+    </div>
+    <div class="meta-cards" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.5rem">
+      <div class="meta-highlight-card" onclick="selMetaTab('ig')">
+        <div class="meta-section-head" style="margin-bottom:10px">${SVG_IG} Instagram</div>
+        <div class="meta-card-num" style="font-size:26px">${formatNum(igProfile.followers_count||0)} <span style="font-size:13px;color:var(--ink-3);font-family:var(--sans)">seguidores</span></div>
+        <div style="margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">Alcance ${formatNum(igIns.reach||0)} · Interacciones ${formatNum(igIns.total_interactions||0)}</div>
+        <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--peach-deep)">Ver desglose completo →</div>
+      </div>
+      <div class="meta-highlight-card" onclick="selMetaTab('fb')">
+        <div class="meta-section-head" style="margin-bottom:10px">${SVG_FB} Facebook</div>
+        <div class="meta-card-num" style="font-size:26px">${formatNum(fbPage.followers_count||fbPage.fan_count||0)} <span style="font-size:13px;color:var(--ink-3);font-family:var(--sans)">seguidores</span></div>
+        <div style="margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">Alcance ${formatNum(fbIns.page_impressions_unique||0)} · Interacciones ${formatNum(fbIns.page_post_engagements||0)}</div>
+        <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--peach-deep)">Ver desglose completo →</div>
+      </div>
+    </div>`;
+
+  if(bestPost){
+    const caption=bestPlatform==="ig"?bestPost.caption:bestPost.message;
+    const score=bestPlatform==="ig"?(bestPost.interactions||0):((bestPost.likes||0)+(bestPost.comments||0)+(bestPost.shares||0));
+    html+=`<div class="meta-chart-box">
+      <div class="meta-chart-title">🏆 Mejor publicación de la semana ${bestPlatform==="ig"?SVG_IG:SVG_FB}</div>
+      <div style="color:var(--ink-2);line-height:1.5;margin-bottom:8px;font-size:13px">${caption?caption.replace(/</g,"&lt;").substring(0,180):"(sin texto)"}</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">❤️ ${bestPost.likes||0} · 💬 ${bestPost.comments||0} · ↗️ ${bestPost.shares||0}${bestPlatform==="ig"?" · 👁 "+formatNum(bestPost.reach||0):""} · <b style="color:var(--peach-deep)">${formatNum(score)} interacciones</b></div>
+    </div>`;
+  }
+  sec.innerHTML=html;
+}
+
+function renderIGPanel(data){
+  const igSec=document.getElementById("meta-ig-section");
+  const chartsSec=document.getElementById("meta-ig-charts");
+  const postsSec=document.getElementById("meta-ig-posts-section");
+  if(!data.ig||!data.ig.profile){igSec.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin datos de Instagram</div>`;chartsSec.innerHTML="";postsSec.innerHTML="";return;}
+
+  const p=data.ig.profile,ins=data.ig.insights||{};
+  igSec.innerHTML=`
+    <div class="meta-section-head">${SVG_IG} Instagram — Datos globales <span class="meta-period">Últimos 7 días</span></div>
+    <div class="meta-cards">
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--purple">👥</div><div class="meta-card-num">${formatNum(p.followers_count||0)}</div><div class="meta-card-label">Seguidores</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👁</div><div class="meta-card-num">${formatNum(ins.reach||0)}</div><div class="meta-card-label">Alcance</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--orange">🔥</div><div class="meta-card-num">${formatNum(ins.accounts_engaged||0)}</div><div class="meta-card-label">Cuentas interacción</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--red">❤️</div><div class="meta-card-num">${formatNum(ins.total_interactions||0)}</div><div class="meta-card-label">Interacciones</div></div>
+    </div>
+    <div class="meta-cards" style="grid-template-columns:repeat(3,1fr)">
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--green">📊</div><div class="meta-card-num">${formatNum(ins.profile_views||0)}</div><div class="meta-card-label">Visitas al perfil</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--pink">📸</div><div class="meta-card-num">${p.media_count||0}</div><div class="meta-card-label">Publicaciones</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">➕</div><div class="meta-card-num">${formatNum(p.follows_count||0)}</div><div class="meta-card-label">Siguiendo</div></div>
+    </div>`;
+
+  let chartsHTML="";
+  const media=data.ig.media||[];
+  if(media.length){
+    const colors=["#E91E63","#FF5722","#FF9800","#4CAF50","#2196F3","#9C27B0"];
+    const byReach=[...media].sort((a,b)=>(b.reach||0)-(a.reach||0)).slice(0,6);
+    chartsHTML+=`<div class="meta-chart-box"><div class="meta-chart-title">📊 Alcance por publicación (Top 6)</div>${barChartHTML(byReach,m=>m.reach,m=>m.caption,(i)=>colors[i%6],formatNum)}</div>`;
+
+    let videos=0,carousels=0,images=0;
+    media.forEach(m=>{if(m.media_type==="VIDEO")videos++;else if(m.media_type==="CAROUSEL_ALBUM")carousels++;else images++;});
+    const pieData=[{label:"Imágenes",val:images,color:"#4285F4"},{label:"Carruseles",val:carousels,color:"#FBBC04"},{label:"Videos/Reels",val:videos,color:"#EA4335"}].filter(d=>d.val>0);
+    chartsHTML+=`<div class="meta-chart-box"><div class="meta-chart-title">📐 Tipo de contenido</div>${pieChartSVG(pieData,media.length)}</div>`;
+
+    const engSorted=[...media].filter(m=>m.reach>0).sort((a,b)=>((b.interactions||0)/(b.reach||1))-((a.interactions||0)/(a.reach||1))).slice(0,6);
+    if(engSorted.length){
+      chartsHTML+=`<div class="meta-chart-box"><div class="meta-chart-title">🔥 Engagement rate por post (Top 6)</div>${barChartHTML(engSorted,m=>((m.interactions||0)/(m.reach||1))*100,m=>m.caption,(i)=>colors[(i+2)%6],v=>v.toFixed(1)+"%")}</div>`;
+    }
+
+    const byLikes=[...media].sort((a,b)=>(b.likes||0)-(a.likes||0)).slice(0,6);
+    chartsHTML+=`<div class="meta-chart-box"><div class="meta-chart-title">❤️ Likes por publicación (Top 6)</div>${barChartHTML(byLikes,m=>m.likes,m=>m.caption,()=>"#E91E63",v=>"❤️ "+formatNum(v))}</div>`;
+  }
+  chartsSec.innerHTML=chartsHTML?`<div class="meta-charts">${chartsHTML}</div>`:"";
+
+  if(media.length){
+    let igCards=media.map(m=>{
       const d=new Date(m.timestamp);const ds=d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
       const typeIcon=m.media_type==="VIDEO"?"🎬":m.media_type==="CAROUSEL_ALBUM"?"📑":"📷";
-      const engRate=m.reach>0?((m.interactions/m.reach)*100).toFixed(1):0;
-      return`<div style="background:var(--surface-alt);border-radius:10px;padding:12px;font-size:13px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span>${typeIcon} <span style="color:var(--ink-4);font-family:var(--mono);font-size:11px">${ds}</span></span>
-          <a href="${m.permalink}" target="_blank" style="color:var(--peach-deep);font-size:11px;font-family:var(--mono)">ver →</a>
-        </div>
-        <div style="color:var(--ink-2);line-height:1.4;margin-bottom:8px">${m.caption?m.caption.replace(/</g,"&lt;"):"(sin caption)"}</div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--ink-3)">
-          <span>❤️ ${m.likes}</span><span>💬 ${m.comments}</span><span>↗️ ${m.shares}</span><span>👁 ${formatNum(m.reach)}</span><span>📊 ${engRate}%</span><span>🔖 ${m.saved}</span>
-        </div>
-      </div>`;
+      const engRate=m.reach>0?((m.interactions/m.reach)*100).toFixed(1):"0";
+      return`<div class="meta-post-card">
+        <div class="meta-post-head"><span>${typeIcon} <span class="meta-post-date">${ds}</span></span><a href="${m.permalink}" target="_blank" class="meta-post-link">ver →</a></div>
+        <div class="meta-post-caption">${m.caption?m.caption.replace(/</g,"&lt;"):"(sin caption)"}</div>
+        <div class="meta-post-metrics">
+          <span>❤️ ${m.likes}</span><span>💬 ${m.comments}</span><span>↗️ ${m.shares}</span><span>👁 ${formatNum(m.reach)}</span><span>🔖 ${m.saved}</span><span class="meta-post-eng">${engRate}%</span>
+        </div></div>`;
     }).join("");
-  }else{igDiv.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin datos de Instagram</div>`;}
+    postsSec.innerHTML=`<div class="meta-section-head">${SVG_IG} Últimos posts de Instagram</div><div style="display:flex;flex-direction:column;gap:10px">${igCards}</div>`;
+  }else{postsSec.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin publicaciones</div>`;}
+}
 
-  // FB posts
-  const fbDiv=document.getElementById("meta-fb-posts");
-  if(data.fb&&data.fb.posts&&data.fb.posts.length){
-    fbDiv.innerHTML=data.fb.posts.map(p=>{
+function renderFBPanel(data){
+  const fbSec=document.getElementById("meta-fb-section");
+  const chartsSec=document.getElementById("meta-fb-charts");
+  const postsSec=document.getElementById("meta-fb-posts-section");
+  if(!data.fb||!data.fb.page){fbSec.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin datos de Facebook</div>`;chartsSec.innerHTML="";postsSec.innerHTML="";return;}
+
+  const fp=data.fb.page,fins=data.fb.insights||{};
+  fbSec.innerHTML=`
+    <div class="meta-section-head">${SVG_FB} Facebook — Página <span class="meta-period">${fp.name||"Diario Río Uruguay"} · Últimos 7 días</span></div>
+    <div class="meta-cards">
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👥</div><div class="meta-card-num">${formatNum(fp.followers_count||fp.fan_count||0)}</div><div class="meta-card-label">Seguidores</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--purple">👁</div><div class="meta-card-num">${formatNum(fins.page_impressions_unique||0)}</div><div class="meta-card-label">Alcance</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--orange">🔥</div><div class="meta-card-num">${formatNum(fins.page_engaged_users||0)}</div><div class="meta-card-label">Usuarios interacción</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--red">❤️</div><div class="meta-card-num">${formatNum(fins.page_post_engagements||0)}</div><div class="meta-card-label">Interacciones con posts</div></div>
+    </div>
+    <div class="meta-cards" style="grid-template-columns:repeat(3,1fr)">
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--green">📊</div><div class="meta-card-num">${formatNum(fins.page_views_total||0)}</div><div class="meta-card-label">Visitas a la página</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--pink">📝</div><div class="meta-card-num">${data.fb.posts?data.fb.posts.length:0}</div><div class="meta-card-label">Posts recientes cargados</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👍</div><div class="meta-card-num">${formatNum(fp.fan_count||0)}</div><div class="meta-card-label">Me gusta de la página</div></div>
+    </div>`;
+
+  let chartsHTML="";
+  const posts=data.fb.posts||[];
+  if(posts.length){
+    const colors=["#1877F2","#FF5722","#FF9800","#4CAF50","#9C27B0","#E91E63"];
+    const byEng=[...posts].sort((a,b)=>((b.likes||0)+(b.comments||0)+(b.shares||0))-((a.likes||0)+(a.comments||0)+(a.shares||0))).slice(0,6);
+    chartsHTML+=`<div class="meta-chart-box"><div class="meta-chart-title">📊 Interacciones por publicación (Top 6)</div>${barChartHTML(byEng,p=>(p.likes||0)+(p.comments||0)+(p.shares||0),p=>p.message,(i)=>colors[i%6],formatNum)}</div>`;
+
+    // Engagement composition pie: likes vs comments vs shares
+    const totLikes=posts.reduce((s,p)=>s+(p.likes||0),0);
+    const totComments=posts.reduce((s,p)=>s+(p.comments||0),0);
+    const totShares=posts.reduce((s,p)=>s+(p.shares||0),0);
+    const totAll=totLikes+totComments+totShares;
+    if(totAll>0){
+      const pieData=[{label:"Me gusta",val:totLikes,color:"#1877F2"},{label:"Comentarios",val:totComments,color:"#FBBC04"},{label:"Compartidos",val:totShares,color:"#34A853"}].filter(d=>d.val>0);
+      chartsHTML+=`<div class="meta-chart-box"><div class="meta-chart-title">📐 Composición de interacciones</div>${pieChartSVG(pieData,totAll)}</div>`;
+    }
+
+    const byLikes=[...posts].sort((a,b)=>(b.likes||0)-(a.likes||0)).slice(0,6);
+    chartsHTML+=`<div class="meta-chart-box"><div class="meta-chart-title">👍 Me gusta por publicación (Top 6)</div>${barChartHTML(byLikes,p=>p.likes,p=>p.message,()=>"#1877F2",v=>"👍 "+formatNum(v))}</div>`;
+  }
+  chartsSec.innerHTML=chartsHTML?`<div class="meta-charts">${chartsHTML}</div>`:"";
+
+  if(posts.length){
+    let fbCards=posts.map(p=>{
       const d=new Date(p.created_time);const ds=d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
-      return`<div style="background:var(--surface-alt);border-radius:10px;padding:12px;font-size:13px">
-        <div style="color:var(--ink-4);font-family:var(--mono);font-size:11px;margin-bottom:6px">${ds}</div>
-        <div style="color:var(--ink-2);line-height:1.4;margin-bottom:8px">${p.message?p.message.replace(/</g,"&lt;"):"(sin texto)"}</div>
-        <div style="display:flex;gap:12px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">
-          <span>👍 ${p.likes}</span><span>💬 ${p.comments}</span><span>↗️ ${p.shares}</span>
-        </div>
-      </div>`;
+      return`<div class="meta-post-card">
+        <div class="meta-post-head"><span class="meta-post-date">${ds}</span></div>
+        <div class="meta-post-caption">${p.message?p.message.replace(/</g,"&lt;"):"(sin texto)"}</div>
+        <div class="meta-post-metrics"><span>👍 ${p.likes}</span><span>💬 ${p.comments}</span><span>↗️ ${p.shares}</span></div></div>`;
     }).join("");
-  }else{fbDiv.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin datos de Facebook</div>`;}
+    postsSec.innerHTML=`<div class="meta-section-head">${SVG_FB} Últimos posts de Facebook</div><div style="display:flex;flex-direction:column;gap:10px">${fbCards}</div>`;
+  }else{postsSec.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin publicaciones</div>`;}
 }
 
 function formatNum(n){if(n>=1000000)return(n/1000000).toFixed(1)+"M";if(n>=1000)return(n/1000).toFixed(1)+"K";return n.toString();}
@@ -1540,6 +1706,8 @@ async function runMetaAIAnalysis(){
       return`${i+1}. "${p.message||"sin texto"}" — 👍${p.likes} 💬${p.comments} ↗️${p.shares} compartidos`;
     }).join("\n");
     if(metaData.fb.page)postsContext+=`\n\nPÁGINA FB: ${metaData.fb.page.followers_count||metaData.fb.page.fan_count} seguidores`;
+    const fins=metaData.fb.insights||{};
+    if(fins.page_impressions_unique)postsContext+=`\nMÉTRICAS 7 DÍAS FB: alcance ${fins.page_impressions_unique}, usuarios interacción ${fins.page_engaged_users||0}, interacciones con posts ${fins.page_post_engagements||0}, visitas página ${fins.page_views_total||0}`;
   }
 
   const prompt=`Sos analista de redes sociales de Diario Río Uruguay (Concordia, Entre Ríos · 56K IG / 103K FB). Medio periodístico regional serio, anti-clickbait.

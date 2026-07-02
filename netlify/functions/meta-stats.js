@@ -34,15 +34,31 @@ exports.handler = async (event) => {
 
       // Facebook Page
       if (FB_PAGE_ID) {
-        const [page, posts] = await Promise.all([
+        const now = new Date();
+        const since = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        const until = now.toISOString().split("T")[0];
+
+        const [page, posts, insights] = await Promise.all([
           graphGet(FB_PAGE_ID, TOKEN, { fields: "name,fan_count,followers_count" }),
           graphGet(`${FB_PAGE_ID}/posts`, TOKEN, {
             fields: "message,created_time,shares,likes.summary(true),comments.summary(true)",
             limit: 12
-          })
+          }),
+          graphGet(`${FB_PAGE_ID}/insights`, TOKEN, {
+            metric: "page_impressions_unique,page_engaged_users,page_post_engagements,page_views_total",
+            period: "day",
+            since, until
+          }).catch(() => ({ data: [] }))
         ]);
+
+        const insightsMap = {};
+        (insights.data || []).forEach(m => {
+          insightsMap[m.name] = (m.values || []).reduce((sum, v) => sum + (v.value || 0), 0);
+        });
+
         result.fb = {
           page,
+          insights: insightsMap,
           posts: (posts.data || []).map(p => ({
             id: p.id, message: (p.message || "").substring(0, 200), created_time: p.created_time,
             likes: p.likes?.summary?.total_count || 0, comments: p.comments?.summary?.total_count || 0,
