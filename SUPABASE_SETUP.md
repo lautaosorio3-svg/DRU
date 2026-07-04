@@ -152,6 +152,25 @@ nadie tiene que tener el panel abierto.
 
 ---
 
+## Extra — tabla de Sugerencias (opcional, para compartirlas con el equipo)
+
+Si querés que las sugerencias del equipo se guarden en Supabase (y no solo lleguen por
+email), corré este bloque en **SQL Editor → New query → Run**. Hasta que lo hagas, las
+sugerencias siguen funcionando como antes (email + guardado local).
+
+```sql
+create table sugerencias (
+  id bigint primary key generated always as identity,
+  nombre text,
+  categoria text,
+  texto text not null,
+  creado timestamptz default now()
+);
+alter table sugerencias enable row level security;
+```
+
+---
+
 ## Preguntas frecuentes
 
 **¿Cuánto aguanta el tier gratuito?**

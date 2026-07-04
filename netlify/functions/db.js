@@ -1,8 +1,9 @@
 // Proxy a Supabase REST. La service key vive SOLO acá (variables de entorno
 // de Netlify) — nunca en el navegador. El frontend habla con esta función.
+const CORS_ORIGIN = process.env.URL || "https://dru-plataforma.netlify.app";
 const HEADERS = {
   "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": CORS_ORIGIN,
   "Access-Control-Allow-Headers": "Content-Type",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
 };
@@ -12,7 +13,8 @@ const TABLES = {
   borradores: { order: "creado.desc", limit: 100 },
   correcciones: { order: "creado.desc", limit: 50 },
   keywords: { order: "creado.asc", limit: 100 },
-  alertas: { order: "creado.desc", limit: 200 }
+  alertas: { order: "creado.desc", limit: 200 },
+  sugerencias: { order: "creado.desc", limit: 200 }
 };
 
 function supa() {

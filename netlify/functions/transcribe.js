@@ -1,7 +1,9 @@
 // Devuelve la API key de OpenAI para que el frontend llame directo a Whisper
 // (evita el límite de 6MB de body en Netlify Functions)
+const CORS_ORIGIN = process.env.URL || "https://dru-plataforma.netlify.app";
+
 exports.handler = async (event) => {
-  const HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Allow-Methods": "GET, OPTIONS" };
+  const HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": CORS_ORIGIN, "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Allow-Methods": "GET, OPTIONS" };
 
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: HEADERS, body: "" };

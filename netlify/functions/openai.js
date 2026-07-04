@@ -1,5 +1,7 @@
+const CORS_ORIGIN = process.env.URL || "https://dru-plataforma.netlify.app";
+
 exports.handler = async (event) => {
-  const HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
+  const HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": CORS_ORIGIN, "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 
   if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers: HEADERS, body: "" };
   if (event.httpMethod !== "POST") return { statusCode: 405, headers: HEADERS, body: "Method not allowed" };

@@ -128,15 +128,24 @@ extraer el JS a `app.js` (mejora además el cacheo del navegador) y separar por 
 
 ## Hoja de ruta sugerida
 
-| Prioridad | Acción | Esfuerzo |
-|---|---|---|
-| 1 | Límites de gasto en OpenAI y Anthropic (hoy mismo, sin código) | 10 min |
-| 2 | Rotar la key de OpenAI expuesta | 15 min |
-| 3 | CORS restrictivo (dominio propio en vez de `*`) en todas las funciones | 30 min |
-| 4 | Configurar Supabase (SUPABASE_SETUP.md) y activar alertas | 15 min |
-| 5 | Supabase Auth: login real + validación de sesión en functions | 1 día |
-| 6 | Helper `esc()` para todo el HTML dinámico | 2-3 hs |
-| 7 | Fix transcribe.js (audio comprimido por proxy) | medio día |
-| 8 | Extraer JS a app.js + sidebar por data-page | medio día |
-| 9 | Cache de meta-stats y RSS (10-15 min) para cuidar rate limits | 2 hs |
-| 10 | Migrar sugerencias de Blobs a Supabase (unificar almacenamiento) | 2 hs |
+| Prioridad | Acción | Esfuerzo | Estado |
+|---|---|---|---|
+| 1 | Límites de gasto en OpenAI y Anthropic (hoy mismo, sin código) | 10 min | ⏳ manual del usuario |
+| 2 | Rotar la key de OpenAI expuesta | 15 min | ⏳ manual del usuario |
+| 3 | CORS restrictivo (dominio propio en vez de `*`) en todas las funciones | 30 min | ✅ hecho (jul 2026) |
+| 4 | Configurar Supabase (SUPABASE_SETUP.md) y activar alertas | 15 min | ✅ hecho |
+| 5 | Supabase Auth: login real + validación de sesión en functions | 1 día | ⏸ pospuesto (equipo optó por contraseña compartida) |
+| 6 | Helper `esc()` para todo el HTML dinámico | 2-3 hs | ✅ hecho |
+| 7 | Fix transcribe.js (audio comprimido por proxy) | medio día | ⏸ pendiente (mitigado con límites de gasto + rotación de key) |
+| 8 | Extraer JS a app.js + sidebar por data-page | medio día | ⏸ pendiente |
+| 9 | Cache de meta-stats y RSS (10-15 min) para cuidar rate limits | 2 hs | ✅ hecho (cache 15 min en navegador) |
+| 10 | Migrar sugerencias de Blobs a Supabase (unificar almacenamiento) | 2 hs | ✅ hecho (requiere crear tabla `sugerencias`) |
+
+### Ejecutado en julio 2026
+- **CORS restrictivo**: todas las funciones usan `process.env.URL` (dominio del sitio) en vez de `*`.
+- **esc()**: helper anti-XSS aplicado a sugerencias, keywords, titulares RSS, alertas, resultado de ángulo SEO e historial. Arreglado el bug de los botones "Copiar" (se rompían con saltos de línea) usando un store global en vez de interpolar texto en `onclick`.
+- **Cache 15 min** de meta-stats (por período) y titulares RSS en `localStorage` — el botón "Actualizar datos" fuerza refresco.
+- **Sugerencias → Supabase**: tabla `sugerencias` en el allowlist de `db.js`; el frontend lee/escribe de Supabase con fallback a localStorage y sigue enviando el email vía `sugerencias.js`.
+- **Housekeeping**: `server.js` eliminado, `parse_efem.py` movido a `tools/`, `.DS_Store` fuera del tracking.
+
+Pendiente del usuario para completar #10: correr en Supabase (SQL Editor) el `create table sugerencias` que figura al final de SUPABASE_SETUP.md.

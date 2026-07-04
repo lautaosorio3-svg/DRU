@@ -768,7 +768,7 @@
 
         <!-- Refresh -->
         <div style="margin-top:1rem;text-align:right">
-          <button class="btn btn--ghost btn--sm" onclick="loadMetaStats()">↻ Actualizar datos</button>
+          <button class="btn btn--ghost btn--sm" onclick="loadMetaStats(true)">↻ Actualizar datos</button>
           <span class="font-mono" style="font-size:10px;color:var(--ink-4);margin-left:8px" id="meta-last-update"></span>
         </div>
       </div>
@@ -1147,7 +1147,7 @@ function copyOut(){const t=document.getElementById("ocontent").textContent;navig
 async function sendChatCorrection(){
   const input=document.getElementById("gen-chat-input");const msg=input.value.trim();if(!msg)return;
   const msgs=document.getElementById("gen-chat-msgs");const content=document.getElementById("ocontent");
-  msgs.innerHTML+=`<div style="font-size:12px;color:var(--peach-deep);margin-bottom:4px;padding:4px 0;font-family:var(--mono)">📝 ${msg}</div>`;
+  msgs.innerHTML+=`<div style="font-size:12px;color:var(--peach-deep);margin-bottom:4px;padding:4px 0;font-family:var(--mono)">📝 ${esc(msg)}</div>`;
   input.value="";
   msgs.innerHTML+=`<div style="font-size:11px;color:var(--ink-3);margin-bottom:8px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgs.scrollTop=msgs.scrollHeight;
@@ -1210,36 +1210,39 @@ async function searchAngle(){
   }catch(e){result.innerHTML=`<div style="color:var(--ink-3)">Error de conexión.</div>`;}
 }
 
+let lastAngle=null;
+function copyAngle(field){if(!lastAngle)return;let v=lastAngle[field];if(Array.isArray(v))v=v.join(", ");copyKw(v||"");}
 function renderAngleResult(r){
+  lastAngle=r; // los botones "Copiar" leen de acá (evita romper el onclick con saltos de línea/comillas)
   const result=document.getElementById("seo-angle-result");
   const hasER=r.has_connection;
   result.innerHTML=`<div class="angle-result" style="margin-top:1.5rem;border-left-color:${hasER?"var(--sky-deep)":"var(--rose-deep)"}">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-      <span class="font-display" style="font-size:32px">${r.topic}</span>
+      <span class="font-display" style="font-size:32px">${esc(r.topic)}</span>
       <span class="tag tag--${hasER?"sky":"rose"}">${hasER?"✓ Conexión ER encontrada":"✗ Sin conexión directa"}</span>
     </div>
-    <div class="angle-row"><div class="angle-label">Datos clave</div><div class="angle-value">${r.key_facts||""}</div></div>
-    <div class="angle-row"><div class="angle-label">Conexión ER</div><div class="angle-value">${r.er_connection||""}</div></div>
-    ${r.angle?`<div class="angle-row"><div class="angle-label">Ángulo</div><div class="angle-value">${r.angle}</div></div>`:""}
-    ${r.sources_to_check?`<div class="angle-row"><div class="angle-label">Fuentes</div><div class="angle-value">${r.sources_to_check}</div></div>`:""}
-    ${r.search_queries&&r.search_queries.length?`<div class="angle-row"><div class="angle-label">Verificar</div><div class="angle-value"><div class="kw-row">${r.search_queries.map(q=>`<a class="kw" href="https://www.google.com/search?q=${encodeURIComponent(q)}" target="_blank" rel="noreferrer">🔍 ${q}</a>`).join("")}</div></div></div>`:""}
-    <div class="angle-row"><div class="angle-label">Título SEO</div><div class="angle-value" style="font-weight:500">${r.seo_title||""}</div></div>
-    <div class="angle-row"><div class="angle-label">Meta desc</div><div class="angle-value" style="color:var(--ink-2)">${r.meta_desc||""}</div></div>
-    <div class="angle-row"><div class="angle-label">Keywords</div><div class="angle-value"><div class="kw-row">${(r.keywords||[]).map(k=>`<button class="kw" onclick="copyKw('${k.replace(/'/g,"\\'")}')">${k}</button>`).join("")}</div></div></div>
-    <div class="angle-row"><div class="angle-label">IG hook</div><div class="angle-value">${r.ig_hook||""}</div></div>
-    <div class="angle-row"><div class="angle-label">Facebook</div><div class="angle-value" style="white-space:pre-line;font-size:13px;line-height:1.6">${r.fb_copy||""}</div></div>
+    <div class="angle-row"><div class="angle-label">Datos clave</div><div class="angle-value">${esc(r.key_facts)}</div></div>
+    <div class="angle-row"><div class="angle-label">Conexión ER</div><div class="angle-value">${esc(r.er_connection)}</div></div>
+    ${r.angle?`<div class="angle-row"><div class="angle-label">Ángulo</div><div class="angle-value">${esc(r.angle)}</div></div>`:""}
+    ${r.sources_to_check?`<div class="angle-row"><div class="angle-label">Fuentes</div><div class="angle-value">${esc(r.sources_to_check)}</div></div>`:""}
+    ${r.search_queries&&r.search_queries.length?`<div class="angle-row"><div class="angle-label">Verificar</div><div class="angle-value"><div class="kw-row">${r.search_queries.map(q=>`<a class="kw" href="https://www.google.com/search?q=${encodeURIComponent(q)}" target="_blank" rel="noreferrer">🔍 ${esc(q)}</a>`).join("")}</div></div></div>`:""}
+    <div class="angle-row"><div class="angle-label">Título SEO</div><div class="angle-value" style="font-weight:500">${esc(r.seo_title)}</div></div>
+    <div class="angle-row"><div class="angle-label">Meta desc</div><div class="angle-value" style="color:var(--ink-2)">${esc(r.meta_desc)}</div></div>
+    <div class="angle-row"><div class="angle-label">Keywords</div><div class="angle-value"><div class="kw-row">${(r.keywords||[]).map((k,ki)=>`<button class="kw" onclick="copyKw(lastAngle.keywords[${ki}])">${esc(k)}</button>`).join("")}</div></div></div>
+    <div class="angle-row"><div class="angle-label">IG hook</div><div class="angle-value">${esc(r.ig_hook)}</div></div>
+    <div class="angle-row"><div class="angle-label">Facebook</div><div class="angle-value" style="white-space:pre-line;font-size:13px;line-height:1.6">${esc(r.fb_copy)}</div></div>
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-      <button class="btn btn--ghost btn--sm" onclick="copyKw('${(r.seo_title||"").replace(/'/g,"\\'")}')">Copiar título</button>
-      <button class="btn btn--ghost btn--sm" onclick="copyKw('${(r.keywords||[]).join(", ").replace(/'/g,"\\'")}')">Copiar keywords</button>
-      <button class="btn btn--ghost btn--sm" onclick="copyKw('${(r.ig_hook||"").replace(/'/g,"\\'")}')">Copiar IG</button>
-      <button class="btn btn--primary btn--sm" onclick="copyKw('${(r.fb_copy||"").replace(/'/g,"\\'")}')">Copiar Facebook</button>
+      <button class="btn btn--ghost btn--sm" onclick="copyAngle('seo_title')">Copiar título</button>
+      <button class="btn btn--ghost btn--sm" onclick="copyAngle('keywords')">Copiar keywords</button>
+      <button class="btn btn--ghost btn--sm" onclick="copyAngle('ig_hook')">Copiar IG</button>
+      <button class="btn btn--primary btn--sm" onclick="copyAngle('fb_copy')">Copiar Facebook</button>
     </div>
   </div>`;
 }
 function renderSEOHistory(){
   const el=document.getElementById("seo-history");if(!seoHistory.length||seoHistory.length<2){el.innerHTML="";return;}
   el.innerHTML=`<div class="section"><div class="section-head"><h2 class="section-title" style="font-size:32px">Búsquedas de hoy</h2><div class="section-meta">${seoHistory.length} consultas</div></div>
-  <div class="mg">${seoHistory.map(r=>`<div class="mc mc--wide" style="cursor:default"><div class="mc-head"><div class="mc-kind">${r.has_connection?"Conexión ER":"Sin conexión"}</div></div><div class="mc-body" style="padding-top:14px"><div class="mc-title" style="font-size:22px">${r.topic}</div><div class="mc-desc">${r.er_connection||""}</div>${r.seo_title&&r.seo_title!=="—"?`<div class="font-mono" style="font-size:11px;color:var(--ink-3);margin-top:6px">SEO · ${r.seo_title}</div>`:""}</div></div>`).join("")}</div></div>`;
+  <div class="mg">${seoHistory.map(r=>`<div class="mc mc--wide" style="cursor:default"><div class="mc-head"><div class="mc-kind">${r.has_connection?"Conexión ER":"Sin conexión"}</div></div><div class="mc-body" style="padding-top:14px"><div class="mc-title" style="font-size:22px">${esc(r.topic)}</div><div class="mc-desc">${esc(r.er_connection)}</div>${r.seo_title&&r.seo_title!=="—"?`<div class="font-mono" style="font-size:11px;color:var(--ink-3);margin-top:6px">SEO · ${esc(r.seo_title)}</div>`:""}</div></div>`).join("")}</div></div>`;
 }
 function copyKw(text){navigator.clipboard&&navigator.clipboard.writeText(text);showToast(`✓ Copiado: "${text.substring(0,40)}${text.length>40?"…":""}"`); }
 
@@ -1467,6 +1470,14 @@ function showPage(id,navEl){
   if(id==="gen")renderGenList();
 }
 
+// ══ ESCAPE HTML (anti-XSS) ══
+// Escapa contenido dinámico (input de usuario, respuestas de IA, RSS externo) antes de innerHTML.
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+
+// ══ CACHE (navegador, cuida rate limits de Meta/RSS) ══
+function cacheGet(key,maxAgeMs){try{const o=JSON.parse(localStorage.getItem(key));if(o&&(Date.now()-o.t)<maxAgeMs)return o.d;}catch(e){}return null;}
+function cacheSet(key,data){try{localStorage.setItem(key,JSON.stringify({t:Date.now(),d:data}));}catch(e){}}
+
 // ══ TOAST ══
 function showToast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(()=>t.remove(),300);},3000);}
 
@@ -1540,7 +1551,21 @@ function selMetaPeriod(days){
   loadMetaStats();
 }
 
-async function loadMetaStats(){
+async function loadMetaStats(force){
+  const ck="dru_cache_meta_"+metaPeriodDays;
+  // Cache 15 min: evita ~15 requests a Meta en cada login/click. El botón "Actualizar" pasa force=true.
+  if(!force){
+    const cached=cacheGet(ck,15*60*1000);
+    if(cached){
+      metaData=cached;renderMetaDashboard(cached);
+      document.getElementById("meta-loading").style.display="none";
+      document.getElementById("meta-not-configured").style.display="none";
+      document.getElementById("meta-dashboard").style.display="block";
+      const c=JSON.parse(localStorage.getItem(ck));
+      document.getElementById("meta-last-update").textContent="Desde cache · "+new Date(c.t).toLocaleTimeString("es-AR");
+      return;
+    }
+  }
   document.getElementById("meta-loading").style.display="block";
   document.getElementById("meta-dashboard").style.display="none";
   document.getElementById("meta-not-configured").style.display="none";
@@ -1548,7 +1573,7 @@ async function loadMetaStats(){
     const res=await fetch("/.netlify/functions/meta-stats?action=overview&period="+metaPeriodDays);
     const data=await res.json();
     if(!data.configured){document.getElementById("meta-not-configured").style.display="block";document.getElementById("meta-loading").style.display="none";return;}
-    metaData=data;
+    metaData=data;cacheSet(ck,data);
     renderMetaDashboard(data);
     document.getElementById("meta-loading").style.display="none";
     document.getElementById("meta-dashboard").style.display="block";
@@ -2024,6 +2049,7 @@ async function syncFromDB(){
 
 // ══ ALERTAS ══
 const SK_ALERTAS_VISTAS="dru_alertas_vistas";
+let alertasRows=[];
 function getVistas(){try{return JSON.parse(localStorage.getItem(SK_ALERTAS_VISTAS)||"[]");}catch(e){return[];}}
 async function updateAlertasBadge(){
   const rows=await dbGet("alertas");
@@ -2041,6 +2067,7 @@ async function renderAlertas(){
   if(rows===null){notCfg.style.display="block";dash.style.display="none";return;}
   notCfg.style.display="none";dash.style.display="block";
   renderKeywords();
+  alertasRows=rows; // cache para lookup por id (usarAlertaEnSEO)
   const list=document.getElementById("alertas-list");
   document.getElementById("alertas-count").textContent=rows.length+" alerta"+(rows.length!==1?"s":"");
   if(!rows.length){list.innerHTML=`<div class="empty">Sin alertas todavía. Agregá keywords y esperá la próxima revisión (o forzala con el botón).</div>`;return;}
@@ -2052,13 +2079,13 @@ async function renderAlertas(){
     return`<div class="step" style="margin-bottom:10px;${nueva?"border-left:3px solid var(--peach-deep)":""}">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
         ${nueva?'<span class="tag tag--peach">● Nueva</span>':""}
-        <span class="tag tag--sky">${(a.keyword||"").replace(/</g,"&lt;")}</span>
-        <span class="font-mono" style="font-size:11px;color:var(--ink-4)">${(a.fuente||"")} · ${(a.ciudad||"")} · ${ds}</span>
+        <span class="tag tag--sky">${esc(a.keyword)}</span>
+        <span class="font-mono" style="font-size:11px;color:var(--ink-4)">${esc(a.fuente)} · ${esc(a.ciudad)} · ${ds}</span>
       </div>
-      <div style="font-weight:600;font-size:15px;line-height:1.4;margin-bottom:8px">${(a.titulo||"").replace(/</g,"&lt;")}</div>
+      <div style="font-weight:600;font-size:15px;line-height:1.4;margin-bottom:8px">${esc(a.titulo)}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a class="btn btn--ghost btn--sm" href="${(a.link||"#").replace(/"/g,"")}" target="_blank" rel="noreferrer">Leer nota →</a>
-        <button class="btn btn--ghost btn--sm" onclick="usarAlertaEnSEO('${(a.titulo||"").replace(/'/g,"\\'").replace(/\n/g," ").substring(0,120)}')">Buscar ángulo DRU</button>
+        <a class="btn btn--ghost btn--sm" href="${encodeURI(a.link||"#")}" target="_blank" rel="noreferrer">Leer nota →</a>
+        <button class="btn btn--ghost btn--sm" onclick="usarAlertaEnSEO(${a.id})">Buscar ángulo DRU</button>
         ${nueva?`<button class="btn btn--ghost btn--sm" onclick="marcarVista(${a.id})">Marcar vista</button>`:""}
       </div>
     </div>`;
@@ -2071,16 +2098,17 @@ function marcarVista(id){
   renderAlertas();updateAlertasBadge();
 }
 
-function usarAlertaEnSEO(titulo){
+function usarAlertaEnSEO(id){
+  const a=alertasRows.find(x=>x.id===id);if(!a)return;
   showPage("seo",document.querySelectorAll(".sb-item")[3]);
-  setTimeout(()=>{document.getElementById("seo-topic").value=titulo;searchAngle();},150);
+  setTimeout(()=>{document.getElementById("seo-topic").value=a.titulo||"";searchAngle();},150);
 }
 
 async function renderKeywords(){
   const rows=await dbGet("keywords");
   const el=document.getElementById("kw-list");
   if(rows===null||!rows.length){el.innerHTML=`<span style="font-style:italic;color:var(--ink-4);font-size:13px">Sin keywords todavía — agregá la primera.</span>`;return;}
-  el.innerHTML=rows.map(k=>`<button class="chip" onclick="removeKeyword(${k.id})" title="Clic para eliminar">${(k.palabra||"").replace(/</g,"&lt;")} ✕</button>`).join("");
+  el.innerHTML=rows.map(k=>`<button class="chip" onclick="removeKeyword(${k.id})" title="Clic para eliminar">${esc(k.palabra)} ✕</button>`).join("");
 }
 async function addKeyword(){
   const input=document.getElementById("kw-input");
@@ -2123,8 +2151,9 @@ async function loadTendencias(){
   btn.disabled=true;btn.innerHTML=`Leyendo 9 medios<span class="dots"><span></span><span></span><span></span></span>`;
   list.innerHTML=`<div style="font-style:italic;color:var(--ink-3);font-family:var(--serif);padding:1rem 0">Consultando los feeds de la región...</div>`;
   try{
-    const res=await fetch("/.netlify/functions/rss-trends?action=titulares&hours=48");
-    const data=await res.json();
+    // Cache 15 min de los titulares RSS (cuida los feeds y acelera la carga)
+    let data=cacheGet("dru_cache_rss",15*60*1000);
+    if(!data){const res=await fetch("/.netlify/functions/rss-trends?action=titulares&hours=48");data=await res.json();cacheSet("dru_cache_rss",data);}
     trendsItems=data.items||[];
     if(!trendsItems.length){list.innerHTML=`<div class="empty">No se pudieron leer los feeds. Probá de nuevo en unos minutos.</div>`;}
     else{
@@ -2140,7 +2169,7 @@ async function loadTendencias(){
               const ds=d?d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"):"";
               return`<div style="display:flex;align-items:baseline;gap:8px;font-size:13px;line-height:1.4">
                 <span class="font-mono" style="font-size:10px;color:var(--ink-4);flex-shrink:0">${ds}</span>
-                <button style="background:none;border:none;padding:0;cursor:pointer;text-align:left;color:var(--ink-2);font-size:13px;font-family:inherit" onclick="usarTendencia(this.textContent)" title="Clic para buscar el ángulo DRU">${i.title.replace(/</g,"&lt;")}</button>
+                <button style="background:none;border:none;padding:0;cursor:pointer;text-align:left;color:var(--ink-2);font-size:13px;font-family:inherit" onclick="usarTendencia(this.textContent)" title="Clic para buscar el ángulo DRU">${esc(i.title)}</button>
               </div>`;
             }).join("")}
           </div>
@@ -2183,26 +2212,34 @@ async function addSugerencia(){
   const cat=document.getElementById("sug-cat").value;const text=document.getElementById("sug-text").value.trim();
   if(!text){showToast("⚠ Escribí una descripción");return;}
   const sug={id:Date.now(),name,category:cat,text,date:new Date().toISOString()};
-  // Guardar en localStorage siempre
+  // Guardar en localStorage siempre (fallback si Supabase no está)
   try{const arr=JSON.parse(localStorage.getItem("dru_sugerencias")||"[]");arr.push(sug);localStorage.setItem("dru_sugerencias",JSON.stringify(arr));}catch(e){}
-  // Enviar al servidor (mail + intento de Blobs)
+  // Guardar en Supabase (compartido con el equipo)
+  dbPost("insert","sugerencias",{row:{nombre:name,categoria:cat,texto:text}});
+  // Notificar por email (sugerencias.js sigue mandando el mail)
   try{
     const res=await fetch("/.netlify/functions/sugerencias",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,category:cat,text,notify:["admin"]})});
     const data=await res.json();
     if(data.email)showToast("✓ Sugerencia enviada · mail notificado");
     else showToast("✓ Sugerencia guardada");
-  }catch(e){showToast("✓ Sugerencia guardada localmente");}
+  }catch(e){showToast("✓ Sugerencia guardada");}
   document.getElementById("sug-text").value="";renderSugerencias();
 }
 
 async function renderSugerencias(){
   const list=document.getElementById("sug-list");
   list.innerHTML=`<div style="font-style:italic;color:var(--ink-3);font-family:var(--serif);padding:1rem">Cargando...</div>`;
-  // Combinar server + localStorage
-  let serverSugs=[];try{const res=await fetch("/.netlify/functions/sugerencias");serverSugs=await res.json();if(!Array.isArray(serverSugs))serverSugs=[];}catch(e){}
+  // Combinar Supabase (compartido) + localStorage (fallback)
+  let serverSugs=[];
+  const rows=await dbGet("sugerencias");
+  if(rows!==null){serverSugs=rows.map(r=>({id:r.id,name:r.nombre,category:r.categoria,text:r.texto,date:r.creado}));}
+  else{ // Supabase no configurado: caer al endpoint viejo (Blobs)
+    try{const res=await fetch("/.netlify/functions/sugerencias");const j=await res.json();if(Array.isArray(j))serverSugs=j;}catch(e){}
+  }
   let localSugs=[];try{localSugs=JSON.parse(localStorage.getItem("dru_sugerencias")||"[]");}catch(e){}
-  const ids=new Set(serverSugs.map(s=>s.id));
-  const sugs=[...serverSugs,...localSugs.filter(s=>!ids.has(s.id))];
+  // Dedupe por texto (los ids difieren entre Supabase y local)
+  const serverTexts=new Set(serverSugs.map(s=>(s.text||"").trim()));
+  const sugs=[...serverSugs,...localSugs.filter(s=>!serverTexts.has((s.text||"").trim()))];
   sugs.sort((a,b)=>new Date(b.date)-new Date(a.date));
   document.getElementById("sug-count").textContent=sugs.length+" en total";
   if(!sugs.length){list.innerHTML=`<div class="empty">No hay sugerencias todavía.</div>`;return;}
@@ -2215,7 +2252,7 @@ async function renderSugerencias(){
     html+=`<div style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="tag tag--${catTones[cat]||"ghost"}">${catLabels[cat]||cat}</span><span class="font-mono" style="font-size:10px;color:var(--ink-4);letter-spacing:.12em;text-transform:uppercase">${items.length} idea${items.length!==1?"s":""}</span></div>`;
     html+=`<div style="display:flex;flex-direction:column;gap:8px">${items.map(s=>{
       const d=new Date(s.date);const ds=d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear();
-      return`<div class="sug-card"><div class="sug-card-head"><span class="sug-card-author">${s.name}</span><span>·</span><span>${ds}</span></div><div class="sug-card-text">${s.text.replace(/</g,"&lt;")}</div></div>`;
+      return`<div class="sug-card"><div class="sug-card-head"><span class="sug-card-author">${esc(s.name)}</span><span>·</span><span>${ds}</span></div><div class="sug-card-text">${esc(s.text)}</div></div>`;
     }).join("")}</div></div>`;
   }
   list.innerHTML=html;

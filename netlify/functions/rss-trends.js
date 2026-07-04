@@ -1,6 +1,7 @@
+const CORS_ORIGIN = process.env.URL || "https://dru-plataforma.netlify.app";
 const HEADERS = {
   "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": CORS_ORIGIN,
   "Access-Control-Allow-Headers": "Content-Type",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
 };
