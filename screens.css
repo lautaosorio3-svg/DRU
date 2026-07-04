@@ -370,6 +370,25 @@
   border-radius: 50%;
 }
 
+/* ===== Botón "Recordar regla" (chats de corrección) ===== */
+.rule-btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--peach-deep);
+  background: none;
+  border: 1px solid var(--peach-pale);
+  border-radius: 20px;
+  padding: 2px 8px;
+  margin-left: 6px;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background .15s, border-color .15s;
+  white-space: nowrap;
+}
+.rule-btn:hover { background: var(--peach-tint); border-color: var(--peach-deep); }
+.rule-btn:disabled { color: var(--ink-4); border-color: var(--line-hair); background: none; cursor: default; }
+
 /* ===== Meta Dashboard ===== */
 .meta-tabs {
   display: flex;

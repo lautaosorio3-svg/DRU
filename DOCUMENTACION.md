@@ -141,7 +141,9 @@ no se migró para no romper nada.
   ⚠️ `loadDraft()` y otros usan índices posicionales de `.sb-item` — si agregás un ítem
   al sidebar, revisá esos índices.
 - Los prompts de IA incorporan los criterios editoriales DRU (CLAUDE.md) y el contexto
-  de correcciones (`getCorrectionsContext()`).
+  de correcciones (`getCorrectionsContext()`). Las correcciones NO se guardan solas:
+  el redactor marca "☆ Recordar regla" en el chat y solo eso se comparte como
+  preferencia de estilo del equipo (tabla `correcciones` de Supabase + localStorage).
 - CSS: `theme.css` (variables, light/dark) + `screens.css` (componentes). Prefijos:
   `.meta-*` (dashboard Meta), `.mc` (magazine cards), `.sb-*` (sidebar), `.fi/.flbl` (forms).
 

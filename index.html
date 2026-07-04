@@ -1147,12 +1147,11 @@ function copyOut(){const t=document.getElementById("ocontent").textContent;navig
 async function sendChatCorrection(){
   const input=document.getElementById("gen-chat-input");const msg=input.value.trim();if(!msg)return;
   const msgs=document.getElementById("gen-chat-msgs");const content=document.getElementById("ocontent");
-  msgs.innerHTML+=`<div style="font-size:12px;color:var(--peach-deep);margin-bottom:4px;padding:4px 0;font-family:var(--mono)">📝 ${esc(msg)}</div>`;
+  msgs.innerHTML+=`<div style="font-size:12px;color:var(--peach-deep);margin-bottom:4px;padding:4px 0;font-family:var(--mono)">📝 ${esc(msg)}${ruleBtnHTML(msg)}</div>`;
   input.value="";
   msgs.innerHTML+=`<div style="font-size:11px;color:var(--ink-3);margin-bottom:8px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgs.scrollTop=msgs.scrollHeight;
   genChatHistory.push({role:"user",content:msg});
-  saveCorrection(msg);
   const apiUrl=selModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
   const model=selModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
   const systemMsg={role:"user",content:"Sos redactor de Diario Río Uruguay. Aplicá los cambios y devolvé la nota completa corregida."};
@@ -1298,9 +1297,9 @@ let tpChatMsgs=[];
 async function sendTpChat(){
   const input=document.getElementById("tp-chat-input");const msg=input.value.trim();if(!msg)return;
   const msgsDiv=document.getElementById("tp-chat-msgs");
-  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${esc(msg)}${ruleBtnHTML(msg)}</div>`;
   input.value="";
-  tpChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
+  tpChatMsgs.push({role:"user",content:msg});
   msgsDiv.innerHTML+=`<div id="tp-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1349,9 +1348,9 @@ async function genSocialFromNote(){
 async function sendTpSocialChat(){
   const input=document.getElementById("tp-social-chat-input");const msg=input.value.trim();if(!msg)return;
   const msgsDiv=document.getElementById("tp-social-chat-msgs");
-  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${esc(msg)}${ruleBtnHTML(msg)}</div>`;
   input.value="";
-  tpSocialChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
+  tpSocialChatMsgs.push({role:"user",content:msg});
   msgsDiv.innerHTML+=`<div id="tp-social-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1434,9 +1433,9 @@ let dsgChatMsgs=[];
 async function sendDsgChat(){
   const input=document.getElementById("dsg-chat-input");const msg=input.value.trim();if(!msg)return;
   const msgsDiv=document.getElementById("dsg-chat-msgs");
-  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${esc(msg)}${ruleBtnHTML(msg)}</div>`;
   input.value="";
-  dsgChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
+  dsgChatMsgs.push({role:"user",content:msg});
   msgsDiv.innerHTML+=`<div id="dsg-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1520,9 +1519,9 @@ let enfChatMsgs=[];
 async function sendEnfChat(){
   const input=document.getElementById("enf-chat-input");const msg=input.value.trim();if(!msg)return;
   const msgsDiv=document.getElementById("enf-chat-msgs");
-  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${esc(msg)}${ruleBtnHTML(msg)}</div>`;
   input.value="";
-  enfChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
+  enfChatMsgs.push({role:"user",content:msg});
   msgsDiv.innerHTML+=`<div id="enf-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1871,9 +1870,9 @@ Sé directo, sin rodeos. Datos y recomendaciones accionables.`+getCorrectionsCon
 async function sendMetaChat(){
   const input=document.getElementById("meta-ai-chat-input");const msg=input.value.trim();if(!msg)return;
   const msgsDiv=document.getElementById("meta-ai-chat-msgs");
-  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${msg.replace(/</g,"&lt;")}</div>`;
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${esc(msg)}${ruleBtnHTML(msg)}</div>`;
   input.value="";
-  metaChatMsgs.push({role:"user",content:msg});saveCorrection(msg);
+  metaChatMsgs.push({role:"user",content:msg});
   msgsDiv.innerHTML+=`<div id="meta-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Analizando...</div>`;
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
@@ -1978,6 +1977,20 @@ function copyDraftText(id){const d=loadDrafts().find(x=>x.id===id);if(d)navigato
 function deleteDraft(id){const drafts=loadDrafts().filter(d=>d.id!==id);saveDrafts(drafts);dbPost("delete","borradores",{client_id:id});renderDrafts();showToast("✓ Borrador eliminado");}
 
 // ══ CORRECCIONES EN PROMPTS ══
+// Los mensajes de chat NO se guardan solos: el redactor marca "☆ Recordar regla"
+// y solo eso viaja como preferencia de estilo a los prompts de todo el equipo.
+let ruleCandidates=[];
+function ruleBtnHTML(msg){
+  ruleCandidates.push(msg);
+  const i=ruleCandidates.length-1;
+  return` <button class="rule-btn" onclick="rememberRule(${i},this)" title="Guardar como preferencia de estilo para todos los prompts del equipo">☆ Recordar regla</button>`;
+}
+function rememberRule(i,btn){
+  const msg=ruleCandidates[i];if(!msg)return;
+  saveCorrection(msg);
+  btn.textContent="✓ Regla guardada";btn.disabled=true;
+  showToast("✓ Regla de estilo guardada para el equipo");
+}
 const SK_CORRECTIONS="dru_corrections";
 function loadCorrections(){try{return JSON.parse(localStorage.getItem(SK_CORRECTIONS)||"[]");}catch(e){return[];}}
 function saveCorrection(msg){
