@@ -106,16 +106,20 @@
         <span class="sb-item-num">08</span><span class="sb-item-name">Estadísticas</span>
         <span class="sb-item-badge">META</span><span class="sb-item-arrow">→</span>
       </div>
+      <div class="sb-item" onclick="showPage('alertas',this)">
+        <span class="sb-item-num">09</span><span class="sb-item-name">Alertas</span>
+        <span class="sb-item-badge is-count" id="alertas-cnt">0</span><span class="sb-item-arrow">→</span>
+      </div>
     </div>
 
     <div class="sb-section">
       <div class="sb-section-label"><span>/ Workspace</span><span class="sb-section-num">04</span></div>
       <div class="sb-item" onclick="showPage('borradores',this)">
-        <span class="sb-item-num">09</span><span class="sb-item-name">Borradores</span>
+        <span class="sb-item-num">10</span><span class="sb-item-name">Borradores</span>
         <span class="sb-item-badge is-count" id="drafts-cnt">0</span><span class="sb-item-arrow">→</span>
       </div>
       <div class="sb-item" onclick="showPage('sugerencias',this)">
-        <span class="sb-item-num">10</span><span class="sb-item-name">Sugerencias</span>
+        <span class="sb-item-num">11</span><span class="sb-item-name">Sugerencias</span>
         <span class="sb-item-arrow">→</span>
       </div>
     </div>
@@ -356,6 +360,21 @@
           <a class="seo-source" href="https://www.google.com/search?q=site:diarioriouruguay.com" target="_blank" rel="noreferrer"><span class="seo-source-mark" style="background:var(--sky)">🗄</span><div><div class="seo-source-name">Archivo DRU</div><div class="seo-source-desc">Búsqueda en el sitio</div></div></a>
           <a class="seo-source" href="https://www.google.com/search?q=tendencias+argentina+hoy" target="_blank" rel="noreferrer"><span class="seo-source-mark" style="background:var(--rose)">🔍</span><div><div class="seo-source-name">Google Search</div><div class="seo-source-desc">Tendencias Argentina hoy</div></div></a>
         </div>
+      </div>
+
+      <!-- Tendencias regionales RSS -->
+      <div class="section">
+        <div class="section-tag-row"><span class="tag tag--peach">Tendencias regionales</span><span class="tag tag--ghost">RSS en vivo</span></div>
+        <div class="section-head"><h2 class="section-title">Qué publican los medios de la región</h2><div class="section-meta">9 fuentes · Costa del Uruguay</div></div>
+        <p style="font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink-3);max-width:640px;margin-top:0">Titulares de las últimas 48 horas de Concordia, C. del Uruguay, Gualeguaychú, Chajarí, Federación y Paraná. La IA detecta los temas calientes y sugiere el enfoque DRU.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <button class="btn btn--peach" id="trends-load-btn" onclick="loadTendencias()">Cargar titulares regionales <span class="font-mono" style="font-size:11px">→</span></button>
+          <button class="btn btn--primary" id="trends-ai-btn" onclick="analizarTendencias()" style="display:none">Detectar tendencias con IA <span class="font-mono" style="font-size:11px">→</span></button>
+        </div>
+        <div id="trends-ai-result" style="display:none;margin-bottom:14px">
+          <div class="out-box" id="trends-ai-content"></div>
+        </div>
+        <div id="trends-list"></div>
       </div>
 
       <!-- Paso 2 -->
@@ -755,6 +774,62 @@
       </div>
     </div>
 
+    <!-- ═══ ALERTAS ═══ -->
+    <div class="page" id="page-alertas">
+      <div class="hero">
+        <div class="hero-row">
+          <div class="hero-num">№ 09 · Monitoreo regional</div>
+          <div class="hero-rule"></div>
+          <div class="hero-num">9 medios · Costa del Uruguay</div>
+        </div>
+        <h1 class="hero-title">Alertas <span class="accent">de agenda</span></h1>
+        <div class="hero-sub">El panel vigila los medios de la región cada hora. Cuando un titular menciona una keyword del equipo, todos reciben la alerta.</div>
+        <div class="hero-gradient"></div>
+      </div>
+
+      <div class="section" id="alertas-not-configured" style="display:none">
+        <div class="step">
+          <div class="step-head"><span class="step-num step-num--peach">!</span><div class="step-title">Supabase no configurado</div></div>
+          <div class="step-help" style="line-height:1.8">
+            Las alertas compartidas necesitan la base de datos del equipo (Supabase).<br>
+            Seguí la guía paso a paso en <code style="background:var(--surface-alt);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">SUPABASE_SETUP.md</code> del repositorio — lleva ~15 minutos y es gratis.<br>
+            Mientras tanto podés usar las <b>Tendencias regionales</b> en "SEO del día", que funcionan sin base de datos.
+          </div>
+        </div>
+      </div>
+
+      <div class="section" id="alertas-dashboard" style="display:none">
+        <div class="wflow">
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num step-num--peach">1</span><div class="step-title">Keywords vigiladas</div><div class="step-tag-row"><span class="tag tag--ghost">Compartidas con el equipo</span></div></div>
+              <div class="step-help">Temas, personalidades o lugares. Si un titular de la región los menciona, se genera una alerta para todos.</div>
+              <div style="display:flex;gap:6px;margin:12px 0">
+                <input class="fi" id="kw-input" placeholder="Ej: Salto Grande, intendente, tarifas…" style="flex:1;font-size:13px" onkeydown="if(event.key==='Enter')addKeyword()">
+                <button class="btn btn--primary btn--sm" onclick="addKeyword()">Agregar</button>
+              </div>
+              <div class="chips" id="kw-list" style="margin-bottom:0"></div>
+            </div>
+            <div class="step">
+              <div class="step-head"><span class="step-num step-num--peach">2</span><div class="step-title">Chequeo manual</div></div>
+              <div class="step-help">El sistema revisa solo cada hora. Con este botón forzás una revisión ahora.</div>
+              <button class="btn btn--peach" id="alertas-check-btn" onclick="checkAlertasNow()" style="width:100%;margin-top:10px">Revisar medios ahora <span class="font-mono" style="font-size:11px">→</span></button>
+              <div class="font-mono" id="alertas-check-status" style="font-size:11px;color:var(--ink-4);margin-top:8px"></div>
+            </div>
+          </div>
+          <div class="wcol">
+            <div class="step" style="background:transparent;border:0;padding:0">
+              <div class="step-head" style="border-bottom:2px solid var(--line)">
+                <div class="step-title" style="font-size:28px">Alertas del equipo</div>
+                <div class="step-tag-row"><span class="tag tag--ghost" id="alertas-count">0 alertas</span></div>
+              </div>
+              <div id="alertas-list"><div class="empty">Sin alertas todavía. Agregá keywords y esperá la próxima revisión.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ BORRADORES ═══ -->
     <div class="page" id="page-borradores">
       <div class="hero">
@@ -901,6 +976,7 @@ function doLogout(){localStorage.removeItem("dru_session");document.getElementBy
 async function initApp(){
   updateDraftsBadge();
   loadMetaStats();
+  syncFromDB(); // Supabase: borradores/correcciones compartidos + badge de alertas (no bloquea)
   if(!ARCHIVO_EFEM.length){try{const r=await fetch("efemerides.json");if(r.ok)ARCHIVO_EFEM=await r.json();}catch(e){}}
   DB=loadDB();
   const now=new Date();const dd=now.getDate(),mm=now.getMonth()+1,yy=now.getFullYear();
@@ -1376,7 +1452,7 @@ async function sendDsgChat(){
 }
 
 // ══ NAV ══
-const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",metastats:"Estadísticas Meta",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
+const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",metastats:"Estadísticas Meta",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
 function showPage(id,navEl){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -1385,6 +1461,7 @@ function showPage(id,navEl){
   document.getElementById("pt").innerHTML=`Panel <span style="margin:0 8px;color:var(--ink-4)">/</span> <b>${PAGE_TITLE[id]||""}</b>`;
   if(id==="seo"){const now=new Date();document.getElementById("seo-date-label").textContent=now.getDate()+" de "+MESF[now.getMonth()+1]+" de "+now.getFullYear();}
   if(id==="metastats")loadMetaStats();
+  if(id==="alertas")renderAlertas();
   if(id==="borradores")renderDrafts();
   if(id==="sugerencias"){if(currentUser)document.getElementById("sug-name").value=currentUser.name;renderSugerencias();}
   if(id==="gen")renderGenList();
@@ -1817,8 +1894,11 @@ function saveDraft(section){
   }
   if(!content||content.length<20){showToast("⚠ No hay contenido para guardar");return;}
   const drafts=loadDrafts();
-  drafts.unshift({id:Date.now(),section,label:secLabels[section],title:title.substring(0,80),format,content,date:new Date().toISOString()});
+  const nuevo={id:Date.now(),section,label:secLabels[section],title:title.substring(0,80),format,content,date:new Date().toISOString()};
+  drafts.unshift(nuevo);
   saveDrafts(drafts);
+  // Compartir con el equipo si Supabase está configurado (no bloquea)
+  dbPost("insert","borradores",{row:{client_id:nuevo.id,seccion:section,etiqueta:nuevo.label,titulo:nuevo.title,formato:format,contenido:content,autor:currentUser?.name||""}});
   showToast("✓ Borrador guardado");
 }
 
@@ -1870,7 +1950,7 @@ function loadDraft(id){
   showToast("✓ Borrador cargado");
 }
 function copyDraftText(id){const d=loadDrafts().find(x=>x.id===id);if(d)navigator.clipboard&&navigator.clipboard.writeText(d.content);showToast("✓ Texto copiado");}
-function deleteDraft(id){const drafts=loadDrafts().filter(d=>d.id!==id);saveDrafts(drafts);renderDrafts();showToast("✓ Borrador eliminado");}
+function deleteDraft(id){const drafts=loadDrafts().filter(d=>d.id!==id);saveDrafts(drafts);dbPost("delete","borradores",{client_id:id});renderDrafts();showToast("✓ Borrador eliminado");}
 
 // ══ CORRECCIONES EN PROMPTS ══
 const SK_CORRECTIONS="dru_corrections";
@@ -1881,12 +1961,220 @@ function saveCorrection(msg){
   // Mantener últimas 20 correcciones
   if(arr.length>20)arr.splice(0,arr.length-20);
   localStorage.setItem(SK_CORRECTIONS,JSON.stringify(arr));
+  // Compartir con el equipo (la IA aprende del estilo de todos)
+  dbPost("insert","correcciones",{row:{texto:msg,autor:currentUser?.name||""}});
 }
 function getCorrectionsContext(){
   const arr=loadCorrections();
   if(!arr.length)return"";
   const recent=arr.slice(-10).map(c=>c.text);
   return"\n\nNOTA: El redactor ha dado estas correcciones anteriormente. Tené en cuenta su estilo y preferencias:\n- "+recent.join("\n- ");
+}
+
+// ══ SUPABASE (vía /.netlify/functions/db) ══
+// La app funciona igual sin Supabase: localStorage es el respaldo local.
+// Cuando Supabase está configurado, borradores/correcciones/keywords/alertas
+// se comparten entre todo el equipo.
+let dbConfigured=null; // null = sin chequear, true/false después del primer fetch
+async function dbGet(table){
+  try{
+    const res=await fetch("/.netlify/functions/db?table="+table);
+    const data=await res.json();
+    dbConfigured=!!data.configured;
+    return data.configured?(data.rows||[]):null;
+  }catch(e){dbConfigured=false;return null;}
+}
+async function dbPost(action,table,payload){
+  try{
+    const res=await fetch("/.netlify/functions/db",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,table,...payload})});
+    const data=await res.json();
+    return data.configured?data:null;
+  }catch(e){return null;}
+}
+
+// Sync inicial: baja lo compartido y sube lo local que falte
+async function syncFromDB(){
+  const remote=await dbGet("borradores");
+  if(remote===null)return; // Supabase no configurado
+  // Merge borradores remotos → localStorage (por id de cliente)
+  const local=loadDrafts();
+  const localIds=new Set(local.map(d=>d.id));
+  const remoteMapped=remote.map(r=>({id:r.client_id||r.id,dbId:r.id,section:r.seccion,label:r.etiqueta,title:r.titulo,format:r.formato,content:r.contenido,date:r.creado,autor:r.autor}));
+  const nuevos=remoteMapped.filter(r=>!localIds.has(r.id));
+  if(nuevos.length){saveDrafts([...nuevos,...local].sort((a,b)=>new Date(b.date)-new Date(a.date)));}
+  // Subir borradores locales que no están en la nube
+  const remoteIds=new Set(remoteMapped.map(r=>r.id));
+  const pendientes=local.filter(d=>!remoteIds.has(d.id)&&!d.dbId);
+  for(const d of pendientes){
+    dbPost("insert","borradores",{row:{client_id:d.id,seccion:d.section,etiqueta:d.label||d.section,titulo:d.title,formato:d.format,contenido:d.content,autor:currentUser?.name||""}});
+  }
+  // Correcciones remotas → contexto local
+  const corrRemote=await dbGet("correcciones");
+  if(corrRemote&&corrRemote.length){
+    const localCorr=loadCorrections();
+    const localTexts=new Set(localCorr.map(c=>c.text));
+    const nuevas=corrRemote.filter(c=>!localTexts.has(c.texto)).map(c=>({text:c.texto,date:c.creado}));
+    if(nuevas.length){
+      const merged=[...localCorr,...nuevas].slice(-20);
+      localStorage.setItem(SK_CORRECTIONS,JSON.stringify(merged));
+    }
+  }
+  updateAlertasBadge();
+}
+
+// ══ ALERTAS ══
+const SK_ALERTAS_VISTAS="dru_alertas_vistas";
+function getVistas(){try{return JSON.parse(localStorage.getItem(SK_ALERTAS_VISTAS)||"[]");}catch(e){return[];}}
+async function updateAlertasBadge(){
+  const rows=await dbGet("alertas");
+  const badge=document.getElementById("alertas-cnt");
+  if(rows===null){badge.textContent="0";return;}
+  const vistas=new Set(getVistas());
+  const noVistas=rows.filter(a=>!vistas.has(a.id)).length;
+  badge.textContent=noVistas;
+}
+
+async function renderAlertas(){
+  const dash=document.getElementById("alertas-dashboard");
+  const notCfg=document.getElementById("alertas-not-configured");
+  const rows=await dbGet("alertas");
+  if(rows===null){notCfg.style.display="block";dash.style.display="none";return;}
+  notCfg.style.display="none";dash.style.display="block";
+  renderKeywords();
+  const list=document.getElementById("alertas-list");
+  document.getElementById("alertas-count").textContent=rows.length+" alerta"+(rows.length!==1?"s":"");
+  if(!rows.length){list.innerHTML=`<div class="empty">Sin alertas todavía. Agregá keywords y esperá la próxima revisión (o forzala con el botón).</div>`;return;}
+  const vistas=new Set(getVistas());
+  list.innerHTML=rows.map(a=>{
+    const d=a.publicado?new Date(a.publicado):new Date(a.creado);
+    const ds=d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
+    const nueva=!vistas.has(a.id);
+    return`<div class="step" style="margin-bottom:10px;${nueva?"border-left:3px solid var(--peach-deep)":""}">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        ${nueva?'<span class="tag tag--peach">● Nueva</span>':""}
+        <span class="tag tag--sky">${(a.keyword||"").replace(/</g,"&lt;")}</span>
+        <span class="font-mono" style="font-size:11px;color:var(--ink-4)">${(a.fuente||"")} · ${(a.ciudad||"")} · ${ds}</span>
+      </div>
+      <div style="font-weight:600;font-size:15px;line-height:1.4;margin-bottom:8px">${(a.titulo||"").replace(/</g,"&lt;")}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn btn--ghost btn--sm" href="${(a.link||"#").replace(/"/g,"")}" target="_blank" rel="noreferrer">Leer nota →</a>
+        <button class="btn btn--ghost btn--sm" onclick="usarAlertaEnSEO('${(a.titulo||"").replace(/'/g,"\\'").replace(/\n/g," ").substring(0,120)}')">Buscar ángulo DRU</button>
+        ${nueva?`<button class="btn btn--ghost btn--sm" onclick="marcarVista(${a.id})">Marcar vista</button>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function marcarVista(id){
+  const vistas=getVistas();
+  if(!vistas.includes(id)){vistas.push(id);localStorage.setItem(SK_ALERTAS_VISTAS,JSON.stringify(vistas));}
+  renderAlertas();updateAlertasBadge();
+}
+
+function usarAlertaEnSEO(titulo){
+  showPage("seo",document.querySelectorAll(".sb-item")[3]);
+  setTimeout(()=>{document.getElementById("seo-topic").value=titulo;searchAngle();},150);
+}
+
+async function renderKeywords(){
+  const rows=await dbGet("keywords");
+  const el=document.getElementById("kw-list");
+  if(rows===null||!rows.length){el.innerHTML=`<span style="font-style:italic;color:var(--ink-4);font-size:13px">Sin keywords todavía — agregá la primera.</span>`;return;}
+  el.innerHTML=rows.map(k=>`<button class="chip" onclick="removeKeyword(${k.id})" title="Clic para eliminar">${(k.palabra||"").replace(/</g,"&lt;")} ✕</button>`).join("");
+}
+async function addKeyword(){
+  const input=document.getElementById("kw-input");
+  const palabra=input.value.trim();
+  if(!palabra)return;
+  if(palabra.length<3){showToast("⚠ Mínimo 3 caracteres");return;}
+  const r=await dbPost("insert","keywords",{row:{palabra,autor:currentUser?.name||""}});
+  if(r){input.value="";renderKeywords();showToast("✓ Keyword agregada para todo el equipo");}
+  else showToast("⚠ No se pudo guardar (¿duplicada?)");
+}
+async function removeKeyword(id){
+  await dbPost("delete","keywords",{id});
+  renderKeywords();showToast("✓ Keyword eliminada");
+}
+
+async function checkAlertasNow(){
+  const btn=document.getElementById("alertas-check-btn");
+  const status=document.getElementById("alertas-check-status");
+  btn.disabled=true;btn.innerHTML=`Revisando 9 medios<span class="dots"><span></span><span></span><span></span></span>`;
+  status.textContent="";
+  try{
+    const res=await fetch("/.netlify/functions/rss-trends?action=check-alertas&hours=48");
+    const data=await res.json();
+    if(!data.configured){status.textContent="Supabase no configurado.";}
+    else{
+      const nuevas=(data.alertas||[]).length;
+      status.textContent=`Revisión completa · ${data.keywords||0} keywords · ${data.matched||0} coincidencias · ${nuevas} alertas nuevas`;
+      if(nuevas)showToast(`🔔 ${nuevas} alerta${nuevas>1?"s":""} nueva${nuevas>1?"s":""}`);
+      renderAlertas();updateAlertasBadge();
+    }
+  }catch(e){status.textContent="Error de conexión.";}
+  btn.disabled=false;btn.innerHTML=`Revisar medios ahora <span class="font-mono" style="font-size:11px">→</span>`;
+}
+
+// ══ TENDENCIAS REGIONALES (SEO del día) ══
+let trendsItems=[];
+async function loadTendencias(){
+  const btn=document.getElementById("trends-load-btn");
+  const list=document.getElementById("trends-list");
+  btn.disabled=true;btn.innerHTML=`Leyendo 9 medios<span class="dots"><span></span><span></span><span></span></span>`;
+  list.innerHTML=`<div style="font-style:italic;color:var(--ink-3);font-family:var(--serif);padding:1rem 0">Consultando los feeds de la región...</div>`;
+  try{
+    const res=await fetch("/.netlify/functions/rss-trends?action=titulares&hours=48");
+    const data=await res.json();
+    trendsItems=data.items||[];
+    if(!trendsItems.length){list.innerHTML=`<div class="empty">No se pudieron leer los feeds. Probá de nuevo en unos minutos.</div>`;}
+    else{
+      // Agrupar por fuente
+      const bySource={};
+      trendsItems.forEach(i=>{(bySource[i.source]=bySource[i.source]||[]).push(i);});
+      list.innerHTML=Object.entries(bySource).map(([src,items])=>`
+        <details style="margin-bottom:8px;border:1.5px solid var(--line-hair);border-radius:10px;padding:10px 14px">
+          <summary style="cursor:pointer;font-weight:600;font-size:14px">${src} <span class="font-mono" style="font-size:11px;color:var(--ink-4)">· ${items[0].city} · ${items.length} notas</span></summary>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+            ${items.slice(0,15).map(i=>{
+              const d=i.date?new Date(i.date):null;
+              const ds=d?d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0"):"";
+              return`<div style="display:flex;align-items:baseline;gap:8px;font-size:13px;line-height:1.4">
+                <span class="font-mono" style="font-size:10px;color:var(--ink-4);flex-shrink:0">${ds}</span>
+                <button style="background:none;border:none;padding:0;cursor:pointer;text-align:left;color:var(--ink-2);font-size:13px;font-family:inherit" onclick="usarTendencia(this.textContent)" title="Clic para buscar el ángulo DRU">${i.title.replace(/</g,"&lt;")}</button>
+              </div>`;
+            }).join("")}
+          </div>
+        </details>`).join("");
+      document.getElementById("trends-ai-btn").style.display="inline-flex";
+      showToast(`✓ ${trendsItems.length} titulares cargados`);
+    }
+  }catch(e){list.innerHTML=`<div class="empty">Error de conexión con los feeds.</div>`;}
+  btn.disabled=false;btn.innerHTML=`Cargar titulares regionales <span class="font-mono" style="font-size:11px">→</span>`;
+}
+
+function usarTendencia(titulo){
+  document.getElementById("seo-topic").value=titulo.trim();
+  document.getElementById("seo-topic").scrollIntoView({behavior:"smooth",block:"center"});
+  searchAngle();
+}
+
+async function analizarTendencias(){
+  if(!trendsItems.length){showToast("⚠ Cargá los titulares primero");return;}
+  const btn=document.getElementById("trends-ai-btn");
+  const result=document.getElementById("trends-ai-result");
+  const content=document.getElementById("trends-ai-content");
+  btn.disabled=true;btn.innerHTML=`Analizando<span class="dots"><span></span><span></span><span></span></span>`;
+  result.style.display="block";
+  content.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> Detectando temas calientes en ${trendsItems.length} titulares...`;
+  const titulares=trendsItems.slice(0,80).map(i=>`[${i.source}·${i.city}] ${i.title}`).join("\n");
+  const prompt=`Sos editor de agenda de Diario Río Uruguay (Concordia, Entre Ríos). Estos son los titulares de las últimas 48hs de los medios de la región:\n\n${titulares}\n\nDetectá y respondé:\n\n1. **TEMAS CALIENTES** — Los 3-5 temas que más se repiten o crecen. Para cada uno: qué medios lo cubren y qué falta cubrir.\n\n2. **PERSONALIDADES EN AGENDA** — Nombres propios que aparecen en varios titulares.\n\n3. **OPORTUNIDADES DRU** — 3 temas que los medios de Concordia todavía NO cubrieron bien y DRU puede tomar. Para cada uno sugerí: enfoque Shishkin recomendado (Update me / Educate me / Help me / etc.), título SEO (keyword geográfica al inicio, máx 60 chars) y por qué conviene.\n\n4. **AGENDA PRÓXIMOS DÍAS** — Eventos o fechas mencionadas que generan cobertura anticipable.\n\nCriterios DRU: anti-clickbait, keyword geográfica, calidad editorial sobre métricas.`+getCorrectionsContext();
+  try{
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2500,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    if(data.error){content.textContent="Error: "+data.error;}
+    else{content.textContent=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");}
+  }catch(e){content.textContent="Error de conexión con la IA.";}
+  btn.disabled=false;btn.innerHTML=`Detectar tendencias con IA <span class="font-mono" style="font-size:11px">→</span>`;
 }
 
 // ══ SUGERENCIAS ══

@@ -6,6 +6,10 @@
 [functions]
   node_bundler = "esbuild"
 
+# Revisa los feeds RSS cada hora y guarda alertas en Supabase
+[functions."rss-alertas"]
+  schedule = "@hourly"
+
 [[headers]]
   for = "/*"
   [headers.values]
