@@ -89,7 +89,7 @@ function normalize(s) {
 // Matchea titulares contra keywords vigiladas y guarda alertas nuevas (dedupe por link).
 async function checkAlertas(hours = 24) {
   if (!supaConfigured()) return { configured: false, alertas: [] };
-  const base = process.env.SUPABASE_URL + "/rest/v1";
+  const base = process.env.SUPABASE_URL.trim().replace(/\/+$/, "").replace(/\/rest\/v1$/, "") + "/rest/v1";
 
   const kwRes = await fetch(`${base}/keywords?select=palabra`, { headers: supaHeaders() });
   const keywords = (await kwRes.json() || []).map(k => k.palabra).filter(Boolean);

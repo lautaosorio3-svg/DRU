@@ -19,8 +19,10 @@ function supa() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) return null;
+  // Tolera que SUPABASE_URL venga con o sin /rest/v1 (o con barra final).
+  const clean = url.trim().replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
   return {
-    base: url.replace(/\/$/, "") + "/rest/v1",
+    base: clean + "/rest/v1",
     headers: { "Content-Type": "application/json", apikey: key, Authorization: `Bearer ${key}` }
   };
 }
