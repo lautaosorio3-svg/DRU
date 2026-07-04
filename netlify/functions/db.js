@@ -34,10 +34,25 @@ exports.handler = async (event) => {
   try {
     if (event.httpMethod === "GET") {
       const qs = event.queryStringParameters || {};
+
+      // Diagnóstico seguro: NO expone la service key, solo el host y el estado.
+      if (qs.action === "diag") {
+        let host = "";
+        try { host = new URL(process.env.SUPABASE_URL).host; } catch { host = "(SUPABASE_URL inválida: '" + String(process.env.SUPABASE_URL).slice(0, 40) + "')"; }
+        let status = null, snippet = "";
+        try {
+          const r = await fetch(`${s.base}/keywords?select=id&limit=1`, { headers: s.headers });
+          status = r.status;
+          snippet = (await r.text()).slice(0, 200);
+        } catch (e) { snippet = "fetch error: " + e.message; }
+        return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ configured: true, base: s.base, host, keyLen: (process.env.SUPABASE_SERVICE_KEY || "").length, status, snippet }) };
+      }
+
       const cfg = TABLES[qs.table];
       if (!cfg) return { statusCode: 400, headers: HEADERS, body: JSON.stringify({ error: "Tabla no permitida" }) };
       const res = await fetch(`${s.base}/${qs.table}?select=*&order=${cfg.order}&limit=${cfg.limit}`, { headers: s.headers });
       const rows = await res.json();
+      if (!res.ok) return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ configured: true, rows: [], error: rows.message || JSON.stringify(rows) }) };
       return { statusCode: 200, headers: HEADERS, body: JSON.stringify({ configured: true, rows: Array.isArray(rows) ? rows : [] }) };
     }
 
