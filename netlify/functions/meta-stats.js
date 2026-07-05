@@ -52,8 +52,11 @@ async function fetchIGInsightsSummed(IG_USER_ID, TOKEN, days) {
 
 async function fetchFBInsightsSummed(FB_PAGE_ID, TOKEN, days) {
   const ranges = chunkRanges(days);
+  // Meta eliminó reach/impressions a nivel página en v21 (page_impressions_unique,
+  // page_engaged_users ya no son métricas válidas). Solo pedimos las que siguen vivas,
+  // si no, la llamada entera falla y todo vuelve 0.
   const results = await Promise.all(ranges.map(r => graphGet(`${FB_PAGE_ID}/insights`, TOKEN, {
-    metric: "page_impressions_unique,page_engaged_users,page_post_engagements,page_views_total",
+    metric: "page_post_engagements,page_views_total,page_daily_follows_unique",
     period: "day",
     since: r.since, until: r.until
   }).catch(() => ({ data: [] }))));

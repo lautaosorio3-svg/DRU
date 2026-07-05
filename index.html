@@ -1634,7 +1634,7 @@ function renderGeneralPanel(data){
   const fbIns=(data.fb&&data.fb.insights)||{};
   const fbPage=(data.fb&&data.fb.page)||{};
   const totalFollowers=(igProfile.followers_count||0)+(fbPage.followers_count||fbPage.fan_count||0);
-  const totalReach=(igIns.reach||0)+(fbIns.page_impressions_unique||0);
+  const totalReach=(igIns.reach||0); // FB ya no expone alcance en la API
   const totalInteractions=(igIns.total_interactions||0)+(fbIns.page_post_engagements||0);
 
   // Best post overall (IG vs FB) by engagement
@@ -1654,7 +1654,7 @@ function renderGeneralPanel(data){
     <div class="meta-section-head">🌐 Resumen combinado <span class="meta-period">Últimos ${metaPeriodDays} días · IG + FB</span></div>
     <div class="meta-cards">
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--purple">👥</div><div class="meta-card-num">${formatNum(totalFollowers)}</div><div class="meta-card-label">Audiencia total</div></div>
-      <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👁</div><div class="meta-card-num">${formatNum(totalReach)}</div><div class="meta-card-label">Alcance combinado</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👁</div><div class="meta-card-num">${formatNum(totalReach)}</div><div class="meta-card-label">Alcance Instagram</div></div>
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--red">❤️</div><div class="meta-card-num">${formatNum(totalInteractions)}</div><div class="meta-card-label">Interacciones combinadas</div></div>
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--orange">🔥</div><div class="meta-card-num">${formatNum((data.ig&&data.ig.media?data.ig.media.length:0)+(data.fb&&data.fb.posts?data.fb.posts.length:0))}</div><div class="meta-card-label">Posts analizados</div></div>
     </div>
@@ -1668,7 +1668,7 @@ function renderGeneralPanel(data){
       <div class="meta-highlight-card" onclick="selMetaTab('fb')">
         <div class="meta-section-head" style="margin-bottom:10px">${SVG_FB} Facebook</div>
         <div class="meta-card-num" style="font-size:26px">${formatNum(fbPage.followers_count||fbPage.fan_count||0)} <span style="font-size:13px;color:var(--ink-3);font-family:var(--sans)">seguidores</span></div>
-        <div style="margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">Alcance ${formatNum(fbIns.page_impressions_unique||0)} · Interacciones ${formatNum(fbIns.page_post_engagements||0)}</div>
+        <div style="margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink-3)">Interacciones ${formatNum(fbIns.page_post_engagements||0)} · Visitas ${formatNum(fbIns.page_views_total||0)}</div>
         <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--peach-deep)">Ver desglose completo →</div>
       </div>
     </div>`;
@@ -1755,15 +1755,15 @@ function renderFBPanel(data){
     <div class="meta-section-head">${SVG_FB} Facebook — Página <span class="meta-period">${fp.name||"Diario Río Uruguay"} · Últimos ${metaPeriodDays} días</span></div>
     <div class="meta-cards">
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👥</div><div class="meta-card-num">${formatNum(fp.followers_count||fp.fan_count||0)}</div><div class="meta-card-label">Seguidores</div></div>
-      <div class="meta-card"><div class="meta-card-icon meta-card-icon--purple">👁</div><div class="meta-card-num">${formatNum(fins.page_impressions_unique||0)}</div><div class="meta-card-label">Alcance</div></div>
-      <div class="meta-card"><div class="meta-card-icon meta-card-icon--orange">🔥</div><div class="meta-card-num">${formatNum(fins.page_engaged_users||0)}</div><div class="meta-card-label">Usuarios interacción</div></div>
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--red">❤️</div><div class="meta-card-num">${formatNum(fins.page_post_engagements||0)}</div><div class="meta-card-label">Interacciones con posts</div></div>
-    </div>
-    <div class="meta-cards" style="grid-template-columns:repeat(3,1fr)">
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--green">📊</div><div class="meta-card-num">${formatNum(fins.page_views_total||0)}</div><div class="meta-card-label">Visitas a la página</div></div>
-      <div class="meta-card"><div class="meta-card-icon meta-card-icon--pink">📝</div><div class="meta-card-num">${data.fb.posts?data.fb.posts.length:0}</div><div class="meta-card-label">Posts recientes cargados</div></div>
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--orange">➕</div><div class="meta-card-num">${formatNum(fins.page_daily_follows_unique||0)}</div><div class="meta-card-label">Nuevos seguidores</div></div>
+    </div>
+    <div class="meta-cards" style="grid-template-columns:repeat(2,1fr)">
       <div class="meta-card"><div class="meta-card-icon meta-card-icon--blue">👍</div><div class="meta-card-num">${formatNum(fp.fan_count||0)}</div><div class="meta-card-label">Me gusta de la página</div></div>
-    </div>`;
+      <div class="meta-card"><div class="meta-card-icon meta-card-icon--pink">📝</div><div class="meta-card-num">${data.fb.posts?data.fb.posts.length:0}</div><div class="meta-card-label">Posts recientes cargados</div></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--ink-4);margin:-4px 0 4px">ℹ️ El alcance de Facebook ya no está disponible en la API de Meta (sí en Instagram). El engagement por post se ve más abajo.</div>`;
 
   let chartsHTML="";
   const posts=data.fb.posts||[];
@@ -1823,7 +1823,7 @@ async function runMetaAIAnalysis(){
     }).join("\n");
     if(metaData.fb.page)postsContext+=`\n\nPÁGINA FB: ${metaData.fb.page.followers_count||metaData.fb.page.fan_count} seguidores`;
     const fins=metaData.fb.insights||{};
-    if(fins.page_impressions_unique)postsContext+=`\nMÉTRICAS ${metaPeriodDays} DÍAS FB: alcance ${fins.page_impressions_unique}, usuarios interacción ${fins.page_engaged_users||0}, interacciones con posts ${fins.page_post_engagements||0}, visitas página ${fins.page_views_total||0}`;
+    if(fins.page_post_engagements)postsContext+=`\nMÉTRICAS ${metaPeriodDays} DÍAS FB: interacciones con posts ${fins.page_post_engagements}, visitas página ${fins.page_views_total||0}, nuevos seguidores ${fins.page_daily_follows_unique||0} (nota: Meta ya no expone alcance de FB por API)`;
   }
 
   const prompt=`Sos analista de redes sociales de Diario Río Uruguay (Concordia, Entre Ríos · 56K IG / 103K FB). Medio periodístico regional serio, anti-clickbait.
