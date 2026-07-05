@@ -1551,7 +1551,7 @@ function selMetaPeriod(days){
 }
 
 async function loadMetaStats(force){
-  const ck="dru_cache_meta_"+metaPeriodDays;
+  const ck="dru_cache_meta_v2_"+metaPeriodDays;
   // Cache 15 min: evita ~15 requests a Meta en cada login/click. El botón "Actualizar" pasa force=true.
   if(!force){
     const cached=cacheGet(ck,15*60*1000);
@@ -2165,8 +2165,8 @@ async function loadTendencias(){
   list.innerHTML=`<div style="font-style:italic;color:var(--ink-3);font-family:var(--serif);padding:1rem 0">Consultando los feeds de la región...</div>`;
   try{
     // Cache 15 min de los titulares RSS (cuida los feeds y acelera la carga)
-    let data=cacheGet("dru_cache_rss",15*60*1000);
-    if(!data){const res=await fetch("/.netlify/functions/rss-trends?action=titulares&hours=48");data=await res.json();cacheSet("dru_cache_rss",data);}
+    let data=cacheGet("dru_cache_rss_v2",15*60*1000);
+    if(!data){const res=await fetch("/.netlify/functions/rss-trends?action=titulares&hours=48");data=await res.json();cacheSet("dru_cache_rss_v2",data);}
     trendsItems=data.items||[];
     if(!trendsItems.length){list.innerHTML=`<div class="empty">No se pudieron leer los feeds. Probá de nuevo en unos minutos.</div>`;}
     else{
