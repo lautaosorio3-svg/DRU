@@ -98,16 +98,20 @@
         <span class="sb-item-num">07</span><span class="sb-item-name">Enfoques</span>
         <span class="sb-item-arrow">→</span>
       </div>
+      <div class="sb-item" onclick="showPage('gacetilla',this)">
+        <span class="sb-item-num">08</span><span class="sb-item-name">Gacetilla a nota</span>
+        <span class="sb-item-badge">NEW</span><span class="sb-item-arrow">→</span>
+      </div>
     </div>
 
     <div class="sb-section">
       <div class="sb-section-label"><span>/ Métricas</span><span class="sb-section-num">03</span></div>
       <div class="sb-item active" onclick="showPage('metastats',this)">
-        <span class="sb-item-num">08</span><span class="sb-item-name">Estadísticas</span>
+        <span class="sb-item-num">09</span><span class="sb-item-name">Estadísticas</span>
         <span class="sb-item-badge">META</span><span class="sb-item-arrow">→</span>
       </div>
       <div class="sb-item" onclick="showPage('alertas',this)">
-        <span class="sb-item-num">09</span><span class="sb-item-name">Alertas</span>
+        <span class="sb-item-num">10</span><span class="sb-item-name">Alertas</span>
         <span class="sb-item-badge is-count" id="alertas-cnt">0</span><span class="sb-item-arrow">→</span>
       </div>
     </div>
@@ -115,11 +119,11 @@
     <div class="sb-section">
       <div class="sb-section-label"><span>/ Workspace</span><span class="sb-section-num">04</span></div>
       <div class="sb-item" onclick="showPage('borradores',this)">
-        <span class="sb-item-num">10</span><span class="sb-item-name">Borradores</span>
+        <span class="sb-item-num">11</span><span class="sb-item-name">Borradores</span>
         <span class="sb-item-badge is-count" id="drafts-cnt">0</span><span class="sb-item-arrow">→</span>
       </div>
       <div class="sb-item" onclick="showPage('sugerencias',this)">
-        <span class="sb-item-num">11</span><span class="sb-item-name">Sugerencias</span>
+        <span class="sb-item-num">12</span><span class="sb-item-name">Sugerencias</span>
         <span class="sb-item-arrow">→</span>
       </div>
     </div>
@@ -667,6 +671,61 @@
                     <input class="fi" id="enf-chat-input" placeholder="Ej: Hacelo más corto, cambiá el tono, agregá una cita…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')sendEnfChat()">
                     <button class="btn btn--primary btn--sm" onclick="sendEnfChat()">Enviar</button>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ GACETILLA A NOTA ═══ -->
+    <div class="page" id="page-gacetilla">
+      <div class="hero">
+        <div class="hero-row">
+          <div class="hero-num">№ 08 · Redacción asistida</div>
+          <div class="hero-rule"></div>
+          <div class="hero-num">Manual de estilo DRU</div>
+        </div>
+        <h1 class="hero-title">De la <span class="accent">gacetilla</span> a la nota</h1>
+        <div class="hero-sub">Pegá el comunicado de prensa. La IA lo convierte en nota periodística con criterios editoriales DRU y SEO listo.</div>
+        <div class="hero-gradient"></div>
+      </div>
+      <div class="section">
+        <div class="wflow wflow--narrow">
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num step-num--peach">1</span><div class="step-title">La gacetilla</div></div>
+              <div class="step-help">Pegá el texto completo del comunicado (municipio, institución, empresa, club…). La IA elimina el tono promocional, atribuye la fuente y respeta las citas textuales.</div>
+              <div class="ff" style="margin-bottom:12px"><label class="flbl">Texto de la gacetilla</label><textarea class="fi" id="gct-text" placeholder="Pegá acá el comunicado de prensa completo…" style="min-height:260px;font-family:var(--serif)"></textarea></div>
+              <div class="fgrid" style="margin-bottom:12px">
+                <div class="ff ff--3"><label class="flbl">Sección</label><select class="fi" id="gct-section"><option>General</option><option>Política</option><option>Economía</option><option>Sociedad</option><option>Deportes</option><option>Cultura</option><option>Policiales</option></select></div>
+                <div class="ff ff--3"><label class="flbl">Fuente / emisor</label><input class="fi" type="text" id="gct-source" placeholder="Ej: Municipalidad de Concordia"></div>
+              </div>
+              <div style="margin-bottom:10px">
+                <label class="flbl">Modelo de IA</label>
+                <div style="display:flex;gap:6px">
+                  <button class="chip active" id="gct-model-claude" onclick="selGctModel('claude')" style="flex:1;text-align:center;justify-content:center">Claude</button>
+                  <button class="chip" id="gct-model-gpt" onclick="selGctModel('gpt')" style="flex:1;text-align:center;justify-content:center">GPT-4o</button>
+                </div>
+              </div>
+              <button class="btn btn--peach" id="gct-btn" onclick="genGacetilla()" style="width:100%">Convertir en nota periodística <span class="font-mono" style="font-size:11px">→</span></button>
+            </div>
+            <!-- Resultado -->
+            <div class="step" id="gct-result" style="display:none">
+              <div class="step-head"><span class="step-num">→</span><div class="step-title">Nota periodística</div><div class="step-tag-row"><span class="tag tag--peach">Código DRU + SEO</span></div></div>
+              <div class="out-box" id="gct-content"></div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn btn--ghost btn--sm" onclick="genGacetilla()">Regenerar</button>
+                <button class="btn btn--primary btn--sm" onclick="copyGct()">Copiar texto</button>
+                <button class="btn btn--ghost btn--sm" onclick="saveDraft('gacetilla')">💾 Guardar borrador</button>
+              </div>
+              <div id="gct-chat" style="margin-top:1.25rem;border-top:1px solid var(--line-hair);padding-top:1rem;display:none">
+                <div class="flbl" style="margin-bottom:8px">Corregir o ajustar la nota</div>
+                <div id="gct-chat-msgs" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+                <div style="display:flex;gap:6px">
+                  <input class="fi" id="gct-chat-input" placeholder="Ej: Acortá el copete, sacá el segundo subtítulo…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')sendGctChat()">
+                  <button class="btn btn--primary btn--sm" onclick="sendGctChat()">Enviar</button>
                 </div>
               </div>
             </div>
@@ -1485,7 +1544,7 @@ async function sendDsgChat(){
 }
 
 // ══ NAV ══
-const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",metastats:"Estadísticas Meta",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
+const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",gacetilla:"Gacetilla a nota",metastats:"Estadísticas Meta",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
 function showPage(id,navEl){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -1567,6 +1626,60 @@ async function sendEnfChat(){
     msgsDiv.scrollTop=msgsDiv.scrollHeight;
   }catch(e){const ld=document.getElementById("enf-chat-loading");if(ld)ld.textContent="Error de conexión.";}
 }
+
+// ══ GACETILLA A NOTA ══
+let gctModelStr="claude";
+let gctChatMsgs=[];
+function selGctModel(m){gctModelStr=m;document.getElementById("gct-model-claude").classList.toggle("active",m==="claude");document.getElementById("gct-model-gpt").classList.toggle("active",m==="gpt");}
+
+async function genGacetilla(){
+  const text=document.getElementById("gct-text").value.trim();
+  if(!text||text.length<80){showToast("⚠ Pegá la gacetilla completa (mínimo unas líneas)");return;}
+  const seccion=document.getElementById("gct-section").value;
+  const fuente=document.getElementById("gct-source").value.trim();
+  const btn=document.getElementById("gct-btn");btn.innerHTML=`Redactando nota<span class="dots"><span></span><span></span><span></span></span>`;btn.disabled=true;
+  const result=document.getElementById("gct-result");result.style.display="block";
+  const content=document.getElementById("gct-content");
+  content.innerHTML=`<span class="dots"><span></span><span></span><span></span></span> Convirtiendo la gacetilla en nota periodística...`;
+  const prompt=`Sos redactor de Diario Río Uruguay (Concordia, Entre Ríos). Te llega una GACETILLA de prensa${fuente?" emitida por: "+fuente:""} (sección ${seccion}). Convertila en NOTA PERIODÍSTICA.\n\nGACETILLA:\n${text.substring(0,4000)}\n\nREGLAS DE CONVERSIÓN (manual de estilo DRU):\n- Eliminá el tono promocional/institucional: nada de "orgullosamente", "importante logro", "destacó el compromiso". Hechos, no elogios.\n- ATRIBUÍ la información a la fuente: "informó ${fuente||"la institución"}", "según el comunicado", "detallaron". Atribución en pasado.\n- NUNCA inventar datos ni citas. Las comillas son sagradas: solo citas textuales que estén en la gacetilla. Si no hay citas, no las fabriques.\n- No estires con relleno: si la gacetilla da para 300 palabras, la nota tiene 300 palabras honestas.\n- Keyword geográfica obligatoria en título y primer párrafo: "Concordia", "Entre Ríos" o "Salto Grande" (la que corresponda).\n- Tono formal-periodístico, sin sensacionalismo.\n\nESTRUCTURA:\n1. TÍTULO — máx 65 caracteres, keyword geográfica al inicio, informativo (qué pasó), sin clickbait.\n2. COPETE — máx 240 caracteres, responde las 5W (qué, quién, cuándo, dónde, por qué).\n3. CUERPO — pirámide invertida (lo más importante primero), subtítulo H2 cada ~3 párrafos, citas textuales entre comillas con atribución.\n\nANÁLISIS SEO (al final):\n- META TITLE: keyword geo al inicio, máx 60 caracteres.\n- META DESCRIPTION: máx 155 caracteres.\n- SLUG: url-amigable-con-guiones.\n- KEYWORDS: 4-6 términos de búsqueda locales.\n- SUGERENCIA: 1 línea sobre qué le falta a la nota para posicionar mejor (foto, dato, testimonio a conseguir).`+getCorrectionsContext();
+  try{
+    const api=gctModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=gctModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:[{role:"user",content:prompt}]})});
+    const raw=await res.text();let data;try{data=JSON.parse(raw);}catch(pe){data=null;}
+    if(!data||data.error){content.textContent="Error"+(data&&data.error?": "+String(data.error).substring(0,80):" al conectar con la IA")+". Probá de nuevo.";}
+    else{
+      const outText=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+      content.textContent=outText;
+      gctChatMsgs=[{role:"user",content:prompt},{role:"assistant",content:outText}];
+      document.getElementById("gct-chat").style.display="block";
+      document.getElementById("gct-chat-msgs").innerHTML="";
+    }
+  }catch(e){content.textContent="Error de conexión con la IA. Probá de nuevo.";}
+  btn.innerHTML=`Convertir en nota periodística <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
+}
+
+async function sendGctChat(){
+  const input=document.getElementById("gct-chat-input");const msg=input.value.trim();if(!msg)return;
+  const msgsDiv=document.getElementById("gct-chat-msgs");
+  msgsDiv.innerHTML+=`<div style="background:var(--surface-alt);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>Vos:</b> ${esc(msg)}${ruleBtnHTML(msg)}</div>`;
+  input.value="";
+  gctChatMsgs.push({role:"user",content:msg});
+  msgsDiv.innerHTML+=`<div id="gct-chat-loading" style="font-style:italic;color:var(--ink-3);font-size:13px;padding:4px 10px"><span class="dots"><span></span><span></span><span></span></span> Corrigiendo...</div>`;
+  msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  try{
+    const api=gctModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
+    const mod=gctModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:gctChatMsgs})});
+    const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+    gctChatMsgs.push({role:"assistant",content:text});
+    document.getElementById("gct-content").textContent=text;
+    const ld=document.getElementById("gct-chat-loading");if(ld)ld.remove();
+    msgsDiv.innerHTML+=`<div style="background:var(--peach-pale);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px"><b>IA:</b> Nota actualizada ✓</div>`;
+    msgsDiv.scrollTop=msgsDiv.scrollHeight;
+  }catch(e){const ld=document.getElementById("gct-chat-loading");if(ld)ld.textContent="Error de conexión.";}
+}
+function copyGct(){navigator.clipboard&&navigator.clipboard.writeText(document.getElementById("gct-content").textContent);showToast("✓ Nota copiada");}
 
 // ══ META STATS ══
 let metaData=null;
@@ -1982,7 +2095,7 @@ function saveDrafts(arr){localStorage.setItem(SK_DRAFTS,JSON.stringify(arr));upd
 function updateDraftsBadge(){const c=loadDrafts().length;document.getElementById("drafts-cnt").textContent=c;}
 
 function saveDraft(section){
-  const secLabels={gen:"Generador",traspaso:"Análisis",desgrab:"Desgrabador",enfoques:"Enfoques",metastats:"Estadísticas"};
+  const secLabels={gen:"Generador",traspaso:"Análisis",desgrab:"Desgrabador",enfoques:"Enfoques",gacetilla:"Gacetilla",metastats:"Estadísticas"};
   let content="",title="",format="";
   if(section==="gen"){
     content=document.getElementById("ocontent").textContent;
@@ -1998,6 +2111,10 @@ function saveDraft(section){
   }else if(section==="enfoques"){
     content=document.getElementById("enf-content").textContent;
     title=document.getElementById("enf-title").value.trim()||"Enfoque editorial";format=selEnf_val;
+  }else if(section==="gacetilla"){
+    content=document.getElementById("gct-content").textContent;
+    const firstLine=(content.split("\n").find(l=>l.trim().length>10)||"Gacetilla convertida").replace(/^T[ÍI]TULO:?\s*/i,"");
+    title=firstLine.substring(0,80);format="nota";
   }else if(section==="metastats"){
     content=document.getElementById("meta-ai-content").textContent;
     title="Análisis Meta semanal";format="análisis";
@@ -2056,6 +2173,9 @@ function loadDraft(id){
   }else if(draft.section==="enfoques"){
     showPage("enfoques",document.querySelectorAll(".sb-item")[6]);
     setTimeout(()=>{document.getElementById("enf-content").textContent=draft.content;document.getElementById("enf-result").style.display="block";enfChatMsgs=[{role:"assistant",content:draft.content}];document.getElementById("enf-chat").style.display="block";},100);
+  }else if(draft.section==="gacetilla"){
+    showPage("gacetilla",document.querySelectorAll(".sb-item")[7]);
+    setTimeout(()=>{document.getElementById("gct-content").textContent=draft.content;document.getElementById("gct-result").style.display="block";gctChatMsgs=[{role:"assistant",content:draft.content}];document.getElementById("gct-chat").style.display="block";},100);
   }
   showToast("✓ Borrador cargado");
 }

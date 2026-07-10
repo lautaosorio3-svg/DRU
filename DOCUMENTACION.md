@@ -53,10 +53,11 @@ localStorage.
 | 05 | Análisis de notas | Chequeo SEO local (score /100) + análisis IA profundo + generación de copy para redes | Claude/GPT |
 | 06 | Desgrabador | Sube audio → Whisper transcribe → IA redacta nota + copy | Whisper + Claude/GPT |
 | 07 | Enfoques | Reescribe una nota según los 8 enfoques del modelo Shishkin (News User Needs) | Claude/GPT |
-| 08 | Estadísticas | Dashboard Meta (IG+FB) con pestañas General/Instagram/Facebook, período 7/28/90 días, gráficos y análisis IA | Claude/GPT |
-| 09 | Alertas | Keywords vigiladas compartidas + alertas automáticas cada hora desde 9 medios regionales | — |
-| 10 | Borradores | Borradores guardados desde cualquier sección; compartidos vía Supabase | — |
-| 11 | Sugerencias | Feedback del equipo → Netlify Blobs + email vía Resend | — |
+| 08 | Gacetilla a nota | Convierte comunicados de prensa en notas periodísticas (quita tono promocional, atribuye la fuente, respeta citas) con bloque SEO | Claude/GPT |
+| 09 | Estadísticas | Dashboard Meta (IG+FB) con pestañas General/Instagram/Facebook, período 7/28/90 días, gráficos diarios, vista previa de posts y análisis IA | Claude/GPT |
+| 10 | Alertas | Keywords vigiladas compartidas + alertas automáticas cada hora desde 9 medios regionales | — |
+| 11 | Borradores | Borradores guardados desde cualquier sección; compartidos vía Supabase | — |
+| 12 | Sugerencias | Feedback del equipo → Supabase + email vía Resend | — |
 
 ## 3. Fuentes RSS monitoreadas
 
