@@ -50,6 +50,25 @@ async function fetchIGInsightsSummed(IG_USER_ID, TOKEN, days) {
   return map;
 }
 
+// Serie diaria de alcance IG (para el gráfico de evolución). Sin metric_type
+// la API devuelve un valor por día en vez del total del período.
+async function fetchIGDailyReach(IG_USER_ID, TOKEN, days) {
+  const ranges = chunkRanges(days);
+  const results = await Promise.all(ranges.map(r => graphGet(`${IG_USER_ID}/insights`, TOKEN, {
+    metric: "reach",
+    period: "day",
+    since: r.since, until: r.until
+  }).catch(() => ({ data: [] }))));
+  const daily = [];
+  results.forEach(insights => {
+    ((insights.data || [])[0]?.values || []).forEach(v => {
+      daily.push({ date: (v.end_time || "").substring(0, 10), reach: v.value || 0 });
+    });
+  });
+  daily.sort((a, b) => a.date.localeCompare(b.date));
+  return daily;
+}
+
 async function fetchFBInsightsSummed(FB_PAGE_ID, TOKEN, days) {
   const ranges = chunkRanges(days);
   // Meta eliminó reach/impressions a nivel página en v21 (page_impressions_unique,
@@ -61,13 +80,18 @@ async function fetchFBInsightsSummed(FB_PAGE_ID, TOKEN, days) {
     since: r.since, until: r.until
   }).catch(() => ({ data: [] }))));
   const map = {};
+  const daily = []; // serie diaria de interacciones (para el gráfico de evolución)
   results.forEach(insights => {
     (insights.data || []).forEach(m => {
       const sum = (m.values || []).reduce((s, v) => s + (v.value || 0), 0);
       map[m.name] = (map[m.name] || 0) + sum;
+      if (m.name === "page_post_engagements") {
+        (m.values || []).forEach(v => daily.push({ date: (v.end_time || "").substring(0, 10), value: v.value || 0 }));
+      }
     });
   });
-  return map;
+  daily.sort((a, b) => a.date.localeCompare(b.date));
+  return { map, daily };
 }
 
 exports.handler = async (event) => {
@@ -94,10 +118,10 @@ exports.handler = async (event) => {
 
       // Facebook Page
       if (FB_PAGE_ID) {
-        const [page, posts, insightsMap] = await Promise.all([
+        const [page, posts, fbIns] = await Promise.all([
           graphGet(FB_PAGE_ID, TOKEN, { fields: "name,fan_count,followers_count" }),
           graphGet(`${FB_PAGE_ID}/posts`, TOKEN, {
-            fields: "message,created_time,shares,likes.summary(true),comments.summary(true)",
+            fields: "message,created_time,shares,full_picture,likes.summary(true),comments.summary(true)",
             limit: mediaLimit
           }),
           fetchFBInsightsSummed(FB_PAGE_ID, TOKEN, days)
@@ -105,11 +129,13 @@ exports.handler = async (event) => {
 
         result.fb = {
           page,
-          insights: insightsMap,
+          insights: fbIns.map,
+          daily: fbIns.daily,
           posts: (posts.data || [])
             .filter(p => new Date(p.created_time) >= periodStart)
             .map(p => ({
               id: p.id, message: (p.message || "").substring(0, 200), created_time: p.created_time,
+              preview: p.full_picture || null,
               likes: p.likes?.summary?.total_count || 0, comments: p.comments?.summary?.total_count || 0,
               shares: p.shares?.count || 0
             }))
@@ -118,11 +144,12 @@ exports.handler = async (event) => {
 
       // Instagram
       if (IG_USER_ID) {
-        const [profile, insightsMap, mediaList] = await Promise.all([
+        const [profile, insightsMap, daily, mediaList] = await Promise.all([
           graphGet(IG_USER_ID, TOKEN, { fields: "username,name,followers_count,follows_count,media_count,biography" }),
           fetchIGInsightsSummed(IG_USER_ID, TOKEN, days),
+          fetchIGDailyReach(IG_USER_ID, TOKEN, days),
           graphGet(`${IG_USER_ID}/media`, TOKEN, {
-            fields: "caption,timestamp,media_type,permalink,like_count,comments_count",
+            fields: "caption,timestamp,media_type,permalink,like_count,comments_count,media_url,thumbnail_url",
             limit: mediaLimit
           })
         ]);
@@ -136,6 +163,7 @@ exports.handler = async (event) => {
             return {
               id: m.id, caption: (m.caption || "").substring(0, 200), timestamp: m.timestamp,
               media_type: m.media_type, permalink: m.permalink,
+              preview: m.thumbnail_url || m.media_url || null,
               likes: m.like_count || 0, comments: m.comments_count || 0,
               reach: getData("reach"), saved: getData("saved"),
               shares: getData("shares"), interactions: getData("total_interactions")
@@ -144,13 +172,14 @@ exports.handler = async (event) => {
             return {
               id: m.id, caption: (m.caption || "").substring(0, 200), timestamp: m.timestamp,
               media_type: m.media_type, permalink: m.permalink,
+              preview: m.thumbnail_url || m.media_url || null,
               likes: m.like_count || 0, comments: m.comments_count || 0,
               reach: 0, saved: 0, shares: 0, interactions: 0
             };
           }
         }));
 
-        result.ig = { profile, insights: insightsMap, media: mediaWithInsights };
+        result.ig = { profile, insights: insightsMap, daily, media: mediaWithInsights };
       }
 
       return { statusCode: 200, headers: HEADERS, body: JSON.stringify(result) };

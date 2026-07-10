@@ -1196,17 +1196,48 @@ async function searchAngle(){
   const topic=document.getElementById("seo-topic").value.trim();
   if(!topic){showToast("⚠ Escribí un tema trending");return;}
   const result=document.getElementById("seo-angle-result");
-  result.innerHTML=`<div class="angle-result" style="margin-top:1.5rem;border-left-color:var(--ink-4)"><div style="font-style:italic;color:var(--ink-3);font-family:var(--serif)"><span class="dots"><span></span><span></span><span></span></span> Buscando conexión de "${topic}" con Entre Ríos...</div></div>`;
-  const prompt=`Sos periodista de Diario Río Uruguay (Concordia, Entre Ríos). Tema trending: "${topic}".\n\nAnalizá: 1) datos clave, 2) conexión con ER/Concordia, 3) 3 búsquedas Google para verificar.\n\nJSON:\n{"topic":"${topic}","key_facts":"datos separados por ;","er_connection":"conexión con ER","has_connection":true,"angle":"ángulo DRU","sources_to_check":"fuentes locales","search_queries":["q1","q2","q3"],"seo_title":"keyword geo, máx 60 chars","meta_desc":"máx 155 chars","keywords":["kw1","kw2","kw3","kw4"],"ig_hook":"máx 12 palabras","fb_copy":"línea\\ndato\\ndiarioriouruguay.com\\n#Concordia #EntreRíos"}`;
+  result.innerHTML=`<div class="angle-result" style="margin-top:1.5rem;border-left-color:var(--ink-4)"><div style="font-style:italic;color:var(--ink-3);font-family:var(--serif)"><span class="dots"><span></span><span></span><span></span></span> Buscando "${esc(topic)}" en la web y conectándolo con Entre Ríos...</div></div>`;
+  // Doble fuente: titulares RSS regionales (lo ya publicado) + búsqueda web en vivo
+  // (lo que nadie cubrió todavía). Si la búsqueda web falla, cae a solo-RSS.
+  let rssCtx="";
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
-    const raw=await res.text();let data;try{data=JSON.parse(raw);}catch(pe){result.innerHTML=`<div style="color:var(--ink-3);padding:.5rem 0">Error al procesar.</div>`;return;}
-    if(data.error){result.innerHTML=`<div style="color:var(--ink-3)">Error: ${data.error}</div>`;return;}
-    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
-    const parsed=extractJSON(text);
-    if(!parsed){result.innerHTML=`<div style="color:var(--ink-3)">Respuesta incompleta. Intentá con un tema más corto.</div>`;return;}
-    renderAngleResult(parsed);seoHistory.unshift(parsed);renderSEOHistory();
-  }catch(e){result.innerHTML=`<div style="color:var(--ink-3)">Error de conexión.</div>`;}
+    let rssData=cacheGet("dru_cache_rss_v2",15*60*1000);
+    if(!rssData){const r=await fetch("/.netlify/functions/rss-trends?action=titulares&hours=48");rssData=await r.json();cacheSet("dru_cache_rss_v2",rssData);}
+    if(rssData&&rssData.items&&rssData.items.length){
+      rssCtx="\n\nTITULARES de los medios de la región (últimas 48hs):\n"+rssData.items.slice(0,60).map(i=>`[${i.source}·${i.city}] ${i.title}`).join("\n");
+    }
+  }catch(e){}
+  const buildPrompt=(conWeb)=>`Sos periodista de Diario Río Uruguay (Concordia, Entre Ríos). Tema trending: "${topic}".${rssCtx}\n\nPasos: 1) Si el tema aparece en los titulares regionales, usalos como fuente principal.${conWeb?` 2) Si no alcanzan, buscá en la web información ACTUAL (máximo 2 búsquedas: probá "${topic} Entre Ríos" o "${topic} Concordia" primero, y el tema solo si no hay resultados locales).`:""} ${conWeb?"3)":"2)"} Conectá el tema con la provincia y la ciudad de forma CONCRETA: personalidades entrerrianas involucradas, impacto local, eventos en la región, o ángulo de servicio para el lector concordiense.\n\nRespondé SOLO con este JSON (sin texto extra):\n{"topic":"${topic}","key_facts":"datos actuales separados por ;","er_connection":"conexión concreta citando el titular regional o el hallazgo web","has_connection":true,"angle":"ángulo DRU concreto y accionable","sources_to_check":"fuentes locales","search_queries":["q1","q2","q3"],"seo_title":"keyword geo al inicio, máx 60 chars","meta_desc":"máx 155 chars","keywords":["kw1","kw2","kw3","kw4"],"ig_hook":"máx 12 palabras","fb_copy":"línea gancho\\ndato\\ndiarioriouruguay.com\\n#Concordia #EntreRíos"}`;
+  // Intento 1: con búsqueda web. Intento 2 (fallback): solo RSS + conocimiento.
+  const intentos=[
+    {tools:[{type:"web_search_20250305",name:"web_search",max_uses:2}],prompt:buildPrompt(true)},
+    {tools:null,prompt:buildPrompt(false)}
+  ];
+  for(let i=0;i<intentos.length;i++){
+    const int=intentos[i];
+    const body={model:"claude-haiku-4-5-20251001",max_tokens:2000,messages:[{role:"user",content:int.prompt}]};
+    if(int.tools)body.tools=int.tools;
+    const esUltimo=i===intentos.length-1;
+    try{
+      const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+      const raw=await res.text();let data;try{data=JSON.parse(raw);}catch(pe){data=null;}
+      if(!data||data.error){
+        if(esUltimo){result.innerHTML=`<div style="color:var(--ink-3)">Error: ${data&&data.error?esc(data.error):"al procesar la respuesta"}. Probá de nuevo.</div>`;return;}
+        result.innerHTML=`<div class="angle-result" style="margin-top:1.5rem;border-left-color:var(--ink-4)"><div style="font-style:italic;color:var(--ink-3);font-family:var(--serif)"><span class="dots"><span></span><span></span><span></span></span> La búsqueda web tardó demasiado — reintentando con fuentes regionales...</div></div>`;
+        continue;
+      }
+      const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+      const parsed=extractJSON(text);
+      if(!parsed){
+        if(esUltimo){result.innerHTML=`<div style="color:var(--ink-3)">Respuesta incompleta. Intentá con un tema más corto.</div>`;return;}
+        continue;
+      }
+      renderAngleResult(parsed);seoHistory.unshift(parsed);renderSEOHistory();
+      return;
+    }catch(e){
+      if(esUltimo){result.innerHTML=`<div style="color:var(--ink-3)">Error de conexión.</div>`;return;}
+    }
+  }
 }
 
 let lastAngle=null;
@@ -1551,7 +1582,7 @@ function selMetaPeriod(days){
 }
 
 async function loadMetaStats(force){
-  const ck="dru_cache_meta_v2_"+metaPeriodDays;
+  const ck="dru_cache_meta_v3_"+metaPeriodDays;
   // Cache 15 min: evita ~15 requests a Meta en cada login/click. El botón "Actualizar" pasa force=true.
   if(!force){
     const cached=cacheGet(ck,15*60*1000);
@@ -1593,6 +1624,24 @@ function selMetaTab(tab){
     document.getElementById("meta-tab-"+t).classList.toggle("active",t===tab);
     document.getElementById("meta-panel-"+t).style.display=t===tab?"block":"none";
   });
+}
+
+// Gráfico de columnas para series diarias [{date, <valueKey>}]
+function dailyColsHTML(daily,valueKey,color){
+  if(!daily||!daily.length)return"";
+  const max=Math.max(...daily.map(d=>d[valueKey]||0),1);
+  // Con 90 días las etiquetas no entran: mostrar 1 de cada N
+  const step=daily.length>35?7:daily.length>14?2:1;
+  return`<div class="meta-cols">${daily.map((d,i)=>{
+    const v=d[valueKey]||0;
+    const h=Math.max(Math.round((v/max)*100),2);
+    const dt=d.date?d.date.substring(5).split("-").reverse().join("/"):"";
+    return`<div class="meta-col" title="${dt}: ${formatNum(v)}">
+      ${daily.length<=14?`<div class="meta-col-val">${formatNum(v)}</div>`:""}
+      <div class="meta-col-bar" style="height:${h}%;background:${color}"></div>
+      <div class="meta-col-lbl">${i%step===0?dt:""}</div>
+    </div>`;
+  }).join("")}</div>`;
 }
 
 function pieChartSVG(pieData,total){
@@ -1673,13 +1722,26 @@ function renderGeneralPanel(data){
       </div>
     </div>`;
 
+  // Evolución diaria del alcance IG en el panel general
+  if(data.ig&&data.ig.daily&&data.ig.daily.length){
+    html+=`<div class="meta-chart-box" style="margin-bottom:12px">
+      <div class="meta-chart-title">📈 Evolución del alcance en Instagram (día por día)</div>
+      ${dailyColsHTML(data.ig.daily,"reach","var(--sky-deep)")}
+    </div>`;
+  }
+
   if(bestPost){
     const caption=bestPlatform==="ig"?bestPost.caption:bestPost.message;
     const score=bestPlatform==="ig"?(bestPost.interactions||0):((bestPost.likes||0)+(bestPost.comments||0)+(bestPost.shares||0));
     html+=`<div class="meta-chart-box">
-      <div class="meta-chart-title">🏆 Mejor publicación de la semana ${bestPlatform==="ig"?SVG_IG:SVG_FB}</div>
-      <div style="color:var(--ink-2);line-height:1.5;margin-bottom:8px;font-size:13px">${caption?caption.replace(/</g,"&lt;").substring(0,180):"(sin texto)"}</div>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">❤️ ${bestPost.likes||0} · 💬 ${bestPost.comments||0} · ↗️ ${bestPost.shares||0}${bestPlatform==="ig"?" · 👁 "+formatNum(bestPost.reach||0):""} · <b style="color:var(--peach-deep)">${formatNum(score)} interacciones</b></div>
+      <div class="meta-chart-title">🏆 Mejor publicación del período ${bestPlatform==="ig"?SVG_IG:SVG_FB}</div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        ${bestPost.preview?`<img class="meta-post-thumb" src="${encodeURI(bestPost.preview)}" alt="" loading="lazy" onerror="this.style.display='none'">`:""}
+        <div class="meta-post-body">
+          <div style="color:var(--ink-2);line-height:1.5;margin-bottom:8px;font-size:13px">${caption?esc(caption.substring(0,180)):"(sin texto)"}</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">❤️ ${bestPost.likes||0} · 💬 ${bestPost.comments||0} · ↗️ ${bestPost.shares||0}${bestPlatform==="ig"?" · 👁 "+formatNum(bestPost.reach||0):""} · <b style="color:var(--peach-deep)">${formatNum(score)} interacciones</b></div>
+        </div>
+      </div>
     </div>`;
   }
   sec.innerHTML=html;
@@ -1707,6 +1769,9 @@ function renderIGPanel(data){
     </div>`;
 
   let chartsHTML="";
+  if(data.ig.daily&&data.ig.daily.length){
+    chartsHTML+=`<div class="meta-chart-box" style="grid-column:1/-1"><div class="meta-chart-title">📈 Alcance por día</div>${dailyColsHTML(data.ig.daily,"reach","var(--sky-deep)")}</div>`;
+  }
   const media=data.ig.media||[];
   if(media.length){
     const colors=["#E91E63","#FF5722","#FF9800","#4CAF50","#2196F3","#9C27B0"];
@@ -1734,10 +1799,15 @@ function renderIGPanel(data){
       const typeIcon=m.media_type==="VIDEO"?"🎬":m.media_type==="CAROUSEL_ALBUM"?"📑":"📷";
       const engRate=m.reach>0?((m.interactions/m.reach)*100).toFixed(1):"0";
       return`<div class="meta-post-card">
-        <div class="meta-post-head"><span>${typeIcon} <span class="meta-post-date">${ds}</span></span><a href="${m.permalink}" target="_blank" class="meta-post-link">ver →</a></div>
-        <div class="meta-post-caption">${m.caption?m.caption.replace(/</g,"&lt;"):"(sin caption)"}</div>
-        <div class="meta-post-metrics">
-          <span>❤️ ${m.likes}</span><span>💬 ${m.comments}</span><span>↗️ ${m.shares}</span><span>👁 ${formatNum(m.reach)}</span><span>🔖 ${m.saved}</span><span class="meta-post-eng">${engRate}%</span>
+        <div class="meta-post-head"><span>${typeIcon} <span class="meta-post-date">${ds}</span></span><a href="${encodeURI(m.permalink||"#")}" target="_blank" class="meta-post-link">ver →</a></div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          ${m.preview?`<img class="meta-post-thumb" src="${encodeURI(m.preview)}" alt="" loading="lazy" onerror="this.style.display='none'">`:""}
+          <div class="meta-post-body">
+            <div class="meta-post-caption">${m.caption?esc(m.caption):"(sin caption)"}</div>
+            <div class="meta-post-metrics">
+              <span>❤️ ${m.likes}</span><span>💬 ${m.comments}</span><span>↗️ ${m.shares}</span><span>👁 ${formatNum(m.reach)}</span><span>🔖 ${m.saved}</span><span class="meta-post-eng">${engRate}%</span>
+            </div>
+          </div>
         </div></div>`;
     }).join("");
     postsSec.innerHTML=`<div class="meta-section-head">${SVG_IG} Últimos posts de Instagram</div><div style="display:flex;flex-direction:column;gap:10px">${igCards}</div>`;
@@ -1766,6 +1836,9 @@ function renderFBPanel(data){
     <div style="font-family:var(--mono);font-size:10px;color:var(--ink-4);margin:-4px 0 4px">ℹ️ El alcance de Facebook ya no está disponible en la API de Meta (sí en Instagram). El engagement por post se ve más abajo.</div>`;
 
   let chartsHTML="";
+  if(data.fb.daily&&data.fb.daily.length){
+    chartsHTML+=`<div class="meta-chart-box" style="grid-column:1/-1"><div class="meta-chart-title">📈 Interacciones por día</div>${dailyColsHTML(data.fb.daily,"value","#1877F2")}</div>`;
+  }
   const posts=data.fb.posts||[];
   if(posts.length){
     const colors=["#1877F2","#FF5722","#FF9800","#4CAF50","#9C27B0","#E91E63"];
@@ -1792,8 +1865,13 @@ function renderFBPanel(data){
       const d=new Date(p.created_time);const ds=d.getDate()+"/"+(d.getMonth()+1)+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
       return`<div class="meta-post-card">
         <div class="meta-post-head"><span class="meta-post-date">${ds}</span></div>
-        <div class="meta-post-caption">${p.message?p.message.replace(/</g,"&lt;"):"(sin texto)"}</div>
-        <div class="meta-post-metrics"><span>👍 ${p.likes}</span><span>💬 ${p.comments}</span><span>↗️ ${p.shares}</span></div></div>`;
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          ${p.preview?`<img class="meta-post-thumb" src="${encodeURI(p.preview)}" alt="" loading="lazy" onerror="this.style.display='none'">`:""}
+          <div class="meta-post-body">
+            <div class="meta-post-caption">${p.message?esc(p.message):"(sin texto)"}</div>
+            <div class="meta-post-metrics"><span>👍 ${p.likes}</span><span>💬 ${p.comments}</span><span>↗️ ${p.shares}</span></div>
+          </div>
+        </div></div>`;
     }).join("");
     postsSec.innerHTML=`<div class="meta-section-head">${SVG_FB} Últimos posts de Facebook</div><div style="display:flex;flex-direction:column;gap:10px">${fbCards}</div>`;
   }else{postsSec.innerHTML=`<div style="color:var(--ink-4);font-style:italic;font-size:13px">Sin publicaciones</div>`;}
@@ -1809,17 +1887,21 @@ async function runMetaAIAnalysis(){
 
   let postsContext="";
   if(metaData.ig&&metaData.ig.media){
-    postsContext+="\n\nÚLTIMOS POSTS INSTAGRAM:\n"+metaData.ig.media.map((m,i)=>{
+    // Top 10 por interacciones: contexto más corto = respuesta más rápida
+    // (la función de Netlify corta cerca de los 26s; con 20-30 posts se pasaba)
+    const topIG=[...metaData.ig.media].sort((a,b)=>(b.interactions||0)-(a.interactions||0)).slice(0,10);
+    postsContext+="\n\nPOSTS INSTAGRAM MÁS RELEVANTES DEL PERÍODO:\n"+topIG.map((m,i)=>{
       const engRate=m.reach>0?((m.interactions/m.reach)*100).toFixed(1):0;
-      return`${i+1}. [${m.media_type}] "${m.caption||"sin caption"}" — ❤️${m.likes} 💬${m.comments} ↗️${m.shares} compartidos, 👁${m.reach} alcance, ${engRate}% engagement, 🔖${m.saved} guardados`;
+      return`${i+1}. [${m.media_type}] "${(m.caption||"sin caption").substring(0,120)}" — ❤️${m.likes} 💬${m.comments} ↗️${m.shares} compartidos, 👁${m.reach} alcance, ${engRate}% engagement, 🔖${m.saved} guardados`;
     }).join("\n");
     if(metaData.ig.profile)postsContext+=`\n\nPERFIL IG: ${metaData.ig.profile.followers_count} seguidores, ${metaData.ig.profile.media_count} posts, bio: "${metaData.ig.profile.biography||""}"`;
     const ins=metaData.ig.insights||{};
     if(ins.reach)postsContext+=`\nMÉTRICAS ${metaPeriodDays} DÍAS: alcance ${ins.reach}, cuentas interacción ${ins.accounts_engaged||0}, interacciones totales ${ins.total_interactions||0}, visitas perfil ${ins.profile_views||0}`;
   }
   if(metaData.fb&&metaData.fb.posts){
-    postsContext+="\n\nÚLTIMOS POSTS FACEBOOK:\n"+metaData.fb.posts.map((p,i)=>{
-      return`${i+1}. "${p.message||"sin texto"}" — 👍${p.likes} 💬${p.comments} ↗️${p.shares} compartidos`;
+    const topFB=[...metaData.fb.posts].sort((a,b)=>((b.likes||0)+(b.comments||0)+(b.shares||0))-((a.likes||0)+(a.comments||0)+(a.shares||0))).slice(0,6);
+    postsContext+="\n\nPOSTS FACEBOOK MÁS RELEVANTES:\n"+topFB.map((p,i)=>{
+      return`${i+1}. "${(p.message||"sin texto").substring(0,120)}" — 👍${p.likes} 💬${p.comments} ↗️${p.shares} compartidos`;
     }).join("\n");
     if(metaData.fb.page)postsContext+=`\n\nPÁGINA FB: ${metaData.fb.page.followers_count||metaData.fb.page.fan_count} seguidores`;
     const fins=metaData.fb.insights||{};
@@ -1851,19 +1933,23 @@ Generá un INFORME de los últimos ${metaPeriodDays} días con:
 
 8. **META TAGS Y SEO SOCIAL** — Sugerencias de hashtags, keywords, y meta tags para mejorar el descubrimiento.
 
-Sé directo, sin rodeos. Datos y recomendaciones accionables.`+getCorrectionsContext();
+Sé directo y CONCISO: máximo 3-4 líneas por sección. Datos y recomendaciones accionables, sin relleno.`+getCorrectionsContext();
 
   try{
     const api=metaModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
     const mod=metaModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
-    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:3000,messages:[{role:"user",content:prompt}]})});
-    const data=await res.json();
-    const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
-    content.textContent=text;
-    metaChatMsgs=[{role:"user",content:prompt},{role:"assistant",content:text}];
-    document.getElementById("meta-ai-chat").style.display="block";
-    document.getElementById("meta-ai-chat-msgs").innerHTML="";
-  }catch(e){content.textContent="Error al conectar con la IA.";}
+    // max_tokens acotado: con 3000 la función de Netlify rozaba el timeout (~26s)
+    const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:1800,messages:[{role:"user",content:prompt}]})});
+    const raw=await res.text();let data;try{data=JSON.parse(raw);}catch(pe){data=null;}
+    if(!data||data.error){content.textContent="La IA tardó demasiado o devolvió un error"+(data&&data.error?" ("+String(data.error).substring(0,80)+")":"")+". Probá de nuevo — suele funcionar al segundo intento.";}
+    else{
+      const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
+      content.textContent=text;
+      metaChatMsgs=[{role:"user",content:prompt},{role:"assistant",content:text}];
+      document.getElementById("meta-ai-chat").style.display="block";
+      document.getElementById("meta-ai-chat-msgs").innerHTML="";
+    }
+  }catch(e){content.textContent="Error de conexión con la IA. Probá de nuevo — suele funcionar al segundo intento.";}
   btn.innerHTML=`Analizar posts y sugerir mejoras <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;
 }
 
