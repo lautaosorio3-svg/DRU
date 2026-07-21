@@ -229,7 +229,7 @@
         <div class="hero-row">
           <div class="hero-num">№ 02 · Producción asistida</div>
           <div class="hero-rule"></div>
-          <div class="hero-num">Claude Haiku 4.5</div>
+          <div class="hero-num">Claude Sonnet 5</div>
         </div>
         <h1 class="hero-title">Generador <span class="accent">de pieza</span></h1>
         <div class="hero-sub">Elegí una efeméride del archivo y un formato. La IA redacta respetando el código editorial DRU.</div>
@@ -384,7 +384,7 @@
       <!-- Paso 2 -->
       <div class="section">
         <div class="section-tag-row"><span class="tag tag--sky">Paso 2 · IA</span></div>
-        <div class="section-head"><h2 class="section-title">Buscá el ángulo entrerriano</h2><div class="section-meta">Claude Haiku</div></div>
+        <div class="section-head"><h2 class="section-title">Buscá el ángulo entrerriano</h2><div class="section-meta">Claude Sonnet</div></div>
         <div class="card">
           <p style="font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink-3);margin:0 0 1rem">Pegá un tema trending y la IA busca si tiene conexión con Entre Ríos.</p>
           <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
@@ -1188,7 +1188,7 @@ async function generateContent(){
   };
   try{
     const apiUrl=selModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const model=selModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const model=selModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(apiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model,max_tokens:2000,messages:[{role:"user",content:prompts[selFmtStr]+getCorrectionsContext()}]})});
     const data=await res.json();
     if(data.error){content.textContent="Error API: "+JSON.stringify(data.error);return;}
@@ -1212,7 +1212,7 @@ async function sendChatCorrection(){
   msgs.scrollTop=msgs.scrollHeight;
   genChatHistory.push({role:"user",content:msg});
   const apiUrl=selModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-  const model=selModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+  const model=selModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
   const systemMsg={role:"user",content:"Sos redactor de Diario Río Uruguay. Aplicá los cambios y devolvé la nota completa corregida."};
   try{
     const res=await fetch(apiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model,max_tokens:2000,messages:[systemMsg,...genChatHistory]})});
@@ -1274,7 +1274,7 @@ async function searchAngle(){
   ];
   for(let i=0;i<intentos.length;i++){
     const int=intentos[i];
-    const body={model:"claude-haiku-4-5-20251001",max_tokens:2000,messages:[{role:"user",content:int.prompt}]};
+    const body={model:"claude-sonnet-5",max_tokens:2000,messages:[{role:"user",content:int.prompt}]};
     if(int.tools)body.tools=int.tools;
     const esUltimo=i===intentos.length-1;
     try{
@@ -1374,7 +1374,7 @@ async function runAISEO(){
   const prompt=`Sos editor SEO de Diario Río Uruguay. Analizá esta nota.\n\nTITULAR: ${title}\nCUERPO (${wc} palabras):\n${body.substring(0,3000)}\n\nEvaluá: titular (máx 65 chars, keyword geo), entradilla (5W), estructura (subtítulos), citas. Respondé con: ERRORES, MEJORAS, CORRECTO, SCORE SEO, META TITLE SUGERIDO, META DESCRIPTION, SLUG, TITULARES ALTERNATIVOS, KEYWORDS, SUBTÍTULOS, COPETE.`;
   try{
     const tpApi=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const tpMod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const tpMod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(tpApi,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:tpMod,max_tokens:1200,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");content.textContent=text;
@@ -1394,7 +1394,7 @@ async function sendTpChat(){
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
     const api=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:1200,messages:tpChatMsgs})});
     const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     tpChatMsgs.push({role:"assistant",content:text});
@@ -1425,7 +1425,7 @@ async function genSocialFromNote(){
   const prompt=(fmtPrompts[tpFmtStr]||fmtPrompts.carrusel)+getCorrectionsContext();
   try{
     const api=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");content.textContent=text;
@@ -1445,7 +1445,7 @@ async function sendTpSocialChat(){
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
     const api=tpModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=tpModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:tpSocialChatMsgs})});
     const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     tpSocialChatMsgs.push({role:"assistant",content:text});
@@ -1500,7 +1500,7 @@ async function processTranscription(){
   const prompt=`Sos redactor de Diario Río Uruguay. Procesás transcripción de ${tipo} (sección ${seccion})${persona?" con "+persona:""}.\n\nTRANSCRIPCIÓN:\n${text.substring(0,4000)}\n\nCondiciones: mín 600 palabras. TÍTULO (máx 65 chars, keyword geo), COPETE, CUERPO. Citas textuales, atribución en pasado. Subtítulo cada 3 párrafos. NUNCA inventar.\n\nSEO: META TITLE, META DESCRIPTION, SLUG, KEYWORDS.\n\n---REDES---\n\nCOPY REDES: FACEBOOK + INSTAGRAM + THREADS.`+getCorrectionsContext();
   try{
     const dsgApi=dsgModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const dsgMod=dsgModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const dsgMod=dsgModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(dsgApi,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:dsgMod,max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const raw=await res.text();let data;try{data=JSON.parse(raw);}catch(e){document.getElementById("dsg-nota").textContent="Error. Intentá de nuevo.";btn.innerHTML=`Generar nota periodística <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;return;}
     if(data.error){document.getElementById("dsg-nota").textContent="Error: "+data.error;btn.innerHTML=`Generar nota periodística <span class="font-mono" style="font-size:11px">→</span>`;btn.disabled=false;return;}
@@ -1530,7 +1530,7 @@ async function sendDsgChat(){
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
     const api=dsgModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=dsgModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=dsgModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:dsgChatMsgs})});
     const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     dsgChatMsgs.push({role:"assistant",content:text});
@@ -1595,7 +1595,7 @@ async function genEnfoque(){
   const prompt=`Sos redactor de Diario Río Uruguay.\n\n${ENF_PROMPTS[selEnf_val]}\n\nCondiciones DRU: TÍTULO máx 65 chars con keyword geo, COPETE máx 240 chars, mín 600 palabras, subtítulos cada 3 párrafos, NUNCA inventar.\n\nTITULAR: ${title}\nTEXTO:\n${body.substring(0,2500)}\n\nGenerá: 1. TÍTULO 2. COPETE 3. NOTA REESCRITA 4. COPY FACEBOOK 5. COPY INSTAGRAM`+getCorrectionsContext();
   try{
     const enfApi=enfModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const enfMod=enfModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const enfMod=enfModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(enfApi,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:enfMod,max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");content.textContent=text;
@@ -1616,7 +1616,7 @@ async function sendEnfChat(){
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
     const api=enfModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=enfModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=enfModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:enfChatMsgs})});
     const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     enfChatMsgs.push({role:"assistant",content:text});
@@ -1644,7 +1644,7 @@ async function genGacetilla(){
   const prompt=`Sos redactor de Diario Río Uruguay (Concordia, Entre Ríos). Te llega una GACETILLA de prensa${fuente?" emitida por: "+fuente:""} (sección ${seccion}). Convertila en NOTA PERIODÍSTICA.\n\nGACETILLA:\n${text.substring(0,4000)}\n\nREGLAS DE CONVERSIÓN (manual de estilo DRU):\n- Eliminá el tono promocional/institucional: nada de "orgullosamente", "importante logro", "destacó el compromiso". Hechos, no elogios.\n- ATRIBUÍ la información a la fuente: "informó ${fuente||"la institución"}", "según el comunicado", "detallaron". Atribución en pasado.\n- NUNCA inventar datos ni citas. Las comillas son sagradas: solo citas textuales que estén en la gacetilla. Si no hay citas, no las fabriques.\n- No estires con relleno: si la gacetilla da para 300 palabras, la nota tiene 300 palabras honestas.\n- Keyword geográfica obligatoria en título y primer párrafo: "Concordia", "Entre Ríos" o "Salto Grande" (la que corresponda).\n- Tono formal-periodístico, sin sensacionalismo.\n\nESTRUCTURA:\n1. TÍTULO — máx 65 caracteres, keyword geográfica al inicio, informativo (qué pasó), sin clickbait.\n2. COPETE — máx 240 caracteres, responde las 5W (qué, quién, cuándo, dónde, por qué).\n3. CUERPO — pirámide invertida (lo más importante primero), subtítulo H2 cada ~3 párrafos, citas textuales entre comillas con atribución.\n\nANÁLISIS SEO (al final):\n- META TITLE: keyword geo al inicio, máx 60 caracteres.\n- META DESCRIPTION: máx 155 caracteres.\n- SLUG: url-amigable-con-guiones.\n- KEYWORDS: 4-6 términos de búsqueda locales.\n- SUGERENCIA: 1 línea sobre qué le falta a la nota para posicionar mejor (foto, dato, testimonio a conseguir).`+getCorrectionsContext();
   try{
     const api=gctModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=gctModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=gctModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:[{role:"user",content:prompt}]})});
     const raw=await res.text();let data;try{data=JSON.parse(raw);}catch(pe){data=null;}
     if(!data||data.error){content.textContent="Error"+(data&&data.error?": "+String(data.error).substring(0,80):" al conectar con la IA")+". Probá de nuevo.";}
@@ -1669,7 +1669,7 @@ async function sendGctChat(){
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
     const api=gctModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=gctModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=gctModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:gctChatMsgs})});
     const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     gctChatMsgs.push({role:"assistant",content:text});
@@ -2050,7 +2050,7 @@ Sé directo y CONCISO: máximo 3-4 líneas por sección. Datos y recomendaciones
 
   try{
     const api=metaModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=metaModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=metaModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     // max_tokens acotado: con 3000 la función de Netlify rozaba el timeout (~26s)
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:1800,messages:[{role:"user",content:prompt}]})});
     const raw=await res.text();let data;try{data=JSON.parse(raw);}catch(pe){data=null;}
@@ -2076,7 +2076,7 @@ async function sendMetaChat(){
   msgsDiv.scrollTop=msgsDiv.scrollHeight;
   try{
     const api=metaModelStr==="gpt"?"/.netlify/functions/openai":"/.netlify/functions/ai";
-    const mod=metaModelStr==="gpt"?"gpt-4o-mini":"claude-haiku-4-5-20251001";
+    const mod=metaModelStr==="gpt"?"gpt-4o-mini":"claude-sonnet-5";
     const res=await fetch(api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:mod,max_tokens:2000,messages:metaChatMsgs})});
     const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");
     metaChatMsgs.push({role:"assistant",content:text});
@@ -2417,7 +2417,7 @@ async function analizarTendencias(){
   const titulares=trendsItems.slice(0,80).map(i=>`[${i.source}·${i.city}] ${i.title}`).join("\n");
   const prompt=`Sos editor de agenda de Diario Río Uruguay (Concordia, Entre Ríos). Estos son los titulares de las últimas 48hs de los medios de la región:\n\n${titulares}\n\nDetectá y respondé:\n\n1. **TEMAS CALIENTES** — Los 3-5 temas que más se repiten o crecen. Para cada uno: qué medios lo cubren y qué falta cubrir.\n\n2. **PERSONALIDADES EN AGENDA** — Nombres propios que aparecen en varios titulares.\n\n3. **OPORTUNIDADES DRU** — 3 temas que los medios de Concordia todavía NO cubrieron bien y DRU puede tomar. Para cada uno sugerí: enfoque Shishkin recomendado (Update me / Educate me / Help me / etc.), título SEO (keyword geográfica al inicio, máx 60 chars) y por qué conviene.\n\n4. **AGENDA PRÓXIMOS DÍAS** — Eventos o fechas mencionadas que generan cobertura anticipable.\n\nCriterios DRU: anti-clickbait, keyword geográfica, calidad editorial sobre métricas.`+getCorrectionsContext();
   try{
-    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2500,messages:[{role:"user",content:prompt}]})});
+    const res=await fetch("/.netlify/functions/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-5",max_tokens:2500,messages:[{role:"user",content:prompt}]})});
     const data=await res.json();
     if(data.error){content.textContent="Error: "+data.error;}
     else{content.textContent=(data.content||[]).map(b=>b.type==="text"?b.text:"").join("");}
