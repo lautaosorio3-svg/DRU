@@ -18,9 +18,9 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body);
     const requestBody = {
       model: body.model || "claude-sonnet-5",
-      // Techo de tokens: Sonnet es lento y Netlify corta la function a ~26s.
-      // Con <=1500 tokens la generacion termina en ~16-20s, dentro del limite.
-      max_tokens: Math.min(body.max_tokens || 1000, 1500),
+      // Techo de tokens: Sonnet genera a ~63 tok/s y Netlify corta la function
+      // a ~26s. Con <=1200 tokens la generacion termina en ~16-19s, con margen.
+      max_tokens: Math.min(body.max_tokens || 1000, 1200),
       // Sonnet 5 activa "extended thinking" por defecto, lo que suma latencia
       // y nos empuja sobre el timeout. Lo desactivamos para respuestas rapidas.
       thinking: { type: "disabled" },
