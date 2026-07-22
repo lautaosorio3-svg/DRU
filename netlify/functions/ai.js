@@ -17,9 +17,13 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body);
     const requestBody = {
-      // Use the model the frontend requests, or default to haiku (fastest)
       model: body.model || "claude-sonnet-5",
-      max_tokens: body.max_tokens || 1000,
+      // Techo de tokens: Sonnet es lento y Netlify corta la function a ~26s.
+      // Con <=1500 tokens la generacion termina en ~16-20s, dentro del limite.
+      max_tokens: Math.min(body.max_tokens || 1000, 1500),
+      // Sonnet 5 activa "extended thinking" por defecto, lo que suma latencia
+      // y nos empuja sobre el timeout. Lo desactivamos para respuestas rapidas.
+      thinking: { type: "disabled" },
       messages: body.messages || []
     };
     if (body.tools && body.tools.length > 0) {
