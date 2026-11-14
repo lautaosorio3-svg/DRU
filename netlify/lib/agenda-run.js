@@ -85,7 +85,7 @@ async function clasificar(titulares, temas) {
   const data = await r.json();
   if (!r.ok) throw new Error(`Anthropic ${r.status}: ${JSON.stringify(data.error || data).slice(0, 200)}`);
   const uso = (data.content || []).find(b => b.type === "tool_use");
-  return core.parseClassification(uso && uso.input, titulares.length, temas.map(t => t.id));
+  return core.parseClassification(uso && uso.input, titulares.length, temas);
 }
 
 async function aplicarClasificacion(req, pendientes, { asignaciones, nuevos }) {

@@ -78,7 +78,7 @@ ${nuevos}
 
 Reglas:
 - Cada titular nuevo (T0, T1…) va en exactamente un grupo. Leé el texto de cada titular antes de ubicarlo; no lo ubiques por cercanía en la lista.
-- Si el hecho ya es un tema activo, usá su número como tema_id (#123 → 123). No crees un tema nuevo que repita uno activo.
+- Si el hecho ya es un tema activo, usá su número como tema_id (#123 → 123) y copiá su título EXACTO en "titulo". No crees un tema nuevo que repita uno activo.
 - Si no, creá un grupo con tema_id null. Varios titulares nuevos del mismo hecho van en el mismo grupo nuevo.
 - Título de tema nuevo: neutro y descriptivo, máx 80 caracteres, sin datos que no estén en los titulares.
 - Categoría "rutina": información de servicio repetitiva (pronóstico diario, loterías, cronogramas de pago, farmacias de turno).
@@ -86,20 +86,49 @@ Reglas:
 Respondé usando la herramienta agrupar_titulares.`;
 }
 
-function parseClassification(input, n, activeIds) {
-  if (!input || !Array.isArray(input.grupos)) throw new Error("Respuesta de clasificación sin grupos");
-  const ids = new Set(activeIds.map(Number));
+// Coincidencia de palabras (>2 letras, sin tildes) sobre el título más corto: 0..1.
+function palabras(s) {
+  return new Set((s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9ñ]+/g, " ").split(" ").filter(w => w.length > 2));
+}
+function similitud(a, b) {
+  const A = palabras(a), B = palabras(b);
+  if (!A.size || !B.size) return 0;
+  let comunes = 0;
+  for (const w of A) if (B.has(w)) comunes++;
+  return comunes / Math.min(A.size, B.size);
+}
+
+// El modelo a veces pone el número de tema equivocado, pero el título que repite
+// refleja su intención. Se verifica el id contra el título; si no coincide, se busca
+// el tema por título; si tampoco aparece, es un tema nuevo.
+function resolverTema(g, temas) {
+  const elegido = temas.find(t => t.id === Number(g.tema_id));
+  if (elegido && similitud(g.titulo, elegido.titulo) >= 0.6) return elegido.id;
+  let mejor = null, sim = 0;
+  for (const t of temas) {
+    const s = similitud(g.titulo, t.titulo);
+    if (s > sim) { sim = s; mejor = t; }
+  }
+  return mejor && sim >= 0.8 ? mejor.id : null;
+}
+
+function parseClassification(input, n, temas) {
+  let grupos = input && input.grupos;
+  if (typeof grupos === "string") { try { grupos = JSON.parse(grupos); } catch { grupos = null; } }
+  if (!Array.isArray(grupos)) throw new Error("Respuesta de clasificación sin grupos");
   const usados = new Set();
   const asignaciones = [], nuevos = [];
-  for (const g of input.grupos) {
+  for (const g of grupos) {
     const ts = (g && Array.isArray(g.titulares) ? g.titulares : [])
       .map(x => /^T(\d+)$/.exec(String(x)))
       .map(m => (m ? Number(m[1]) : -1))
       .filter(t => t >= 0 && t < n && !usados.has(t));
     if (!ts.length) continue;
     ts.forEach(t => usados.add(t));
-    if (ids.has(Number(g.tema_id))) {
-      ts.forEach(t => asignaciones.push({ t, temaId: Number(g.tema_id) }));
+    const temaId = resolverTema(g, temas);
+    if (temaId !== null) {
+      ts.forEach(t => asignaciones.push({ t, temaId }));
     } else {
       const ref = "N" + (nuevos.length + 1);
       const categoria = CATEGORIAS.includes(g.categoria) ? g.categoria : "sociedad";

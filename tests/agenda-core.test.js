@@ -39,19 +39,38 @@ test("CLASSIFY_TOOL restringe categorías e ids de titulares", () => {
   assert.equal(g.titulares.items.pattern, "^T\\d+$");
 });
 
+const ACTIVOS = [{ id: 7, titulo: "Temporal en Entre Ríos" }, { id: 8, titulo: "Juegos Evita de Adultos Mayores en Concordia" }];
+
 test("parseClassification convierte grupos en asignaciones y temas nuevos", () => {
   const input = { grupos: [
-    { tema_id: 7, titulo: "Temporal", categoria: "clima y servicios", titulares: ["T0", "T4"] },
+    { tema_id: 7, titulo: "Temporal en Entre Ríos", categoria: "clima y servicios", titulares: ["T0", "T4"] },
     { tema_id: null, titulo: "Paro docente", categoria: "educación", titulares: ["T1", "T0", "T9"] },
     { tema_id: 99, titulo: "Id inexistente → nuevo", categoria: "inventada", titulares: ["T2"] },
     { tema_id: null, titulo: "Vacío", categoria: "cultura", titulares: ["T8"] }
   ] };
-  const r = core.parseClassification(input, 5, [7]);
+  const r = core.parseClassification(input, 5, ACTIVOS);
   assert.deepEqual(r.asignaciones, [{ t: 0, temaId: 7 }, { t: 4, temaId: 7 }, { t: 1, ref: "N1" }, { t: 2, ref: "N2" }]);
   assert.deepEqual(r.nuevos, [
     { ref: "N1", titulo: "Paro docente", categoria: "educación" },
     { ref: "N2", titulo: "Id inexistente → nuevo", categoria: "sociedad" }
   ]);
+});
+
+test("parseClassification corrige tema_id que no coincide con el título", () => {
+  const input = { grupos: [
+    { tema_id: 7, titulo: "Juegos Evita de Adultos Mayores en Concordia", categoria: "deportes", titulares: ["T0"] },
+    { tema_id: 7, titulo: "Wanda Nara y la China Suárez", categoria: "sociedad", titulares: ["T1"] },
+    { tema_id: null, titulo: "Temporal en Entre Ríos", categoria: "clima y servicios", titulares: ["T2"] },
+    { tema_id: 8, titulo: "Juegos Evita Adultos Mayores Concordia 2027", categoria: "deportes", titulares: ["T3"] }
+  ] };
+  const r = core.parseClassification(input, 4, ACTIVOS);
+  assert.deepEqual(r.asignaciones, [{ t: 0, temaId: 8 }, { t: 1, ref: "N1" }, { t: 2, temaId: 7 }, { t: 3, temaId: 8 }]);
+  assert.deepEqual(r.nuevos, [{ ref: "N1", titulo: "Wanda Nara y la China Suárez", categoria: "sociedad" }]);
+});
+
+test("parseClassification acepta grupos serializados como texto", () => {
+  const input = { grupos: JSON.stringify([{ tema_id: null, titulo: "Paro", categoria: "educación", titulares: ["T0"] }]) };
+  assert.deepEqual(core.parseClassification(input, 1, []).asignaciones, [{ t: 0, ref: "N1" }]);
 });
 
 test("parseClassification tira error si no hay grupos", () => {
