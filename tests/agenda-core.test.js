@@ -26,22 +26,36 @@ test("selectNew filtra viejos, sin fecha, existentes y duplicados", () => {
   assert.deepEqual(out.map(i => i.link), ["a"]);
 });
 
-test("buildClassifyPrompt incluye temas activos, titulares y categorías", () => {
+test("buildClassifyPrompt usa ids T# para titulares y #id para temas", () => {
   const p = core.buildClassifyPrompt([{ titulo: "Paro docente", fuente: "UNO" }], [{ id: 7, titulo: "Temporal", categoria: "clima y servicios" }]);
-  assert.match(p, /\[7\] Temporal \(clima y servicios\)/);
-  assert.match(p, /0\. Paro docente — UNO/);
+  assert.match(p, /#7 \| Temporal \(clima y servicios\)/);
+  assert.match(p, /T0 \| Paro docente — UNO/);
   assert.match(p, /rutina/);
 });
 
-test("parseClassification valida ids, refs y categorías", () => {
-  const text = 'Acá va:\n```json\n{"asignaciones":[{"t":0,"tema":7},{"t":1,"tema":"N1"},{"t":2,"tema":"99"},{"t":5,"tema":7},{"t":3,"tema":"N9"},{"t":4,"tema":"7"}],"nuevos":[{"ref":"N1","titulo":"Paro docente","categoria":"educación"},{"ref":"N2","titulo":"X","categoria":"inventada"}]}\n```';
-  const r = core.parseClassification(text, 5, [7]);
-  assert.deepEqual(r.asignaciones, [{ t: 0, temaId: 7 }, { t: 1, ref: "N1" }, { t: 4, temaId: 7 }]);
-  assert.deepEqual(r.nuevos, [{ ref: "N1", titulo: "Paro docente", categoria: "educación" }, { ref: "N2", titulo: "X", categoria: "sociedad" }]);
+test("CLASSIFY_TOOL restringe categorías e ids de titulares", () => {
+  const g = core.CLASSIFY_TOOL.input_schema.properties.grupos.items.properties;
+  assert.deepEqual(g.categoria.enum, core.CATEGORIAS);
+  assert.equal(g.titulares.items.pattern, "^T\\d+$");
 });
 
-test("parseClassification tira error si no hay JSON", () => {
-  assert.throws(() => core.parseClassification("no sé", 1, []), /JSON/);
+test("parseClassification convierte grupos en asignaciones y temas nuevos", () => {
+  const input = { grupos: [
+    { tema_id: 7, titulo: "Temporal", categoria: "clima y servicios", titulares: ["T0", "T4"] },
+    { tema_id: null, titulo: "Paro docente", categoria: "educación", titulares: ["T1", "T0", "T9"] },
+    { tema_id: 99, titulo: "Id inexistente → nuevo", categoria: "inventada", titulares: ["T2"] },
+    { tema_id: null, titulo: "Vacío", categoria: "cultura", titulares: ["T8"] }
+  ] };
+  const r = core.parseClassification(input, 5, [7]);
+  assert.deepEqual(r.asignaciones, [{ t: 0, temaId: 7 }, { t: 4, temaId: 7 }, { t: 1, ref: "N1" }, { t: 2, ref: "N2" }]);
+  assert.deepEqual(r.nuevos, [
+    { ref: "N1", titulo: "Paro docente", categoria: "educación" },
+    { ref: "N2", titulo: "Id inexistente → nuevo", categoria: "sociedad" }
+  ]);
+});
+
+test("parseClassification tira error si no hay grupos", () => {
+  assert.throws(() => core.parseClassification({}, 1, []), /grupos/);
 });
 
 test("computeAgenda cuenta medios, cobertura DRU y caliente", () => {

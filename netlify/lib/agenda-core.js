@@ -38,10 +38,37 @@ function selectNew(items, existingLinks, now, horas) {
   return out;
 }
 
+// Tool use forzado: la API garantiza JSON válido con este schema.
+// La salida es por GRUPOS (tema → lista de titulares): agrupar así es más natural
+// para el modelo y evita los corrimientos de índice de "titular i → tema".
+const CLASSIFY_TOOL = {
+  name: "agrupar_titulares",
+  description: "Registra cómo se agrupan los titulares nuevos en temas de agenda.",
+  input_schema: {
+    type: "object",
+    properties: {
+      grupos: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            tema_id: { type: ["integer", "null"], description: "Número del tema activo (#123 → 123) o null si es un tema nuevo." },
+            titulo: { type: "string", description: "Para temas nuevos: título neutro y descriptivo del hecho, máx 80 caracteres. Para temas activos: repetí el título." },
+            categoria: { type: "string", enum: CATEGORIAS },
+            titulares: { type: "array", items: { type: "string", pattern: "^T\\d+$" }, description: "Ids de los titulares nuevos de este tema (T0, T5…)." }
+          },
+          required: ["tema_id", "titulo", "categoria", "titulares"]
+        }
+      }
+    },
+    required: ["grupos"]
+  }
+};
+
 function buildClassifyPrompt(titulares, temas) {
-  const activos = temas.length ? temas.map(x => `[${x.id}] ${x.titulo} (${x.categoria})`).join("\n") : "(ninguno)";
-  const nuevos = titulares.map((x, i) => `${i}. ${x.titulo} — ${x.fuente}`).join("\n");
-  return `Sos editor de agenda de un diario de Entre Ríos. Agrupá titulares de medios regionales en TEMAS: un tema es un mismo hecho o asunto concreto de agenda, no una categoría general. Dos titulares van al mismo tema solo si hablan del mismo hecho.
+  const activos = temas.length ? temas.map(x => `#${x.id} | ${x.titulo} (${x.categoria})`).join("\n") : "(ninguno)";
+  const nuevos = titulares.map((x, i) => `T${i} | ${x.titulo} — ${x.fuente}`).join("\n");
+  return `Sos editor de agenda de un diario de Entre Ríos. Agrupá los titulares nuevos de medios regionales en TEMAS: un tema es un mismo hecho o asunto concreto de agenda, no una categoría general. Dos titulares van al mismo tema solo si hablan del mismo hecho; ante la duda, temas separados.
 
 TEMAS ACTIVOS (últimas 24 h):
 ${activos}
@@ -49,35 +76,38 @@ ${activos}
 TITULARES NUEVOS:
 ${nuevos}
 
-Para cada titular nuevo: si corresponde a un tema activo, usá su id numérico. Si no, creá un tema nuevo con una referencia "N1", "N2", etc. Varios titulares nuevos pueden compartir un tema nuevo.
-Para cada tema nuevo: título neutro y descriptivo del hecho (máx 80 caracteres, sin inventar datos que no estén en los titulares) y una categoría de esta lista exacta: ${CATEGORIAS.join(", ")}.
-"rutina" es para información de servicio repetitiva: pronóstico diario, loterías, cronogramas de pago, farmacias de turno.
+Reglas:
+- Cada titular nuevo (T0, T1…) va en exactamente un grupo. Leé el texto de cada titular antes de ubicarlo; no lo ubiques por cercanía en la lista.
+- Si el hecho ya es un tema activo, usá su número como tema_id (#123 → 123). No crees un tema nuevo que repita uno activo.
+- Si no, creá un grupo con tema_id null. Varios titulares nuevos del mismo hecho van en el mismo grupo nuevo.
+- Título de tema nuevo: neutro y descriptivo, máx 80 caracteres, sin datos que no estén en los titulares.
+- Categoría "rutina": información de servicio repetitiva (pronóstico diario, loterías, cronogramas de pago, farmacias de turno).
 
-Respondé SOLO con JSON válido, sin texto extra:
-{"asignaciones":[{"t":0,"tema":123},{"t":1,"tema":"N1"}],"nuevos":[{"ref":"N1","titulo":"...","categoria":"..."}]}`;
+Respondé usando la herramienta agrupar_titulares.`;
 }
 
-function parseClassification(text, n, activeIds) {
-  const m = String(text || "").match(/\{[\s\S]*\}/);
-  if (!m) throw new Error("Respuesta de clasificación sin JSON");
-  const data = JSON.parse(m[0]);
+function parseClassification(input, n, activeIds) {
+  if (!input || !Array.isArray(input.grupos)) throw new Error("Respuesta de clasificación sin grupos");
   const ids = new Set(activeIds.map(Number));
-  const nuevos = new Map();
-  for (const x of data.nuevos || []) {
-    if (!x || typeof x.ref !== "string" || !x.titulo) continue;
-    const categoria = CATEGORIAS.includes(x.categoria) ? x.categoria : "sociedad";
-    nuevos.set(x.ref, { ref: x.ref, titulo: String(x.titulo).slice(0, 120), categoria });
+  const usados = new Set();
+  const asignaciones = [], nuevos = [];
+  for (const g of input.grupos) {
+    const ts = (g && Array.isArray(g.titulares) ? g.titulares : [])
+      .map(x => /^T(\d+)$/.exec(String(x)))
+      .map(m => (m ? Number(m[1]) : -1))
+      .filter(t => t >= 0 && t < n && !usados.has(t));
+    if (!ts.length) continue;
+    ts.forEach(t => usados.add(t));
+    if (ids.has(Number(g.tema_id))) {
+      ts.forEach(t => asignaciones.push({ t, temaId: Number(g.tema_id) }));
+    } else {
+      const ref = "N" + (nuevos.length + 1);
+      const categoria = CATEGORIAS.includes(g.categoria) ? g.categoria : "sociedad";
+      nuevos.push({ ref, titulo: String(g.titulo || "Tema sin título").slice(0, 120), categoria });
+      ts.forEach(t => asignaciones.push({ t, ref }));
+    }
   }
-  const asignaciones = [];
-  for (const a of data.asignaciones || []) {
-    const t = Number(a && a.t);
-    if (!Number.isInteger(t) || t < 0 || t >= n) continue;
-    const tema = a.tema;
-    const asNum = typeof tema === "number" ? tema : (typeof tema === "string" && /^\d+$/.test(tema) ? Number(tema) : null);
-    if (asNum !== null && ids.has(asNum)) asignaciones.push({ t, temaId: asNum });
-    else if (typeof tema === "string" && nuevos.has(tema)) asignaciones.push({ t, ref: tema });
-  }
-  return { asignaciones, nuevos: [...nuevos.values()] };
+  return { asignaciones, nuevos };
 }
 
 function computeAgenda(titulares, temas, now, horas) {
@@ -118,4 +148,4 @@ function temasParaAviso(agenda) {
   return agenda.filter(t => t.caliente && !t.cubierto_dru && !t.aviso_enviado).map(t => t.id);
 }
 
-module.exports = { CATEGORIAS, UMBRAL_MEDIOS, VENTANA_CALIENTE_H, parseSitemapNews, selectNew, buildClassifyPrompt, parseClassification, computeAgenda, temasParaAviso };
+module.exports = { CATEGORIAS, UMBRAL_MEDIOS, VENTANA_CALIENTE_H, CLASSIFY_TOOL, parseSitemapNews, selectNew, buildClassifyPrompt, parseClassification, computeAgenda, temasParaAviso };

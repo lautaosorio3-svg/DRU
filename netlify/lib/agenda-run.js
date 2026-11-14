@@ -4,7 +4,7 @@ const core = require("./agenda-core");
 const { FEEDS, parseFeed } = require("../functions/rss-trends");
 
 const MODELO = "claude-haiku-5-5";
-const LOTE = 60;
+const LOTE = 40;
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
 
 // Verificados el 13/11/2026.
@@ -77,13 +77,15 @@ async function clasificar(titulares, temas) {
       model: MODELO,
       max_tokens: 4000,
       thinking: { type: "disabled" },
+      tools: [core.CLASSIFY_TOOL],
+      tool_choice: { type: "tool", name: core.CLASSIFY_TOOL.name },
       messages: [{ role: "user", content: core.buildClassifyPrompt(titulares, temas) }]
     })
   });
   const data = await r.json();
   if (!r.ok) throw new Error(`Anthropic ${r.status}: ${JSON.stringify(data.error || data).slice(0, 200)}`);
-  const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
-  return core.parseClassification(text, titulares.length, temas.map(t => t.id));
+  const uso = (data.content || []).find(b => b.type === "tool_use");
+  return core.parseClassification(uso && uso.input, titulares.length, temas.map(t => t.id));
 }
 
 async function aplicarClasificacion(req, pendientes, { asignaciones, nuevos }) {
