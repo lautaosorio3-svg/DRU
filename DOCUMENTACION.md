@@ -26,6 +26,8 @@ análisis SEO, transcripción de audio, métricas de redes y monitoreo de agenda
 │  · sugerencias.js → Netlify Blobs + Resend     │
 │  · rss-trends.js  → lector de 9 feeds RSS      │
 │  · rss-alertas.js → programada @hourly         │
+│  · agenda-recolector.js → programada c/15 min  │
+│  · agenda.js      → leer agenda / forzar corrida│
 │  · db.js          → proxy Supabase REST        │
 └──────┬──────────┬──────────┬───────────────────┘
        ▼          ▼          ▼
@@ -55,9 +57,10 @@ localStorage.
 | 07 | Enfoques | Reescribe una nota según los 8 enfoques del modelo Shishkin (News User Needs) | Claude/GPT |
 | 08 | Gacetilla a nota | Convierte comunicados de prensa en notas periodísticas (quita tono promocional, atribuye la fuente, respeta citas) con bloque SEO | Claude/GPT |
 | 09 | Estadísticas | Dashboard Meta (IG+FB) con pestañas General/Instagram/Facebook, período 7/28/90 días, gráficos diarios, vista previa de posts y análisis IA | Claude/GPT |
-| 10 | Alertas | Keywords vigiladas compartidas + alertas automáticas cada hora desde 9 medios regionales | — |
-| 11 | Borradores | Borradores guardados desde cualquier sección; compartidos vía Supabase | — |
-| 12 | Sugerencias | Feedback del equipo → Supabase + email vía Resend | — |
+| 10 | Agenda ahora | Temas en agenda de 17 medios + DRU cada 15 min (RSS + sitemaps de Google News): medios por tema, 🔥 si 3+ medios en 2 h, si DRU lo cubrió. Lógica en `netlify/lib/agenda-*.js`, tests con `npm test` | Haiku (agrupado) |
+| 11 | Alertas | Keywords vigiladas compartidas + alertas automáticas cada hora desde 9 medios regionales | — |
+| 12 | Borradores | Borradores guardados desde cualquier sección; compartidos vía Supabase | — |
+| 13 | Sugerencias | Feedback del equipo → Supabase + email vía Resend | — |
 
 ## 3. Fuentes RSS monitoreadas
 

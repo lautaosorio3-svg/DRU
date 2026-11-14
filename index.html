@@ -110,8 +110,12 @@
         <span class="sb-item-num">09</span><span class="sb-item-name">Estadísticas</span>
         <span class="sb-item-badge">META</span><span class="sb-item-arrow">→</span>
       </div>
+      <div class="sb-item" onclick="showPage('agenda',this)">
+        <span class="sb-item-num">10</span><span class="sb-item-name">Agenda ahora</span>
+        <span class="sb-item-badge is-count" id="agenda-cnt">0</span><span class="sb-item-arrow">→</span>
+      </div>
       <div class="sb-item" onclick="showPage('alertas',this)">
-        <span class="sb-item-num">10</span><span class="sb-item-name">Alertas</span>
+        <span class="sb-item-num">11</span><span class="sb-item-name">Alertas</span>
         <span class="sb-item-badge is-count" id="alertas-cnt">0</span><span class="sb-item-arrow">→</span>
       </div>
     </div>
@@ -119,11 +123,11 @@
     <div class="sb-section">
       <div class="sb-section-label"><span>/ Workspace</span><span class="sb-section-num">04</span></div>
       <div class="sb-item" onclick="showPage('borradores',this)">
-        <span class="sb-item-num">11</span><span class="sb-item-name">Borradores</span>
+        <span class="sb-item-num">12</span><span class="sb-item-name">Borradores</span>
         <span class="sb-item-badge is-count" id="drafts-cnt">0</span><span class="sb-item-arrow">→</span>
       </div>
       <div class="sb-item" onclick="showPage('sugerencias',this)">
-        <span class="sb-item-num">12</span><span class="sb-item-name">Sugerencias</span>
+        <span class="sb-item-num">13</span><span class="sb-item-name">Sugerencias</span>
         <span class="sb-item-arrow">→</span>
       </div>
     </div>
@@ -889,6 +893,40 @@
       </div>
     </div>
 
+    <!-- ═══ AGENDA AHORA ═══ -->
+    <div class="page" id="page-agenda">
+      <div class="hero">
+        <div class="hero-row">
+          <div class="hero-num">№ 10 · Agenda en tiempo real</div>
+          <div class="hero-rule"></div>
+          <div class="hero-num">17 medios + DRU · cada 15 min</div>
+        </div>
+        <h1 class="hero-title">Agenda <span class="accent">ahora</span></h1>
+        <div class="hero-sub">Qué temas están levantando los medios de Entre Ríos en este momento, cuántos los cubren y si DRU ya los publicó. 🔥 = 3 o más medios en las últimas 2 horas.</div>
+        <div class="hero-gradient"></div>
+      </div>
+
+      <div class="section" id="agenda-not-configured" style="display:none">
+        <div class="step">
+          <div class="step-head"><span class="step-num step-num--peach">!</span><div class="step-title">Falta configurar la base de datos</div></div>
+          <div class="step-help" style="line-height:1.8" id="agenda-not-configured-msg"></div>
+        </div>
+      </div>
+
+      <div class="section" id="agenda-dashboard" style="display:none">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+          <div class="chips" style="margin:0">
+            <button class="chip active" data-h="2" onclick="setAgendaVentana(2)">Últimas 2 h</button>
+            <button class="chip" data-h="24" onclick="setAgendaVentana(24)">Últimas 24 h</button>
+          </div>
+          <button class="btn btn--peach btn--sm" id="agenda-run-btn" onclick="actualizarAgendaAhora()" style="margin-left:auto">Actualizar ahora <span class="font-mono" style="font-size:11px">→</span></button>
+        </div>
+        <div class="chips" id="agenda-cats"></div>
+        <div class="font-mono" id="agenda-status" style="font-size:11px;color:var(--ink-4);margin:8px 0 14px"></div>
+        <div id="agenda-list"><div class="empty">Cargando agenda…</div></div>
+      </div>
+    </div>
+
     <!-- ═══ BORRADORES ═══ -->
     <div class="page" id="page-borradores">
       <div class="hero">
@@ -1544,7 +1582,7 @@ async function sendDsgChat(){
 }
 
 // ══ NAV ══
-const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",gacetilla:"Gacetilla a nota",metastats:"Estadísticas Meta",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
+const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",gacetilla:"Gacetilla a nota",metastats:"Estadísticas Meta",agenda:"Agenda ahora",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
 function showPage(id,navEl){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -1554,6 +1592,7 @@ function showPage(id,navEl){
   if(id==="seo"){const now=new Date();document.getElementById("seo-date-label").textContent=now.getDate()+" de "+MESF[now.getMonth()+1]+" de "+now.getFullYear();}
   if(id==="metastats")loadMetaStats();
   if(id==="alertas")renderAlertas();
+  if(id==="agenda")renderAgenda();
   if(id==="borradores")renderDrafts();
   if(id==="sugerencias"){if(currentUser)document.getElementById("sug-name").value=currentUser.name;renderSugerencias();}
   if(id==="gen")renderGenList();
@@ -2264,6 +2303,7 @@ async function syncFromDB(){
     }
   }
   updateAlertasBadge();
+  updateAgendaBadge();
 }
 
 // ══ ALERTAS ══
@@ -2360,6 +2400,119 @@ async function checkAlertasNow(){
     }
   }catch(e){status.textContent="Error de conexión.";}
   btn.disabled=false;btn.innerHTML=`Revisar medios ahora <span class="font-mono" style="font-size:11px">→</span>`;
+}
+
+// ══ AGENDA AHORA ══
+// Temas que agrupa el recolector (netlify/lib/agenda-run.js) cada 15 min.
+const AGENDA_CATS=["política","economía","policiales","judiciales","salud","educación","clima y servicios","sociedad","deportes","cultura","rutina"];
+let agendaTemas=[],agendaHoras=2,agendaTimer=null;
+const agendaCatsOff=new Set(["rutina"]);
+async function fetchAgenda(horas){
+  try{const res=await fetch("/.netlify/functions/agenda?horas="+horas);return await res.json();}
+  catch(e){return{configured:true,error:"Error de conexión"};}
+}
+function agendaHace(iso){
+  const min=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/60000));
+  if(min<60)return"hace "+min+" min";
+  const h=Math.floor(min/60);return"hace "+h+" h"+(min%60?" "+(min%60)+" min":"");
+}
+function agendaSinCubrir(){return agendaTemas.filter(t=>t.caliente&&!t.cubierto_dru).length;}
+async function updateAgendaBadge(){
+  const data=await fetchAgenda(2);
+  if(!data.temas)return;
+  document.getElementById("agenda-cnt").textContent=data.temas.filter(t=>t.caliente&&!t.cubierto_dru).length;
+}
+async function renderAgenda(){
+  const dash=document.getElementById("agenda-dashboard"),notCfg=document.getElementById("agenda-not-configured");
+  const status=document.getElementById("agenda-status");
+  const data=await fetchAgenda(agendaHoras);
+  if(data.configured===false||data.faltanTablas){
+    notCfg.style.display="block";dash.style.display="none";
+    document.getElementById("agenda-not-configured-msg").innerHTML=data.faltanTablas
+      ?'Faltan las tablas <code>agenda_temas</code> y <code>agenda_titulares</code>. Corré el SQL de la sección «Agenda ahora» de <code>SUPABASE_SETUP.md</code> en el SQL Editor de Supabase.'
+      :'Agenda ahora necesita la base de datos del equipo (Supabase). Seguí la guía de <code>SUPABASE_SETUP.md</code>.';
+    return;
+  }
+  notCfg.style.display="none";dash.style.display="block";
+  if(!agendaTimer)agendaTimer=setInterval(()=>{if(document.getElementById("page-agenda").classList.contains("active"))renderAgenda();},120000);
+  if(data.error){status.textContent="⚠ "+data.error;return;}
+  agendaTemas=data.temas||[];
+  status.textContent=`Actualizado ${new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})} · ${agendaTemas.length} temas · ${agendaSinCubrir()} caliente${agendaSinCubrir()!==1?"s":""} sin cubrir`;
+  document.getElementById("agenda-cnt").textContent=agendaSinCubrir();
+  renderAgendaCats();renderAgendaList();
+}
+function setAgendaVentana(h){
+  agendaHoras=h;
+  document.querySelectorAll("#agenda-dashboard [data-h]").forEach(b=>b.classList.toggle("active",Number(b.dataset.h)===h));
+  renderAgenda();
+}
+function toggleAgendaCat(i){
+  const c=AGENDA_CATS[i];
+  agendaCatsOff.has(c)?agendaCatsOff.delete(c):agendaCatsOff.add(c);
+  renderAgendaCats();renderAgendaList();
+}
+function renderAgendaCats(){
+  const cnt={};agendaTemas.forEach(t=>{cnt[t.categoria]=(cnt[t.categoria]||0)+1;});
+  document.getElementById("agenda-cats").innerHTML=AGENDA_CATS.map((c,i)=>cnt[c]
+    ?`<button class="chip ${agendaCatsOff.has(c)?"":"active"}" onclick="toggleAgendaCat(${i})">${esc(c)} · ${cnt[c]}</button>`:"").join("");
+}
+function renderAgendaList(){
+  const list=document.getElementById("agenda-list");
+  const temas=agendaTemas.filter(t=>!agendaCatsOff.has(t.categoria));
+  if(!temas.length){
+    list.innerHTML=`<div class="empty">${agendaTemas.length?"No hay temas en las categorías elegidas.":"Todavía no hay temas en esta ventana. El recolector corre cada 15 minutos; podés forzarlo con «Actualizar ahora»."}</div>`;
+    return;
+  }
+  list.innerHTML=temas.map(t=>{
+    const alerta=t.caliente&&!t.cubierto_dru;
+    return`<div class="step" style="margin-bottom:10px;${alerta?"border-left:3px solid var(--peach-deep)":""}">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        ${t.caliente?'<span class="tag tag--peach">🔥 Caliente</span>':""}
+        <span class="tag tag--sky">${esc(t.categoria)}</span>
+        ${t.cubierto_dru?'<span class="tag tag--ghost">DRU ✓ cubierto</span>':'<span class="tag tag--ghost" style="color:var(--peach-deep)">Sin cubrir</span>'}
+        <span class="font-mono" style="font-size:11px;color:var(--ink-4)">${t.medios_ventana} medio${t.medios_ventana!==1?"s":""} en ${agendaHoras} h · ${t.medios_total} en total · primer titular ${agendaHace(t.primer_visto)} (${esc(t.primera_fuente)})</span>
+      </div>
+      <div style="font-weight:600;font-size:15px;line-height:1.4;margin-bottom:8px">${esc(t.titulo)}</div>
+      <details style="margin-bottom:8px">
+        <summary class="font-mono" style="font-size:12px;cursor:pointer">${t.titulares.length} titular${t.titulares.length!==1?"es":""}</summary>
+        <ul style="margin:8px 0 0 18px;font-size:13px;line-height:1.6">${t.titulares.map(h=>`<li><a href="${encodeURI(h.link||"#")}" target="_blank" rel="noreferrer">${esc(h.titulo)}</a> <span class="font-mono" style="font-size:11px;color:var(--ink-4)">${esc(h.fuente)} · ${agendaHace(h.publicado)}</span></li>`).join("")}</ul>
+      </details>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn--ghost btn--sm" onclick="agendaAngulo(${t.id})">Buscar ángulo DRU</button>
+        <button class="btn btn--ghost btn--sm" onclick="agendaBorrador(${t.id})">Guardar en borradores</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+function agendaAngulo(id){
+  const t=agendaTemas.find(x=>x.id===id);if(!t)return;
+  showPage("seo",document.querySelectorAll(".sb-item")[3]);
+  setTimeout(()=>{document.getElementById("seo-topic").value=t.titulo;searchAngle();},150);
+}
+function agendaBorrador(id){
+  const t=agendaTemas.find(x=>x.id===id);if(!t)return;
+  const content=`TEMA: ${t.titulo}\nCategoría: ${t.categoria} · ${t.medios_total} medios · ${t.cubierto_dru?"DRU ya lo cubrió":"DRU todavía no lo cubrió"}\n\nTITULARES:\n`+t.titulares.map(h=>`- ${h.titulo} (${h.fuente}) ${h.link}`).join("\n");
+  const drafts=loadDrafts();
+  const nuevo={id:Date.now(),section:"agenda",label:"Agenda",title:t.titulo.substring(0,80),format:"tema",content,date:new Date().toISOString()};
+  drafts.unshift(nuevo);saveDrafts(drafts);
+  dbPost("insert","borradores",{row:{client_id:nuevo.id,seccion:"agenda",etiqueta:"Agenda",titulo:nuevo.title,formato:"tema",contenido:content,autor:currentUser?.name||""}});
+  showToast("✓ Tema guardado en borradores");
+}
+async function actualizarAgendaAhora(){
+  const btn=document.getElementById("agenda-run-btn"),status=document.getElementById("agenda-status");
+  btn.disabled=true;btn.innerHTML=`Leyendo 18 fuentes<span class="dots"><span></span><span></span><span></span></span>`;
+  try{
+    const res=await fetch("/.netlify/functions/agenda",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"run"})});
+    const r=await res.json();
+    if(r.error)status.textContent="⚠ "+r.error;
+    else{
+      showToast(`✓ ${r.nuevos} titulares nuevos · ${r.clasificados} clasificados`);
+      await renderAgenda();
+      if(r.fallidas&&r.fallidas.length)status.textContent+=` · sin respuesta: ${r.fallidas.length} fuente${r.fallidas.length>1?"s":""}`;
+      if(r.errorIA)status.textContent+=" · ⚠ la IA no pudo clasificar (se reintenta sola)";
+    }
+  }catch(e){status.textContent="⚠ Error de conexión.";}
+  btn.disabled=false;btn.innerHTML=`Actualizar ahora <span class="font-mono" style="font-size:11px">→</span>`;
 }
 
 // ══ TENDENCIAS REGIONALES (SEO del día) ══
