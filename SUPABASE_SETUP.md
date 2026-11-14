@@ -171,6 +171,41 @@ alter table sugerencias enable row level security;
 
 ---
 
+## Agenda ahora — tablas de temas y titulares
+
+Necesarias para la sección **Agenda ahora**. Corré este bloque en
+**SQL Editor → New query → pegar → Run**. Hasta que lo hagas, la sección muestra
+un aviso pidiendo este paso.
+
+```sql
+create table agenda_temas (
+  id bigint primary key generated always as identity,
+  titulo text not null,
+  categoria text not null,
+  primer_visto timestamptz not null,
+  ultimo_visto timestamptz not null,
+  aviso_enviado boolean default false,
+  creado timestamptz default now()
+);
+create table agenda_titulares (
+  id bigint primary key generated always as identity,
+  link text unique not null,
+  titulo text not null,
+  fuente text not null,
+  ciudad text,
+  publicado timestamptz not null,
+  es_dru boolean default false,
+  tema_id bigint references agenda_temas(id) on delete set null,
+  creado timestamptz default now()
+);
+create index on agenda_titulares (publicado);
+create index on agenda_titulares (tema_id);
+alter table agenda_temas enable row level security;
+alter table agenda_titulares enable row level security;
+```
+
+---
+
 ## Preguntas frecuentes
 
 **¿Cuánto aguanta el tier gratuito?**

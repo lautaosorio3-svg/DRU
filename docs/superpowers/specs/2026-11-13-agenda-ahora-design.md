@@ -55,7 +55,8 @@ Categorías fijas: política, economía, policiales, judiciales, salud, educaci�
 - Presupuesto: < 30 s (límite de scheduled functions). Invocable a mano vía HTTP para el botón "Actualizar ahora".
 - Llama a Anthropic directo (no vía `ai.js`), modelo Haiku, sin thinking.
 
-## Lectura — `db.js`, `GET ?action=agenda&horas=2|24`
+## Lectura — `netlify/functions/agenda.js`, `GET ?horas=2|24`
+`POST {action:"run"}` fuerza una corrida (las scheduled functions no son invocables por URL en producción).
 Devuelve temas con titulares de las últimas 24 h, con: `medios_ventana`, `medios_total`, `cubierto_dru`, `caliente` (≥3 en 2 h), `primer_visto`, primera fuente y lista de titulares. Agregación en JS.
 
 ## Pantalla — sección "Agenda ahora"

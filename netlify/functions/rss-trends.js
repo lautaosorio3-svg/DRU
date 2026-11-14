@@ -140,3 +140,6 @@ exports.handler = async (event) => {
 // Compartido con rss-alertas.js (función programada)
 exports.checkAlertas = checkAlertas;
 exports.fetchAllFeeds = fetchAllFeeds;
+// Compartido con netlify/lib/agenda-run.js (Agenda ahora)
+exports.FEEDS = FEEDS;
+exports.parseFeed = parseFeed;
