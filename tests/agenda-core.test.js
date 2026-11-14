@@ -73,6 +73,11 @@ test("parseClassification acepta grupos serializados como texto", () => {
   assert.deepEqual(core.parseClassification(input, 1, []).asignaciones, [{ t: 0, ref: "N1" }]);
 });
 
+test("parseClassification ignora titulares repetidos dentro de un grupo", () => {
+  const input = { grupos: [{ tema_id: null, titulo: "Paro", categoria: "educación", titulares: ["T0", "T0", "T1"] }] };
+  assert.deepEqual(core.parseClassification(input, 2, []).asignaciones, [{ t: 0, ref: "N1" }, { t: 1, ref: "N1" }]);
+});
+
 test("parseClassification tira error si no hay grupos", () => {
   assert.throws(() => core.parseClassification({}, 1, []), /grupos/);
 });

@@ -123,9 +123,12 @@ function parseClassification(input, n, temas) {
     const ts = (g && Array.isArray(g.titulares) ? g.titulares : [])
       .map(x => /^T(\d+)$/.exec(String(x)))
       .map(m => (m ? Number(m[1]) : -1))
-      .filter(t => t >= 0 && t < n && !usados.has(t));
+      .filter(t => {
+        if (t < 0 || t >= n || usados.has(t)) return false;
+        usados.add(t); // también descarta repetidos dentro del mismo grupo
+        return true;
+      });
     if (!ts.length) continue;
-    ts.forEach(t => usados.add(t));
     const temaId = resolverTema(g, temas);
     if (temaId !== null) {
       ts.forEach(t => asignaciones.push({ t, temaId }));
