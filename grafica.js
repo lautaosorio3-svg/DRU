@@ -125,58 +125,42 @@
     c.toBlob((b) => { descargar(b, G.nombreArchivo(p.formato, p.texto(d), new Date(), "png")); showToast("✓ PNG descargado"); }, "image/png");
   }
 
-  const MIME_WEBM = "video/webm;codecs=vp9";
-  function webmSoportado() { return !!(window.MediaRecorder && MediaRecorder.isTypeSupported(MIME_WEBM)); }
-
-  // Graba la animación cuadro por cuadro en tiempo real (captureStream + MediaRecorder).
-  async function grabarWebM(p, d) {
+  // Genera la animación cuadro por cuadro como QuickTime Animation (.mov sin pérdida, con alfa)
+  // con mov-animation.js. No graba en tiempo real: dibuja cada cuadro y lo codifica, así que
+  // es exacto y funciona en cualquier navegador.
+  async function generarMov(p, d, alAvanzar) {
     const c = document.createElement("canvas"); c.width = p.w; c.height = p.h;
-    const ctx = c.getContext("2d");
-    p.dibujar(ctx, d, 0);
-    const stream = c.captureStream(0);
-    const track = stream.getVideoTracks()[0];
-    const rec = new MediaRecorder(stream, { mimeType: MIME_WEBM, videoBitsPerSecond: 8e6 });
-    const partes = [];
-    rec.ondataavailable = (e) => { if (e.data.size) partes.push(e.data); };
-    const fin = new Promise((res) => { rec.onstop = res; });
-    rec.start();
-    const total = Math.round(p.duracion * Z.FPS);
-    const t0 = performance.now();
-    for (let k = 0; k <= total; k++) {
-      const espera = t0 + (k * 1000) / Z.FPS - performance.now();
-      if (espera > 0) await new Promise((r) => setTimeout(r, espera));
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    const total = Math.round(p.duracion * Z.FPS);   // 4,5 s × 30 = 135 cuadros, como la referencia
+    const cuadros = [];
+    for (let k = 0; k < total; k++) {
       p.dibujar(ctx, d, k / Z.FPS);
-      track.requestFrame();
+      cuadros.push(MovAnimation.codificarCuadro(ctx.getImageData(0, 0, p.w, p.h).data, p.w, p.h));
+      if (k % 15 === 14) { alAvanzar && alAvanzar((k + 1) / total); await new Promise((r) => setTimeout(r, 0)); }
     }
-    await new Promise((r) => setTimeout(r, 1000 / Z.FPS));
-    rec.stop();
-    await fin;
-    return new Blob(partes, { type: "video/webm" });
+    return new Blob(MovAnimation.crearMov({ ancho: p.w, alto: p.h, fps: Z.FPS, cuadros }), { type: "video/quicktime" });
   }
 
-  async function exportarWebM() {
+  async function exportarMov() {
     if (exportando) return;
-    if (!webmSoportado()) { showToast("⚠ Este navegador no graba video con transparencia. Usá Chrome."); return; }
     await cargarFuentes();
     const p = PLANTILLAS[plantilla];
-    const btn = document.getElementById("gra-webm-btn");
-    exportando = true; btn.disabled = true; btn.textContent = "Grabando animación…";
+    const btn = document.getElementById("gra-mov-btn");
+    const textoBtn = btn.textContent;
+    exportando = true; btn.disabled = true; btn.textContent = "Generando .mov…";
     try {
       const d = p.datos();
-      const blob = await grabarWebM(p, d);
-      descargar(blob, G.nombreArchivo(p.formato, p.texto(d), new Date(), "webm"));
-      showToast("✓ Animación descargada (WebM con transparencia)");
+      const blob = await generarMov(p, d, (f) => { btn.textContent = `Generando .mov… ${Math.round(f * 100)} %`; });
+      descargar(blob, G.nombreArchivo(p.formato, p.texto(d), new Date(), "mov"));
+      showToast("✓ .mov descargado: pista V2 en Premiere");
     } catch (e) {
-      showToast("⚠ No se pudo grabar la animación: " + e.message);
+      showToast("⚠ No se pudo generar el .mov: " + e.message);
     } finally {
-      exportando = false; btn.disabled = false; btn.textContent = "Descargar animación (WebM)";
+      exportando = false; btn.disabled = false; btn.textContent = textoBtn;
     }
   }
 
-  function abrirGrafica() {
-    document.getElementById("gra-webm-aviso").style.display = webmSoportado() ? "none" : "block";
-    render();
-  }
+  function abrirGrafica() { render(); }
 
-  window.Grafica = { abrir: abrirGrafica, render, reproducir, setT, exportarPNG, exportarWebM, _dibujar: (id, ctx, d, t) => PLANTILLAS[id].dibujar(ctx, d, t), _cargarFuentes: cargarFuentes, _grabarWebM: (id, d) => grabarWebM(PLANTILLAS[id], d) };
+  window.Grafica = { abrir: abrirGrafica, render, reproducir, setT, exportarPNG, exportarMov, _dibujar: (id, ctx, d, t) => PLANTILLAS[id].dibujar(ctx, d, t), _cargarFuentes: cargarFuentes, _generarMov: (id, d) => generarMov(PLANTILLAS[id], d) };
 })();

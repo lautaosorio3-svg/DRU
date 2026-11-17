@@ -973,10 +973,9 @@
               </div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button class="btn btn--primary btn--sm" onclick="Grafica.exportarPNG()">Descargar PNG</button>
-                <button class="btn btn--peach btn--sm" id="gra-webm-btn" onclick="Grafica.exportarWebM()">Descargar animación (WebM)</button>
+                <button class="btn btn--peach btn--sm" id="gra-mov-btn" onclick="Grafica.exportarMov()">Descargar .mov (Premiere)</button>
               </div>
-              <div class="step-help" id="gra-webm-aviso" style="display:none;margin-top:10px;color:var(--peach-deep)">⚠ Este navegador no puede grabar video con transparencia (pasa en Safari). El PNG funciona igual; para la animación usá Chrome.</div>
-              <div class="step-help" style="margin-top:10px">La animación tarda 4,5 s en grabarse: dejá la pestaña abierta hasta que se descargue.</div>
+              <div class="step-help" style="margin-top:10px">El .mov es QuickTime Animation con transparencia y sin pérdida. En Premiere: importalo y ponelo en la pista V2, arriba de la entrevista. En la Mac no se previsualiza con doble clic (macOS ya no lee ese formato), pero Premiere sí.</div>
             </div>
           </div>
           <div class="wcol">
@@ -2699,6 +2698,7 @@ async function renderSugerencias(){
 }
 </script>
 <script src="grafica-core.js"></script>
+<script src="mov-animation.js"></script>
 <script src="grafica.js"></script>
 <script src="estetica-2027.js"></script>
 </body>
