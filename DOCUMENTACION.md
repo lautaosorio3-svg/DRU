@@ -150,6 +150,15 @@ no se migró para no romper nada.
   preferencia de estilo del equipo (tabla `correcciones` de Supabase + localStorage).
 - CSS: `theme.css` (variables, light/dark) + `screens.css` (componentes). Prefijos:
   `.meta-*` (dashboard Meta), `.mc` (magazine cards), `.sb-*` (sidebar), `.fi/.flbl` (forms).
+- **Estética 2027** (noviembre 2026): `estetica-2027.css` se carga después de los dos anteriores
+  y los pisa (tipografía, paleta blanco/negro/naranja DRU, menos cajas); `estetica-2027.js` suma
+  el movimiento (títulos palabra por palabra, contadores, ticker, barra de carga de la IA).
+  Para volver al estilo anterior alcanza con quitar esas dos líneas de `index.html`.
+  Todo el movimiento respeta "reducir movimiento" del sistema operativo.
+- **Tipografía** (manual de *El Alma de la Fiesta*): Acumin Pro Extra Condensed para títulos,
+  etiquetas y números; Barlow para texto. Acumin viene del proyecto web de **Adobe Fonts**
+  "DRU Panel" (`use.typekit.net/afu7nsm.css`, cuenta Creative Cloud de Lautaro): si la
+  suscripción se corta, los títulos caen a Barlow Condensed (Google) y el resto sigue igual.
 
 ## 8. Deploy
 
