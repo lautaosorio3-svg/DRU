@@ -129,6 +129,26 @@
     pintarTicker("Hoy en la historia", efem.map((e) => ({ dato: String(e.y), texto: e.title, destino: "efem" })));
   }
 
+  // ── 6. Celular: menú desplegable con botón ☰ (el CSS lo muestra solo abajo de 760 px) ──
+  const velo = document.createElement("div");
+  velo.className = "menu-velo";
+  document.body.appendChild(velo);
+  const menuBtn = document.createElement("button");
+  menuBtn.className = "menu-btn";
+  menuBtn.type = "button";
+  menuBtn.setAttribute("aria-label", "Abrir menú");
+  menuBtn.setAttribute("aria-expanded", "false");
+  menuBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>';
+  if (topbar) topbar.prepend(menuBtn);
+  function menu(abrir) {
+    document.body.classList.toggle("menu-abierto", abrir);
+    menuBtn.setAttribute("aria-expanded", String(abrir));
+    menuBtn.setAttribute("aria-label", abrir ? "Cerrar menú" : "Abrir menú");
+  }
+  menuBtn.addEventListener("click", () => menu(!document.body.classList.contains("menu-abierto")));
+  velo.addEventListener("click", () => menu(false));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") menu(false); });
+
   // ── Enganches ──
   function alMostrar(id) {
     const pagina = document.getElementById("page-" + id);
@@ -140,6 +160,8 @@
   const showPageOriginal = window.showPage;
   window.showPage = function (id, nav) {
     const r = showPageOriginal.apply(this, arguments);
+    menu(false);           // en celular, elegir una sección cierra el menú
+    window.scrollTo(0, 0);
     alMostrar(id);
     return r;
   };

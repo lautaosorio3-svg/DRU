@@ -264,3 +264,75 @@ body { font-family: var(--sans); font-size: 15px; }
 /* Modo oscuro: la etiqueta negra del ticker se perdía sobre el fondo negro */
 [data-theme="dark"] .ticker-label { background: var(--naranja); color: #121212; }
 [data-theme="dark"] .ticker-label .vivo { background: #121212; }
+
+/* ════════════════ Celular ════════════════
+   El panel no tenía diseño para pantallas chicas: menú fijo de 260 px y el contenido
+   apretado al costado. Abajo de 760 px el menú pasa a ser desplegable (botón ☰). */
+.menu-btn { display: none; }
+.menu-velo { display: none; }
+
+@media (max-width: 760px) {
+  .shell { grid-template-columns: 1fr; }
+
+  /* Menú desplegable */
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 150;
+    width: min(84vw, 300px); height: 100dvh;
+    padding-top: max(1.5rem, env(safe-area-inset-top, 0px));
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .32s var(--curva), visibility 0s linear .32s;
+  }
+  body.menu-abierto .sidebar { transform: none; visibility: visible; transition: transform .32s var(--curva); }
+  .menu-velo { display: block; position: fixed; inset: 0; z-index: 140; background: rgba(18, 18, 18, .45); opacity: 0; pointer-events: none; transition: opacity .25s; }
+  body.menu-abierto .menu-velo { opacity: 1; pointer-events: auto; }
+  body.menu-abierto { overflow: hidden; }
+  .sb-item { padding-block: 11px; }   /* objetivos táctiles más altos */
+
+  /* Barra superior compacta */
+  .topbar { padding: .6rem 1rem; padding-top: max(.6rem, env(safe-area-inset-top, 0px)); gap: .6rem; }
+  .menu-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: -8px;
+    background: none; border: 0; color: var(--ink); cursor: pointer; flex-shrink: 0; }
+  .menu-btn svg { width: 24px; height: 24px; }
+  .tb-chip, .tb-date { display: none; }
+  .tb-crumb { font-size: 16px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ticker { height: 34px; }
+  .ticker-label { padding: 0 12px; font-size: 13px; }
+  .ticker-titulo { display: none; }          /* en celular queda solo el punto que late */
+
+  /* Páginas */
+  .page { padding: 1.25rem 1rem 3rem; }
+  .hero { padding-top: 1rem; margin-bottom: 1.25rem; }
+  .hero-row { flex-wrap: wrap; gap: 4px 12px; }
+  .hero-rule { display: none; }
+  .hero-title { font-size: clamp(40px, 12.5vw, 60px); }
+  .hero-sub { font-size: 16px; }
+  .banner { padding: 1.25rem; }
+  .banner-title { font-size: 30px; }
+
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .stat { border-bottom: 1px solid var(--line); }
+  .stat-num { font-size: 40px; }
+  .mg { grid-template-columns: 1fr; }
+  .mg .mc, .mc { grid-column: auto; }
+  .fgrid { grid-template-columns: 1fr; }
+  .fgrid > [class*="ff--"] { grid-column: auto; }
+  .step-head { flex-wrap: wrap; }
+  .chips { flex-wrap: wrap; }
+  .btn { white-space: normal; text-align: center; }
+  table { display: block; overflow-x: auto; }
+  .gra-preview { max-width: 260px; }
+  .toast { left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom, 0px)); }
+
+  /* Login en una columna */
+  .login { grid-template-columns: 1fr; }
+  .login-art { padding: 1.75rem 1.25rem 2rem; gap: 1.5rem; }
+  .login-art-title { font-size: 46px !important; }   /* el HTML trae 72px en línea */
+  .login-art-foot { display: none; }
+  .login-form { padding: 2rem 1.25rem 3rem; align-items: flex-start; }
+  .login-h { font-size: 52px; }
+}
+@media (max-width: 760px) {
+  .gen-grid { grid-template-columns: 1fr; }          /* Generador: lista, formatos y resultado apilados */
+  .seo-sources { grid-template-columns: 1fr 1fr; }   /* SEO del día: fuentes de a dos */
+  .seo-source { min-width: 0; }
+}
