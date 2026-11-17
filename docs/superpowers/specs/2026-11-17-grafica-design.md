@@ -9,7 +9,7 @@ Entrada: foto + textos (o una nota pegada). Salida: PNG listo para publicar y, p
 zócalo de entrevistas, la animación con transparencia.
 
 Fuera de alcance (fase 1): edición libre tipo Express, plantillas del carnaval 2027,
-carruseles de varias placas, video completo de reels (solo overlays).
+video completo de reels (solo overlays).
 
 ## Principio técnico
 Todo se dibuja **en el navegador con `<canvas>`**. No hacen falta functions nuevas, ni
@@ -37,6 +37,33 @@ Pantalla en dos columnas: a la izquierda el formulario, a la derecha la vista pr
   antes de exportar.
 - Atajo desde **Desgrabador**, **Gacetilla a nota** y **Traspaso a redes**: botón "Hacer placa"
   que abre Gráfica con volanta y titular precargados.
+
+## Integración con "Formato para redes" (decidido 2026-11-17)
+El texto de cada pieza se sigue escribiendo donde se escribe hoy (paso 5 de **Análisis de
+notas** y **Generador IA** de Efemérides). Gráfica hace la imagen. No se duplica el selector
+de formatos en Diseño: se conectan.
+
+| Formato | Lo que ya escribe la IA | Plantilla en Gráfica |
+|---|---|---|
+| Placa + Copy | título de placa, subtítulo, caption | Posteo noticia 1080×1350 |
+| Carrusel | slides 1 a 4 (4 = CTA fondo naranja), caption | Carrusel (sube a fase 1) |
+| Guión Reel | gancho, textos en pantalla | Overlay de reel + zócalo por cada persona |
+
+- **Nota SEO queda aparte**: es para la web, no para redes. En los dos módulos el selector
+  se divide en "Para redes" (los tres formatos de arriba) y "Para la web" (Nota SEO, con su
+  propio botón y sin paso por Gráfica).
+- En cada resultado de redes aparece **"Diseñar →"**: abre Gráfica con la plantilla del
+  formato y los textos cargados; falta solo la foto. El caption queda junto a la vista previa
+  para copiarlo, así todo lo necesario para publicar sale de un mismo lugar.
+- **Respuesta estructurada**: los tres prompts de redes pasan de texto libre ("SLIDE 1: …")
+  a tool use forzado con schema (misma técnica que el agrupado de Agenda ahora), para que
+  cada campo llegue a la plantilla sin depender del formato del texto.
+
+### 5. Carrusel — 1080×1350, 4 placas
+- Slides 1 a 3 con el sistema del posteo noticia (foto opcional en la 1); máx. 12 palabras
+  por slide; "DESLIZÁ" en las slides 1 a 3.
+- Slide 4: CTA "Leé la nota completa en diarioriouruguay.com" sobre fondo naranja.
+- Export: las 4 placas en PNG, numeradas (`dru-carrusel-<slug>-<AAAAMMDD>-1.png` … `-4.png`).
 
 ## Plantillas fase 1 (medidas en px sobre el lienzo real)
 Paleta: naranja DRU `#F7941D`, negro `#121212`, blanco. Márgenes laterales: 60.
@@ -77,8 +104,7 @@ Paleta: naranja DRU `#F7941D`, negro `#121212`, blanco. Márgenes laterales: 60.
 
 ## Fase 2 (ideas, no comprometidas)
 Declaración (comilla + cita + atribución), efeméride (panel crema + fecha en serif itálica,
-conectada con la sección Efemérides), clima, último momento (tag de urgencia), carrusel
-(varias placas + "DESLIZÁ" + slide 4 CTA naranja según CLAUDE.md), kit 2027.
+conectada con la sección Efemérides), clima, último momento (tag de urgencia), kit 2027.
 
 ## Pruebas
 - Exportar cada plantilla con titulares de 1, 2 y 3 líneas y con tildes/ñ; comparar contra
