@@ -1959,3 +1959,22 @@
   .ff--3, .ff--2 { grid-column: span 2; }
   .ff--6 { grid-column: span 2; }
 }
+
+/* ===== Gráfica: vista previa de placas ===== */
+.gra-preview {
+  max-width: 340px;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  /* cuadriculado para que se vea la transparencia */
+  background-color: #d9d9d9;
+  background-image:
+    linear-gradient(45deg, #bdbdbd 25%, transparent 25%),
+    linear-gradient(-45deg, #bdbdbd 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #bdbdbd 75%),
+    linear-gradient(-45deg, transparent 75%, #bdbdbd 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+.gra-preview canvas { display: block; width: 100%; height: auto; }

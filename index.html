@@ -6,7 +6,7 @@
 <title>DRU Editorial · Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css">
 <link rel="stylesheet" href="screens.css">
 </head>
@@ -129,6 +129,14 @@
       <div class="sb-item" onclick="showPage('sugerencias',this)">
         <span class="sb-item-num">13</span><span class="sb-item-name">Sugerencias</span>
         <span class="sb-item-arrow">→</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-section-label"><span>/ Diseño</span><span class="sb-section-num">05</span></div>
+      <div class="sb-item" onclick="showPage('grafica',this)">
+        <span class="sb-item-num">14</span><span class="sb-item-name">Gráfica</span>
+        <span class="sb-item-badge">NEW</span><span class="sb-item-arrow">→</span>
       </div>
     </div>
 
@@ -927,6 +935,58 @@
       </div>
     </div>
 
+    <!-- ═══ GRÁFICA ═══ -->
+    <div class="page" id="page-grafica">
+      <div class="hero">
+        <div class="hero-row">
+          <div class="hero-num">№ 14 · Placas de redes</div>
+          <div class="hero-rule"></div>
+          <div class="hero-num">Sistema gráfico DRU</div>
+        </div>
+        <h1 class="hero-title"><span class="accent">Gráfica</span> lista para publicar</h1>
+        <div class="hero-sub">Completá los textos y descargá la placa con el sistema gráfico de DRU, sin abrir Express.</div>
+        <div class="hero-gradient"></div>
+      </div>
+      <div class="section">
+        <div class="wflow">
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num step-num--peach">1</span><div class="step-title">Plantilla</div></div>
+              <div class="chips" style="margin-bottom:0">
+                <button class="chip active" data-gra="zocalo">Zócalo de entrevistas</button>
+              </div>
+            </div>
+            <div class="step" id="gra-form-zocalo">
+              <div class="step-head"><span class="step-num step-num--peach">2</span><div class="step-title">Textos del zócalo</div><div class="step-tag-row"><span class="tag tag--ghost">1080×1920 · 4,5 s</span></div></div>
+              <div class="step-help">Para la sección empresarios. El nombre va en la caja naranja, en mayúsculas; empresa y cargo en la negra. Cada caja se ajusta al largo del texto.</div>
+              <div class="ff" style="margin-bottom:10px"><label class="flbl">Nombre y apellido</label><input class="fi" type="text" id="gra-z-nombre" maxlength="40" placeholder="Ej: Morena Martínez" oninput="Grafica.render()"></div>
+              <div class="fgrid" style="margin-bottom:12px">
+                <div class="ff ff--3"><label class="flbl">Empresa</label><input class="fi" type="text" id="gra-z-empresa" maxlength="40" placeholder="Ej: Móviles" oninput="Grafica.render()"></div>
+                <div class="ff ff--3"><label class="flbl">Cargo</label><input class="fi" type="text" id="gra-z-cargo" maxlength="40" placeholder="Ej: Gerente general" oninput="Grafica.render()"></div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn--primary btn--sm" onclick="Grafica.exportarPNG()">Descargar PNG</button>
+                <button class="btn btn--peach btn--sm" id="gra-webm-btn" onclick="Grafica.exportarWebM()">Descargar animación (WebM)</button>
+              </div>
+              <div class="step-help" id="gra-webm-aviso" style="display:none;margin-top:10px;color:var(--peach-deep)">⚠ Este navegador no puede grabar video con transparencia (pasa en Safari). El PNG funciona igual; para la animación usá Chrome.</div>
+              <div class="step-help" style="margin-top:10px">La animación tarda 4,5 s en grabarse: dejá la pestaña abierta hasta que se descargue.</div>
+            </div>
+          </div>
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num">→</span><div class="step-title">Vista previa</div></div>
+              <div class="gra-preview"><canvas id="gra-canvas" width="1080" height="1920"></canvas></div>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+                <button class="btn btn--ghost btn--sm" onclick="Grafica.reproducir()">▶ Reproducir</button>
+                <input type="range" id="gra-t" min="0" max="4.5" step="0.0333" value="1.5" oninput="Grafica.setT(this.value)" style="flex:1">
+                <span class="font-mono" id="gra-t-label" style="font-size:11px;color:var(--ink-4);min-width:52px;text-align:right">1.50 s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ BORRADORES ═══ -->
     <div class="page" id="page-borradores">
       <div class="hero">
@@ -1582,7 +1642,7 @@ async function sendDsgChat(){
 }
 
 // ══ NAV ══
-const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",gacetilla:"Gacetilla a nota",metastats:"Estadísticas Meta",agenda:"Agenda ahora",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
+const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",gacetilla:"Gacetilla a nota",metastats:"Estadísticas Meta",agenda:"Agenda ahora",grafica:"Gráfica",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
 function showPage(id,navEl){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -1593,6 +1653,7 @@ function showPage(id,navEl){
   if(id==="metastats")loadMetaStats();
   if(id==="alertas")renderAlertas();
   if(id==="agenda")renderAgenda();
+  if(id==="grafica")Grafica.abrir();
   if(id==="borradores")renderDrafts();
   if(id==="sugerencias"){if(currentUser)document.getElementById("sug-name").value=currentUser.name;renderSugerencias();}
   if(id==="gen")renderGenList();
@@ -2630,5 +2691,7 @@ async function renderSugerencias(){
   list.innerHTML=html;
 }
 </script>
+<script src="grafica-core.js"></script>
+<script src="grafica.js"></script>
 </body>
 </html>
