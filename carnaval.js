@@ -4,6 +4,9 @@
   const C = window.CarnavalCore, Gr = window.CarnavalGrafica;
   const SK = { figuras: "dru_carnaval_figuras", marcas: "dru_carnaval_marcas", ultimaMarca: "dru_carnaval_marca" };
   let figuras = [], marcas = [], archivo = null, recursos = null, logo = null, exportando = false, animando = false;
+  // Sin clip, la vista previa reproduce la gráfica sola en un bucle (entrada + oleaje del río).
+  const BUCLE_SIN_VIDEO = 6;
+  let relojInicio = performance.now();
   const $ = (id) => document.getElementById(id);
   const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
   const leer = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch (e) { return def; } };
@@ -53,14 +56,18 @@
   function dibujarPreview() {
     if (!recursos) return;
     const v = $("car-video");
-    Gr.dibujarGrafica($("car-capa").getContext("2d"), datos(), archivo ? v.currentTime : 3, recursos);
+    const t = archivo ? v.currentTime : ((performance.now() - relojInicio) / 1000) % BUCLE_SIN_VIDEO;
+    Gr.dibujarGrafica($("car-capa").getContext("2d"), datos(), t, recursos);
   }
   function bucle() {
     if (!document.getElementById("page-carnaval").classList.contains("active")) { animando = false; return; }
     dibujarPreview(); requestAnimationFrame(bucle);
   }
   function refrescar() { $("car-exportar").disabled = !listoParaExportar(); if (!animando) dibujarPreview(); }
-  function reproducir() { const v = $("car-video"); if (!archivo) return; v.currentTime = 0; v.play(); }
+  function reproducir() {
+    if (!archivo) { relojInicio = performance.now(); return; }   // reinicia el bucle de la gráfica sola
+    const v = $("car-video"); v.currentTime = 0; v.play();
+  }
 
   async function elegirArchivo(f) {
     if (!f) return;
