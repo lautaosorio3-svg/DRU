@@ -75,12 +75,16 @@ Lienzo 1080×1920. Medidas en px.
 | Elemento | Desde | Duración | Movimiento |
 |---|---|---|---|
 | Degradado y lockup DRU | 0 s | 0,4 s | fundido |
-| Franjas | 0,1 s | 0,5 s | crecen desde el centro hacia los bordes |
+| Franjas (el río) | 0,1 s | 0,5 s | entran fluyendo de izquierda a derecha con una ola (14 px) que se calma a un oleaje de 3 px |
 | Listón | 0,25 s | 0,45 s | barrido de izquierda a derecha (recorte) |
 | Nombres | 0,45 s | 0,5 s | cada línea sube desde su máscara (como los títulos del panel) |
 | Puestos | 0,7 s | 0,4 s | fundido y sube 16 px |
 | Auspiciante y Concordia Carnaval | 0,85 s | 0,4 s | fundido |
 Curvas: ease-out cúbica para entradas (la misma del zócalo).
+
+Las franjas son "el río": no quedan quietas, siguen con un oleaje sutil todo el video
+(onda de 720 px, período 3,2 s). Por eso la gráfica se redibuja en cada cuadro. El listón
+con los nombres queda firme para que se lea.
 
 ## Proceso del video (en la notebook)
 - **Librería**: Mediabunny (lectura, decodificación y codificación con WebCodecs, MP4),
@@ -91,8 +95,7 @@ Curvas: ease-out cúbica para entradas (la misma del zócalo).
   centrado a 9:16 y se avisa. Formato no soportado → mensaje con qué exportar.
 - **Cada cuadro**: el cuadro del video se dibuja en un canvas 1080×1920 con escala a
   cubrir (el 4K vertical se reduce exactamente a la mitad) y encima la gráfica en su
-  instante `t`. La gráfica es estática después de 1,25 s, así que desde ahí se reutiliza
-  la misma capa ya dibujada.
+  instante `t` (se redibuja en cada cuadro por el oleaje del río).
 - **Salida**: MP4, H.264 High 1080×1920, mismos fps del original, 16 Mbps, cuadro clave
   cada 2 s; audio AAC 192 kbps (se copia si ya es AAC; se convierte si es PCM).
 - **Rendimiento**: progreso visible; la pestaña tiene que quedar abierta. Objetivo: un clip

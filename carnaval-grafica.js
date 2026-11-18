@@ -72,14 +72,24 @@
     ctx.drawImage(r.lockup, lk.x, lk.y, lk.w, lk.w * r.lockup.height / r.lockup.width);
     ctx.restore();
 
-    // Franjas: crecen desde el centro hacia los bordes
+    // Franjas = el río: entran fluyendo de izquierda a derecha y ondulan siempre
     if (a.franjas > 0) {
-      ctx.save();
-      const ancho = W * a.franjas;
-      ctx.beginPath(); ctx.rect((W - ancho) / 2, m.bloqueY, ancho, m.franjasH); ctx.clip();
-      ctx.translate(0, m.bloqueY);
-      r.franjas[String(m.franjasH)].forEach((p, i) => { ctx.fillStyle = comp.bandas[i]; ctx.fill(p); });
-      ctx.restore();
+      const h = m.franjasH, margen = 24;
+      const clave = comp.id + "-" + h;
+      if (!r._rios) r._rios = {};
+      if (!r._rios[clave]) {                       // franjas planas, dibujadas una vez por comparsa
+        const c = document.createElement("canvas");
+        c.width = W; c.height = h + 2 * margen;
+        const x = c.getContext("2d");
+        x.translate(0, margen);
+        r.franjas[String(h)].forEach((p, i) => { x.fillStyle = comp.bandas[i]; x.fill(p); });
+        r._rios[clave] = c;
+      }
+      const rio = r._rios[clave], paso = 4, frente = W * a.franjas;
+      for (let x = 0; x < frente; x += paso) {
+        const dy = C.ondaRio(x + paso / 2, t);
+        ctx.drawImage(rio, x, 0, paso, rio.height, x, m.bloqueY - margen + dy, paso, rio.height);
+      }
     }
 
     // Listón: barrido de izquierda a derecha; nombres que suben desde su máscara

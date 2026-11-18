@@ -57,3 +57,15 @@ test("nombre de archivo", () => {
     "dru-carnaval-bella-samba-estela-orcellet-y-emilio-molina-20261118.mp4");
   assert.equal(C.nombreArchivo("rafaga", "Ana", "", new Date(2027, 1, 5)), "dru-carnaval-rafaga-ana-20270205.mp4");
 });
+
+test("río: ola marcada al entrar y oleaje sutil después", () => {
+  const max = (t) => Math.max(...Array.from({ length: 1081 }, (_, x) => Math.abs(C.ondaRio(x, t))));
+  assert.ok(max(0.3) > 8, "ola de entrada visible: " + max(0.3));
+  for (const t of [1.25, 2, 7.3, 29]) assert.ok(max(t) <= C.RIO.amplitudOleaje + 1e-9 && max(t) > 2, "oleaje sutil en t=" + t + ": " + max(t));
+});
+
+test("río: se mueve con el tiempo y es continuo", () => {
+  assert.notEqual(C.ondaRio(300, 5), C.ondaRio(300, 5.5));
+  assert.ok(Math.abs(C.ondaRio(300, 5) - C.ondaRio(300, 5 + 1 / 30)) < 1, "sin saltos entre cuadros");
+  assert.ok(Math.abs(C.ondaRio(300, 5) - C.ondaRio(304, 5)) < 0.2, "sin escalones entre columnas");
+});

@@ -55,13 +55,22 @@
     return r;
   }
 
+  // El río: las franjas ondulan como agua. Entran con una ola marcada que se calma
+  // hasta un oleaje sutil y siguen así todo el video.
+  const RIO = { amplitudEntrada: 14, amplitudOleaje: 3, longitud: 720, periodo: 3.2 };
+  function ondaRio(x, t) {
+    const calma = Math.min(Math.max((t - 0.1) / (DURACION_ENTRADA - 0.1), 0), 1);
+    const amp = RIO.amplitudEntrada + (RIO.amplitudOleaje - RIO.amplitudEntrada) * easeOut(calma);
+    return amp * Math.sin((2 * Math.PI * x) / RIO.longitud - (2 * Math.PI * t) / RIO.periodo);
+  }
+
   function nombreArchivo(comparsaId, n1, n2, fecha) {
     const nombres = [limpio(n1), limpio(n2)].filter(Boolean).join(" y ");
     const f = fecha.getFullYear() + String(fecha.getMonth() + 1).padStart(2, "0") + String(fecha.getDate()).padStart(2, "0");
     return `dru-carnaval-${comparsaId}-${G.slug(nombres)}-${f}.mp4`;
   }
 
-  const api = { LIENZO, COLOR, COMPARSAS, comparsa, FUENTE, medidas, lineasListon, textoPuesto, estadoAnim, DURACION_ENTRADA, nombreArchivo, tamanoQueEntra: G.tamanoQueEntra };
+  const api = { LIENZO, COLOR, COMPARSAS, comparsa, FUENTE, medidas, lineasListon, textoPuesto, estadoAnim, DURACION_ENTRADA, RIO, ondaRio, nombreArchivo, tamanoQueEntra: G.tamanoQueEntra };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.CarnavalCore = api;
 })(this);
