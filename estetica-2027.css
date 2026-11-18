@@ -336,3 +336,14 @@ body { font-family: var(--sans); font-size: 15px; }
   .seo-sources { grid-template-columns: 1fr 1fr; }   /* SEO del día: fuentes de a dos */
   .seo-source { min-width: 0; }
 }
+
+/* ===== Carnaval ===== */
+.car-drop { display: flex; align-items: center; justify-content: center; min-height: 110px; padding: 1rem; border: 1.5px dashed var(--line); border-radius: var(--r-lg); text-align: center; cursor: pointer; color: var(--ink-3); }
+.car-drop.sobre, .car-drop:hover { border-color: var(--naranja); color: var(--ink); }
+.car-preview { position: relative; width: 100%; max-width: 360px; aspect-ratio: 9 / 16; margin: 0 auto; background: #120B1F; border-radius: var(--r-lg); overflow: hidden; }
+.car-preview video, .car-preview canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.car-progreso { height: 6px; margin-top: 12px; background: var(--surface-alt); overflow: hidden; }
+.car-progreso > div { height: 100%; width: 0; background: var(--naranja); transition: width .2s; }
+.car-fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line-hair); }
+.car-fila img { height: 32px; max-width: 120px; object-fit: contain; background: #2a2235; padding: 4px; }
+.car-punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }

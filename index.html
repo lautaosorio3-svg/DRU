@@ -145,6 +145,10 @@
         <span class="sb-item-num">14</span><span class="sb-item-name">Gráfica</span>
         <span class="sb-item-badge">NEW</span><span class="sb-item-arrow">→</span>
       </div>
+      <div class="sb-item" onclick="showPage('carnaval',this)">
+        <span class="sb-item-num">15</span><span class="sb-item-name">Carnaval</span>
+        <span class="sb-item-arrow">→</span>
+      </div>
     </div>
 
     <div class="sb-foot">
@@ -993,6 +997,93 @@
       </div>
     </div>
 
+    <!-- ═══ CARNAVAL ═══ -->
+    <div class="page" id="page-carnaval">
+      <div class="hero">
+        <div class="hero-row"><div class="hero-num">№ 15 · El Alma de la Fiesta</div><div class="hero-rule"></div><div class="hero-num">Cobertura 2027</div></div>
+        <h1 class="hero-title">Reels del <span class="accent">carnaval</span></h1>
+        <div class="hero-sub">Elegí el clip y la figura: el panel le suma la gráfica de cobertura y exporta el reel listo para redes. El video no sale de esta compu.</div>
+        <div class="hero-gradient"></div>
+      </div>
+      <div class="chips" style="margin-bottom:1rem">
+        <button class="chip active" data-car-tab="reel" onclick="Carnaval.tab('reel')">Armar reel</button>
+        <button class="chip" data-car-tab="plantel" onclick="Carnaval.tab('plantel')">Plantel y marcas</button>
+      </div>
+      <div class="section" id="car-reel">
+        <div class="wflow">
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num">1</span><div class="step-title">Clip</div></div>
+              <label class="car-drop" id="car-drop">
+                <input type="file" id="car-file" accept="video/mp4,video/quicktime,.mp4,.mov" hidden onchange="Carnaval.elegirArchivo(this.files[0])">
+                <span id="car-file-txt">Arrastrá el clip acá o hacé clic para elegirlo</span>
+              </label>
+              <div class="step-help" id="car-file-info"></div>
+            </div>
+            <div class="step">
+              <div class="step-head"><span class="step-num">2</span><div class="step-title">Figura</div></div>
+              <div class="fgrid" style="margin-bottom:10px">
+                <div class="ff ff--3"><label class="flbl" for="car-comparsa">Comparsa</label><select class="fi" id="car-comparsa" onchange="Carnaval.cambioComparsa()"></select></div>
+                <div class="ff ff--3"><label class="flbl" for="car-figura">Del plantel</label><select class="fi" id="car-figura" onchange="Carnaval.elegirFigura()"></select></div>
+              </div>
+              <div class="fgrid" style="margin-bottom:10px">
+                <div class="ff ff--3"><label class="flbl" for="car-n1">Nombre</label><input class="fi" id="car-n1" maxlength="40" oninput="Carnaval.refrescar()"></div>
+                <div class="ff ff--3"><label class="flbl" for="car-n2">Segundo nombre (opcional)</label><input class="fi" id="car-n2" maxlength="40" oninput="Carnaval.refrescar()"></div>
+              </div>
+              <div class="ff"><label class="flbl" for="car-puesto">Puesto</label><input class="fi" id="car-puesto" maxlength="60" oninput="Carnaval.refrescar()"></div>
+            </div>
+            <div class="step">
+              <div class="step-head"><span class="step-num">3</span><div class="step-title">Auspiciante</div></div>
+              <select class="fi" id="car-marca" onchange="Carnaval.elegirMarca()"></select>
+            </div>
+            <div class="step">
+              <div class="step-head"><span class="step-num">4</span><div class="step-title">Exportar</div></div>
+              <button class="btn btn--peach" id="car-exportar" onclick="Carnaval.exportar()" disabled style="width:100%">Exportar reel (MP4 1080×1920)</button>
+              <div class="car-progreso" id="car-progreso" hidden><div id="car-barra"></div></div>
+              <div class="step-help" id="car-estado">Dejá la pestaña abierta mientras se exporta.</div>
+            </div>
+          </div>
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num">→</span><div class="step-title">Vista previa</div></div>
+              <div class="car-preview"><video id="car-video" playsinline muted loop></video><canvas id="car-capa" width="1080" height="1920"></canvas></div>
+              <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn--ghost btn--sm" onclick="Carnaval.reproducir()">▶ Reproducir desde el inicio</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section" id="car-plantel" hidden>
+        <div class="wflow">
+          <div class="wcol">
+            <div class="step">
+              <div class="step-head"><span class="step-num">+</span><div class="step-title">Agregar figura</div></div>
+              <div class="fgrid" style="margin-bottom:10px">
+                <div class="ff ff--3"><label class="flbl" for="pl-comparsa">Comparsa</label><select class="fi" id="pl-comparsa"></select></div>
+                <div class="ff ff--3"><label class="flbl" for="pl-puesto">Puesto</label><input class="fi" id="pl-puesto" maxlength="60" placeholder="Ej: Porta bandera y maestro de ceremonia"></div>
+              </div>
+              <div class="fgrid" style="margin-bottom:10px">
+                <div class="ff ff--3"><label class="flbl" for="pl-n1">Nombre</label><input class="fi" id="pl-n1" maxlength="40"></div>
+                <div class="ff ff--3"><label class="flbl" for="pl-n2">Segundo nombre (opcional)</label><input class="fi" id="pl-n2" maxlength="40"></div>
+              </div>
+              <button class="btn btn--primary btn--sm" onclick="Carnaval.agregarFigura()">Agregar al plantel</button>
+            </div>
+            <div class="step">
+              <div class="step-head"><span class="step-num">+</span><div class="step-title">Agregar auspiciante</div></div>
+              <div class="fgrid" style="margin-bottom:10px">
+                <div class="ff ff--3"><label class="flbl" for="mk-nombre">Marca</label><input class="fi" id="mk-nombre" maxlength="40"></div>
+                <div class="ff ff--3"><label class="flbl" for="mk-logo">Logo (PNG con fondo transparente)</label><input class="fi" type="file" id="mk-logo" accept="image/png,image/svg+xml,image/jpeg"></div>
+              </div>
+              <button class="btn btn--primary btn--sm" onclick="Carnaval.agregarMarca()">Agregar auspiciante</button>
+            </div>
+          </div>
+          <div class="wcol">
+            <div class="step"><div class="step-head"><div class="step-title">Plantel</div></div><div id="pl-lista"></div></div>
+            <div class="step"><div class="step-head"><div class="step-title">Auspiciantes</div></div><div id="mk-lista"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ BORRADORES ═══ -->
     <div class="page" id="page-borradores">
       <div class="hero">
@@ -1648,7 +1739,7 @@ async function sendDsgChat(){
 }
 
 // ══ NAV ══
-const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",gacetilla:"Gacetilla a nota",metastats:"Estadísticas Meta",agenda:"Agenda ahora",grafica:"Gráfica",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
+const PAGE_TITLE={efem:"Base de efemérides",gen:"Generador de contenido",add:"Agregar efeméride",seo:"SEO del día",traspaso:"Análisis de notas",desgrab:"Desgrabador",enfoques:"Enfoques editoriales",gacetilla:"Gacetilla a nota",metastats:"Estadísticas Meta",agenda:"Agenda ahora",grafica:"Gráfica",carnaval:"Carnaval · cobertura",alertas:"Alertas de agenda",borradores:"Borradores",sugerencias:"Sugerencias y ajustes"};
 function showPage(id,navEl){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page-"+id).classList.add("active");
@@ -1660,6 +1751,7 @@ function showPage(id,navEl){
   if(id==="alertas")renderAlertas();
   if(id==="agenda")renderAgenda();
   if(id==="grafica")Grafica.abrir();
+  if(id==="carnaval")Carnaval.abrir();
   if(id==="borradores")renderDrafts();
   if(id==="sugerencias"){if(currentUser)document.getElementById("sug-name").value=currentUser.name;renderSugerencias();}
   if(id==="gen")renderGenList();
@@ -2700,6 +2792,10 @@ async function renderSugerencias(){
 <script src="grafica-core.js"></script>
 <script src="mov-animation.js"></script>
 <script src="grafica.js"></script>
+<script src="carnaval-core.js"></script>
+<script src="carnaval-grafica.js"></script>
+<script type="module" src="carnaval-video.js"></script>
+<script src="carnaval.js"></script>
 <script src="estetica-2027.js"></script>
 </body>
 </html>
