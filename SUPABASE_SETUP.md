@@ -206,6 +206,33 @@ alter table agenda_titulares enable row level security;
 
 ---
 
+## Carnaval — plantel y marcas
+
+Necesarias para la sección **15 · Carnaval** (figuras de cada comparsa y logos de
+auspiciantes). Corré este bloque en **SQL Editor → New query → pegar → Run**.
+
+```sql
+create table carnaval_figuras (
+  id bigint primary key generated always as identity,
+  comparsa text not null,          -- bella-samba | rafaga | emperatriz | imperio
+  puesto text not null,
+  nombre1 text not null,
+  nombre2 text,
+  orden int default 0,
+  creado timestamptz default now()
+);
+create table carnaval_marcas (
+  id bigint primary key generated always as identity,
+  nombre text not null,
+  logo text not null,              -- PNG en data URL, máx. 300 KB
+  creado timestamptz default now()
+);
+alter table carnaval_figuras enable row level security;
+alter table carnaval_marcas enable row level security;
+```
+
+---
+
 ## Preguntas frecuentes
 
 **¿Cuánto aguanta el tier gratuito?**
