@@ -114,9 +114,11 @@ Curvas: ease-out cúbica para entradas (la misma del zócalo).
 - `assets/carnaval/`: lockup DRU y logo Concordia Carnaval (PNG del lienzo), trazados de franjas.
 
 ## Fuentes
-Manometer Sans y Acumin Pro Extra Condensed **Black** hay que sumarlas al proyecto web de
-Adobe Fonts "DRU Panel" (`afu7nsm`). La gráfica espera a que estén cargadas antes de dibujar;
-si faltan, avisa en pantalla en vez de exportar con otra letra.
+Ya están en el proyecto web de Adobe Fonts "DRU Panel" (`afu7nsm`, 2026-11-18):
+- Nombres: `"manometer-sans"` peso 400 (es ultranegra; tiene una sola variante).
+- Puestos: `"acumin-pro-extra-condensed"` peso **800** (así entrega Adobe la Black).
+La gráfica espera a que estén cargadas antes de dibujar; si faltan, avisa en pantalla en vez
+de exportar con otra letra.
 
 ## Pruebas
 - Tests de `carnaval-core.js`: colores por comparsa, 1 y 2 nombres, achicado de letra,
