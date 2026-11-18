@@ -233,6 +233,24 @@ alter table carnaval_marcas enable row level security;
 
 ---
 
+## Carnaval — LUTs de color
+
+Biblioteca de LUTs (.cube) para la sección **15 · Carnaval**. Se guardan comprimidas en
+16 bits (≈ 290 KB una LUT de 33³).
+
+```sql
+create table carnaval_luts (
+  id bigint primary key generated always as identity,
+  nombre text not null,
+  tamano int not null,             -- lado del cubo (ej. 33)
+  datos text not null,             -- valores RGB en 16 bits, base64
+  creado timestamptz default now()
+);
+alter table carnaval_luts enable row level security;
+```
+
+---
+
 ## Preguntas frecuentes
 
 **¿Cuánto aguanta el tier gratuito?**

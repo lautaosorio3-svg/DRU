@@ -1037,7 +1037,12 @@
               <select class="fi" id="car-marca" onchange="Carnaval.elegirMarca()"></select>
             </div>
             <div class="step">
-              <div class="step-head"><span class="step-num">4</span><div class="step-title">Exportar</div></div>
+              <div class="step-head"><span class="step-num">4</span><div class="step-title">Color</div></div>
+              <select class="fi" id="car-lut" onchange="Carnaval.elegirLut()"></select>
+              <div class="step-help" style="margin-top:8px">Si el clip está grabado en S-Log3, elegí la LUT para pasarlo a color normal. Se aplica al video, no a la gráfica.</div>
+            </div>
+            <div class="step">
+              <div class="step-head"><span class="step-num">5</span><div class="step-title">Exportar</div></div>
               <button class="btn btn--peach" id="car-exportar" onclick="Carnaval.exportar()" disabled style="width:100%">Exportar reel (MP4 1080×1920)</button>
               <div class="car-progreso" id="car-progreso" hidden><div id="car-barra"></div></div>
               <div class="step-help" id="car-estado">Dejá la pestaña abierta mientras se exporta.</div>
@@ -1046,7 +1051,7 @@
           <div class="wcol">
             <div class="step">
               <div class="step-head"><span class="step-num">→</span><div class="step-title">Vista previa</div></div>
-              <div class="car-preview"><video id="car-video" playsinline muted loop></video><canvas id="car-capa" width="1080" height="1920"></canvas></div>
+              <div class="car-preview"><video id="car-video" playsinline muted loop></video><canvas id="car-color" width="540" height="960" hidden></canvas><canvas id="car-capa" width="1080" height="1920"></canvas></div>
               <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn--ghost btn--sm" onclick="Carnaval.reproducir()">▶ Reproducir desde el inicio</button></div>
             </div>
           </div>
@@ -1075,10 +1080,19 @@
               </div>
               <button class="btn btn--primary btn--sm" onclick="Carnaval.agregarMarca()">Agregar auspiciante</button>
             </div>
+            <div class="step">
+              <div class="step-head"><span class="step-num">+</span><div class="step-title">Agregar LUT de color</div></div>
+              <div class="fgrid" style="margin-bottom:10px">
+                <div class="ff ff--3"><label class="flbl" for="lut-nombre">Nombre</label><input class="fi" id="lut-nombre" maxlength="40" placeholder="Ej: Sony S-Log3 → LC-709"></div>
+                <div class="ff ff--3"><label class="flbl" for="lut-archivo">Archivo .cube</label><input class="fi" type="file" id="lut-archivo" accept=".cube"></div>
+              </div>
+              <button class="btn btn--primary btn--sm" onclick="Carnaval.agregarLut()">Agregar LUT</button>
+            </div>
           </div>
           <div class="wcol">
             <div class="step"><div class="step-head"><div class="step-title">Plantel</div></div><div id="pl-lista"></div></div>
             <div class="step"><div class="step-head"><div class="step-title">Auspiciantes</div></div><div id="mk-lista"></div></div>
+            <div class="step"><div class="step-head"><div class="step-title">LUTs de color</div></div><div id="lut-lista"></div></div>
           </div>
         </div>
       </div>
@@ -2794,6 +2808,7 @@ async function renderSugerencias(){
 <script src="grafica.js"></script>
 <script src="carnaval-core.js"></script>
 <script src="carnaval-grafica.js"></script>
+<script src="carnaval-lut.js"></script>
 <script type="module" src="carnaval-video.js"></script>
 <script src="carnaval.js"></script>
 <script src="estetica-2027.js"></script>

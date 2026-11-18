@@ -2,7 +2,9 @@
 // El proceso del video vive en carnaval-video.js; la gráfica en carnaval-grafica.js.
 (function () {
   const C = window.CarnavalCore, Gr = window.CarnavalGrafica;
-  const SK = { figuras: "dru_carnaval_figuras", marcas: "dru_carnaval_marcas", ultimaMarca: "dru_carnaval_marca" };
+  const SK = { figuras: "dru_carnaval_figuras", marcas: "dru_carnaval_marcas", ultimaMarca: "dru_carnaval_marca", luts: "dru_carnaval_luts", ultimaLut: "dru_carnaval_lut" };
+  const L = window.CarnavalLUT;
+  let luts = [], lutActual = null, colorPreview = null;   // lutActual: { tamano, datos }
   let figuras = [], marcas = [], archivo = null, recursos = null, logo = null, exportando = false, animando = false;
   // Sin clip, la vista previa reproduce la gráfica sola en un bucle (entrada + oleaje del río).
   const BUCLE_SIN_VIDEO = 6;
@@ -12,10 +14,11 @@
   const leer = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch (e) { return def; } };
 
   async function cargarDatos() {
-    figuras = leer(SK.figuras, []); marcas = leer(SK.marcas, []);
-    const [f, m] = await Promise.all([dbGet("carnaval_figuras"), dbGet("carnaval_marcas")]);
+    figuras = leer(SK.figuras, []); marcas = leer(SK.marcas, []); luts = leer(SK.luts, []);
+    const [f, m, l] = await Promise.all([dbGet("carnaval_figuras"), dbGet("carnaval_marcas"), dbGet("carnaval_luts")]);
     if (f) { figuras = f; guardar(SK.figuras, f); }    // sin conexión queda la última copia
     if (m) { marcas = m; guardar(SK.marcas, m); }
+    if (l) { luts = l; guardar(SK.luts, l); }
   }
 
   function opcionesComparsas(sel) {
@@ -47,6 +50,26 @@
     refrescar();
   }
 
+  function opcionesLuts() {
+    const ultima = leer(SK.ultimaLut, "");
+    $("car-lut").innerHTML = `<option value="">Sin corrección (color del clip)</option>` + luts.map((x) => `<option value="${x.id}">${esc(x.nombre)}</option>`).join("");
+    $("car-lut").value = luts.some((x) => String(x.id) === String(ultima)) ? String(ultima) : "";
+    elegirLut();
+  }
+  function elegirLut() {
+    const id = $("car-lut").value; guardar(SK.ultimaLut, id);
+    const x = luts.find((y) => String(y.id) === id);
+    lutActual = null; colorPreview = null;
+    if (x) {
+      try {
+        lutActual = { tamano: x.tamano, datos: L.descomprimir(x.datos, x.tamano) };
+        colorPreview = L.crearAplicador(lutActual.tamano, lutActual.datos, 540, 960);
+      } catch (e) { showToast("⚠ " + e.message); lutActual = null; }
+    }
+    $("car-color").hidden = !colorPreview;
+    refrescar();
+  }
+
   function datos() {
     return { comparsa: $("car-comparsa").value, nombre1: $("car-n1").value, nombre2: $("car-n2").value, puesto: $("car-puesto").value, auspiciante: logo };
   }
@@ -57,6 +80,13 @@
     if (!recursos) return;
     const v = $("car-video");
     const t = archivo ? v.currentTime : ((performance.now() - relojInicio) / 1000) % BUCLE_SIN_VIDEO;
+    if (colorPreview && archivo && v.readyState >= 2) {   // el video con la LUT, a media resolución
+      if (!dibujarPreview.tmp) { dibujarPreview.tmp = document.createElement("canvas"); dibujarPreview.tmp.width = 540; dibujarPreview.tmp.height = 960; }
+      const tmp = dibujarPreview.tmp, k = tmp.getContext("2d");
+      const esc_ = Math.max(540 / v.videoWidth, 960 / v.videoHeight), w = v.videoWidth * esc_, h = v.videoHeight * esc_;
+      k.drawImage(v, (540 - w) / 2, (960 - h) / 2, w, h);
+      $("car-color").getContext("2d").drawImage(colorPreview.aplicar(tmp), 0, 0);
+    }
     Gr.dibujarGrafica($("car-capa").getContext("2d"), datos(), t, recursos);
   }
   function bucle() {
@@ -96,6 +126,7 @@
     try {
       const d = datos();
       const mp4 = await window.CarnavalVideo.exportar(archivo, d, recursos, {
+        lut: lutActual,
         alAvanzar: (p) => { barra.style.width = Math.round(p * 100) + "%"; est.textContent = `Exportando… ${Math.round(p * 100)} %`; }
       });
       const a = document.createElement("a");
@@ -115,6 +146,19 @@
       : `<div class="empty">Todavía no hay figuras cargadas.</div>`;
     $("mk-lista").innerHTML = marcas.length ? marcas.map((m) => `<div class="car-fila"><span><img src="${m.logo}" alt=""> ${esc(m.nombre)}</span><button class="btn btn--ghost btn--sm" onclick="Carnaval.borrar('carnaval_marcas',${m.id})">Quitar</button></div>`).join("")
       : `<div class="empty">Todavía no hay auspiciantes.</div>`;
+    $("lut-lista").innerHTML = luts.length ? luts.map((x) => `<div class="car-fila"><span><b>${esc(x.nombre)}</b> · LUT ${x.tamano}³</span><button class="btn btn--ghost btn--sm" onclick="Carnaval.borrar('carnaval_luts',${x.id})">Quitar</button></div>`).join("")
+      : `<div class="empty">Todavía no hay LUTs. Sin LUT, el video sale con el color del clip.</div>`;
+  }
+  async function agregarLut() {
+    const nombre = $("lut-nombre").value.trim(), f = $("lut-archivo").files[0];
+    if (!nombre || !f) { showToast("⚠ Completá nombre y archivo .cube"); return; }
+    let lut;
+    try { lut = L.leerCube(await f.text()); } catch (e) { showToast("⚠ " + e.message); return; }
+    if (lut.tamano > 65) { showToast("⚠ La LUT es demasiado grande (máx. 65³)"); return; }
+    const r = await dbPost("insert", "carnaval_luts", { row: { nombre, tamano: lut.tamano, datos: L.comprimir(lut) } });
+    if (!r || r.error) { showToast("⚠ No se pudo guardar: " + ((r && r.error) || "sin conexión con la base")); return; }
+    $("lut-nombre").value = ""; $("lut-archivo").value = "";
+    await cargarDatos(); pintarListas(); opcionesLuts(); showToast("✓ LUT agregada");
   }
   async function agregarFigura() {
     const fila = { comparsa: $("pl-comparsa").value, puesto: $("pl-puesto").value.trim(), nombre1: $("pl-n1").value.trim(), nombre2: $("pl-n2").value.trim() || null, orden: figuras.length };
@@ -144,7 +188,7 @@
   }
   async function borrar(tabla, id) {
     await dbPost("delete", tabla, { id });
-    await cargarDatos(); pintarListas(); cambioComparsa(); opcionesMarcas();
+    await cargarDatos(); pintarListas(); cambioComparsa(); opcionesMarcas(); opcionesLuts();
   }
 
   function tab(cual) {
@@ -168,9 +212,9 @@
       catch (e) { $("car-estado").textContent = "⚠ " + e.message; }
     }
     await cargarDatos();
-    cambioComparsa(); opcionesMarcas(); pintarListas();
+    cambioComparsa(); opcionesMarcas(); opcionesLuts(); pintarListas();
     if (!animando) { animando = true; requestAnimationFrame(bucle); }
   }
 
-  window.Carnaval = { abrir, tab, cambioComparsa, elegirFigura, elegirMarca, refrescar, reproducir, elegirArchivo, exportar, agregarFigura, agregarMarca, borrar };
+  window.Carnaval = { abrir, tab, cambioComparsa, elegirFigura, elegirMarca, elegirLut, refrescar, reproducir, elegirArchivo, exportar, agregarFigura, agregarMarca, agregarLut, borrar };
 })();

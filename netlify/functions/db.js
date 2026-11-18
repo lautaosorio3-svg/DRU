@@ -16,7 +16,8 @@ const TABLES = {
   alertas: { order: "creado.desc", limit: 200 },
   sugerencias: { order: "creado.desc", limit: 200 },
   carnaval_figuras: { order: "comparsa.asc,orden.asc", limit: 500 },
-  carnaval_marcas: { order: "creado.asc", limit: 50 }
+  carnaval_marcas: { order: "creado.asc", limit: 50 },
+  carnaval_luts: { order: "creado.asc", limit: 20 }
 };
 
 function supa() {

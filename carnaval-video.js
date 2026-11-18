@@ -24,13 +24,15 @@ async function inspeccionar(file) {
   };
 }
 
-async function exportar(file, datos, recursos, { alAvanzar } = {}) {
+// lut (opcional): { tamano, datos: Float32Array } — se aplica al video, nunca a la gráfica.
+async function exportar(file, datos, recursos, { alAvanzar, lut } = {}) {
   const input = await abrir(file);
   const output = new MB.Output({ format: new MB.Mp4OutputFormat({ fastStart: "in-memory" }), target: new MB.BufferTarget() });
   const lienzo = document.createElement("canvas"); lienzo.width = W; lienzo.height = H;
   const ctx = lienzo.getContext("2d", { alpha: false });
   const capa = document.createElement("canvas"); capa.width = W; capa.height = H;
   const capaCtx = capa.getContext("2d");
+  const color = lut ? window.CarnavalLUT.crearAplicador(lut.tamano, lut.datos, W, H) : null;
   let inicio = null;
 
   const conversion = await MB.Conversion.init({
@@ -42,6 +44,7 @@ async function exportar(file, datos, recursos, { alAvanzar } = {}) {
         if (inicio === null) inicio = sample.timestamp;
         ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
         sample.drawWithFit(ctx, { fit: "cover" });
+        if (color) ctx.drawImage(color.aplicar(lienzo), 0, 0);   // corrección de color del video
         window.CarnavalGrafica.dibujarGrafica(capaCtx, datos, sample.timestamp - inicio, recursos);
         ctx.drawImage(capa, 0, 0);
         return lienzo;
