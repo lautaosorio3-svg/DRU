@@ -61,6 +61,8 @@ localStorage.
 | 11 | Alertas | Keywords vigiladas compartidas + alertas automáticas cada hora desde 9 medios regionales | — |
 | 12 | Borradores | Borradores guardados desde cualquier sección; compartidos vía Supabase | — |
 | 13 | Sugerencias | Feedback del equipo → Supabase + email vía Resend | — |
+| 14 | Gráfica | Placas de redes en canvas. Zócalo de entrevistas: PNG y .mov QuickTime Animation con alfa, sin pérdida (`grafica-core.js`, `grafica.js`, `mov-animation.js`) | — |
+| 15 | Carnaval | Reels de cobertura de *El Alma de la Fiesta*: clip de la cámara + gráfica animada (el río) → MP4 1080×1920, todo en el navegador con Mediabunny local (`carnaval-*.js`, `vendor/`). Plantel y auspiciantes en Supabase (`carnaval_figuras`, `carnaval_marcas`) | — |
 
 ## 3. Fuentes RSS monitoreadas
 
