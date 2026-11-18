@@ -43,7 +43,7 @@ Pestaña aparte **"Plantel y marcas"** para cargar el plantel y los logos antes 
 
 ## La gráfica (réplica de "Cobertura 2027 · Figuras", lienzo de diseño → Plantillas cerradas)
 Lienzo 1080×1920. Medidas en px.
-- **Degradado** noche `#120B1F` sobre el video: 70 % (0 %) → 15 % (20 %) → 0 (32 %–50 %) →
+- **Degradado** noche `#120B1F` solo en la parte de abajo (arriba el video queda limpio): 0 hasta 50 % →
   80 % (72 %) → 95 % (100 %).
 - **Lockup DRU** (PNG del lienzo): x 64 · y 305 · ancho 300.
 - **Bloque del listón** desde y 1130:

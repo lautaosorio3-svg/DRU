@@ -65,7 +65,8 @@
     ctx.save();
     ctx.globalAlpha = a.fondo;
     const g = ctx.createLinearGradient(0, 0, 0, H);
-    [[0, 0.7], [0.2, 0.15], [0.32, 0], [0.5, 0], [0.72, 0.8], [1, 0.95]].forEach(([s, o]) => g.addColorStop(s, `rgba(18,11,31,${o})`));
+    // Solo abajo: arriba el video queda limpio (pedido de Lautaro, 18/11)
+    [[0, 0], [0.5, 0], [0.72, 0.8], [1, 0.95]].forEach(([s, o]) => g.addColorStop(s, `rgba(18,11,31,${o})`));
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
     const lk = m.lockup;
