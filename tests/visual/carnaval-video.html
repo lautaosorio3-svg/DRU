@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Prueba · video Carnaval</title>
+<link rel="stylesheet" href="https://use.typekit.net/afu7nsm.css">
+<style>body{margin:0;background:#222;color:#eee;font:14px sans-serif;padding:16px}video{height:640px;background:#000}</style></head>
+<body><p id="estado">Cargando…</p><button id="ir" disabled>Exportar prueba</button><br><video id="vid" controls muted playsinline></video>
+<script src="../../grafica-core.js"></script><script src="../../carnaval-core.js"></script><script src="../../carnaval-grafica.js"></script>
+<script type="module" src="../../carnaval-video.js"></script>
+<script>
+const est = document.getElementById("estado"), btn = document.getElementById("ir");
+const listo = () => { est.textContent = "Listo para exportar"; btn.disabled = false; };
+window.CarnavalVideo ? listo() : window.addEventListener("carnaval-video-listo", listo);
+btn.onclick = async () => {
+  btn.disabled = true;
+  try {
+    const recursos = await CarnavalGrafica.cargarRecursos("../../");
+    const clip = await (await fetch("../../.ref-clip/log.mp4")).blob();
+    const entrada = await CarnavalVideo.inspeccionar(clip);
+    const datos = { comparsa: "bella-samba", nombre1: "Estela Orcellet", nombre2: "Emilio Molina", puesto: "Porta bandera y maestro de ceremonia", auspiciante: null };
+    const t0 = performance.now();
+    const mp4 = await CarnavalVideo.exportar(clip, datos, recursos, { alAvanzar: (p) => est.textContent = "Exportando… " + Math.round(p * 100) + " %" });
+    const segundos = +((performance.now() - t0) / 1000).toFixed(1);
+    const salida = await CarnavalVideo.inspeccionar(mp4);
+    const v = document.getElementById("vid"); v.src = URL.createObjectURL(mp4);
+    await new Promise((ok) => v.onloadeddata = ok); v.currentTime = 2; await new Promise((ok) => v.onseeked = ok);
+    const c = document.createElement("canvas"); c.width = 1080; c.height = 1920; const x = c.getContext("2d"); x.drawImage(v, 0, 0, 1080, 1920);
+    const listonCentro = Array.from(x.getImageData(540, 1150, 1, 1).data).join("/");
+    window.prueba = { entrada, segundos, MB: +(mp4.size / 1e6).toFixed(1), salida, listonCentro };
+    est.textContent = "Listo · " + JSON.stringify(window.prueba);
+  } catch (e) { est.textContent = "Error: " + e.message; window.prueba = { error: e.message }; }
+};
+</script></body></html>
