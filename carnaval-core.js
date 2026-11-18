@@ -15,8 +15,8 @@
 
   // Tamaños calibrados contra los anchos de la plantilla (Task 3).
   const FUENTE = {
-    nombres: { familia: "manometer-sans", peso: 400, tamano: 66 },
-    puestos: { familia: "acumin-pro-extra-condensed", peso: 800, tamano: 35 }
+    nombres: { familia: "manometer-sans", peso: 400, tamano: 67.7 },
+    puestos: { familia: "acumin-pro-extra-condensed", peso: 800, tamano: 51.5 }
   };
 
   function medidas(n) {

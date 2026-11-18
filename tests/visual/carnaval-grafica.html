@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Prueba · gráfica Carnaval</title>
+<link rel="stylesheet" href="https://use.typekit.net/afu7nsm.css">
+<style>body{margin:0;background:#222;color:#eee;font:14px sans-serif;padding:16px}canvas{width:216px;height:384px;margin:4px;background:#333}.fila{display:flex;flex-wrap:wrap}</style>
+</head><body>
+<div id="estado">Cargando…</div><div class="fila" id="casos"></div><div class="fila" id="tira"></div>
+<script src="../../grafica-core.js"></script><script src="../../carnaval-core.js"></script><script src="../../carnaval-grafica.js"></script>
+<script>
+(async () => {
+  const est = document.getElementById("estado");
+  try {
+    const r = await CarnavalGrafica.cargarRecursos("../../");
+    const foto = await new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = "../../.ref-clip/fondo-plantilla.jpg"; });
+    const lienzo = (datos, t, dest) => {
+      const c = document.createElement("canvas"); c.width = 1080; c.height = 1920;
+      const x = c.getContext("2d"); const capa = document.createElement("canvas"); capa.width = 1080; capa.height = 1920;
+      CarnavalGrafica.dibujarGrafica(capa.getContext("2d"), datos, t, r);
+      if (foto) x.drawImage(foto, 0, 0, 1080, 1920);
+      x.drawImage(capa, 0, 0); dest.appendChild(c); return { c, capa };
+    };
+    const casos = document.getElementById("casos"), tira = document.getElementById("tira");
+    const dos = { comparsa: "bella-samba", nombre1: "Estela Orcellet", nombre2: "Emilio Molina", puesto: "Porta bandera y maestro de ceremonia", auspiciante: null };
+    const { capa } = lienzo(dos, 2, casos);
+    lienzo({ comparsa: "imperio", nombre1: "Nombre Apellido", nombre2: "", puesto: "Reina de la comparsa", auspiciante: null }, 2, casos);
+    lienzo({ comparsa: "emperatriz", nombre1: "Valentina Fernández", nombre2: "", puesto: "Figura central", auspiciante: null }, 2, casos);
+    lienzo({ comparsa: "rafaga", nombre1: "María Fernanda de los Ángeles", nombre2: "Juan Ignacio Etchegaray", puesto: "Pareja de baile", auspiciante: null }, 2, casos);
+    for (const t of [0.2, 0.4, 0.6, 0.9, 1.3]) lienzo(dos, t, tira);
+    // Medir: bordes del texto oscuro en cada línea del listón y del texto crema de los puestos
+    const d = capa.getContext("2d").getImageData(0, 0, 1080, 1920).data;
+    const caja = (y0, y1, cond) => { let a = [1e9, -1, 1e9, -1]; for (let y = y0; y < y1; y++) for (let x = 0; x < 1080; x++) { const i = (y * 1080 + x) * 4; if (cond(d[i], d[i + 1], d[i + 2], d[i + 3])) { a[0] = Math.min(a[0], x); a[1] = Math.max(a[1], x); a[2] = Math.min(a[2], y); a[3] = Math.max(a[3], y); } } return a; };
+    const oscuro = (r_, g, b, al) => al > 200 && r_ < 60 && b < 70;
+    const crema = (r_, g, b, al) => al > 200 && r_ > 230 && g > 225;
+    window.resultados = {
+      calibracion: CarnavalGrafica.calibrar(),
+      linea1: caja(1150, 1220, oscuro), linea2: caja(1222, 1290, oscuro),
+      puestos: caja(1320, 1370, crema)
+    };
+    est.textContent = "Listo · " + JSON.stringify(window.resultados);
+  } catch (e) { est.textContent = "Error: " + e.message; window.resultados = { error: e.message }; }
+})();
+</script></body></html>
