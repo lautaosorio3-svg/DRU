@@ -8,11 +8,19 @@
   }
   const fuente = (f, tam) => `${f.peso} ${tam}px "${f.familia}"`;
 
-  async function cargarRecursos(base = "") {
-    await Promise.all([document.fonts.load(fuente(C.FUENTE.nombres, 60), "AÑÍ"), document.fonts.load(fuente(C.FUENTE.puestos, 30), "AÑÍ")]);
-    if (!document.fonts.check(fuente(C.FUENTE.nombres, 60)) || !document.fonts.check(fuente(C.FUENTE.puestos, 30))) {
-      throw new Error("Faltan las fuentes de Adobe (Manometer Sans y Acumin Extra Condensed Black). Revisá la conexión y recargá.");
+  // document.fonts.check() da "sí" cuando la fuente ni siquiera está declarada (por ejemplo,
+  // si el navegador usa un CSS de Adobe guardado de antes de sumarla). Por eso se exige que
+  // exista la cara de la familia y que haya cargado de verdad.
+  async function asegurarFuente(f) {
+    const caras = () => [...document.fonts].filter((x) => x.family.replace(/["']/g, "") === f.familia);
+    if (caras().length) await document.fonts.load(fuente(f, 60), "AÑÍ");
+    if (!caras().some((x) => x.status === "loaded")) {
+      throw new Error(`No cargó la fuente "${f.familia}" de Adobe Fonts. Recargá la página con Cmd+Shift+R; si sigue igual, revisá la conexión.`);
     }
+  }
+
+  async function cargarRecursos(base = "") {
+    await Promise.all([asegurarFuente(C.FUENTE.nombres), asegurarFuente(C.FUENTE.puestos)]);
     const [lockup, carnaval, franjasJson] = await Promise.all([
       imagen(base + "assets/carnaval/dru-lockup.png"),
       imagen(base + "assets/carnaval/concordia-carnaval.png"),

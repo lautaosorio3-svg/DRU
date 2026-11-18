@@ -155,7 +155,10 @@
       drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("sobre"); });
       drop.addEventListener("dragleave", () => drop.classList.remove("sobre"));
       drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("sobre"); elegirArchivo(e.dataTransfer.files[0]); });
-      try { recursos = await Gr.cargarRecursos(); } catch (e) { $("car-estado").textContent = "⚠ " + e.message; }
+    }
+    if (!recursos) {   // se reintenta cada vez que se abre la sección
+      try { recursos = await Gr.cargarRecursos(); $("car-estado").textContent = "Dejá la pestaña abierta mientras se exporta."; }
+      catch (e) { $("car-estado").textContent = "⚠ " + e.message; }
     }
     await cargarDatos();
     cambioComparsa(); opcionesMarcas(); pintarListas();
